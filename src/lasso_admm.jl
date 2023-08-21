@@ -14,13 +14,18 @@ end
 ## ============================================ ##
 # shrinkage 
 
-export shrinkage 
-
-function shrinkage(x, κ) 
+export shrinkage_if 
+function shrinkage_if(x, κ) 
 
     z = 0*x ; 
     for i = 1:length(x) 
-        z[i] = max( 0, x[i] - κ ) - max( 0, -x[i] - κ ) 
+        if x[i] > κ
+            z[i] = x[i] - κ
+        elseif x[i] < -κ
+            z[i] = x[i] + κ
+        else
+            z[i] = 0 
+        end 
     end 
 
     return z 
@@ -51,37 +56,309 @@ end
 # plot everything! 
 
 using Plots 
+using Latexify
+
 export plot_admm 
+function plot_admm( hist, var ) 
 
-function plot_admm( hist ) 
+    ind1 = 1
+    ind2 = Int(round(1/2 * length(hist.objval), digits=1))
+    if var == 2
+        ind1 = ind2 + 1 
+        ind2 = Int(length(hist.objval)) 
+    end 
 
-    K = length(hist.objval) 
+    K = length(hist.objval[ind1:ind2]) 
+    
+    # determine xtick range 
 
     # subplot 1 
-    p_objval = plot( 1:K, hist.objval, 
-        title = "Obj Fn = f(xₖ) + g(zₖ)", legend = false ) 
+    vals = hist.objval[ind1:ind2]
+    ymin, dy, ymax = min_d_max( vals ) 
+    println("vals length = ", length(vals)) 
+    p_objval = plot( 1:K, vals, 
+        legend = false , 
+        title  = string( "\n Obj Fn = ", latexify( "f(x_k)+ g(z_k)" ) ), 
+        yticks = ymin : dy : ymax , 
+        ) 
     
     # subplot 2 
-    p_r_norm = plot( 1:K, hist.r_norm, 
-        title = "|r|₂ = |x-z|₂", label = "|r|₂" ) 
-    plot!( p_r_norm, 1:K, hist.eps_pri, 
-        label = "tol", ls = :dot )
+    vals1 = hist.r_norm[ind1:ind2] 
+    ymin, dy, ymax = min_d_max( vals1 ) 
+    vals2 = hist.eps_pri[ind1:ind2] 
+    if maximum(vals2) > maximum(vals1) 
+        ymin, dy, ymax = min_d_max( vals2 ) 
+    end 
+    p_r_norm = plot( 1:K, vals1, 
+        title = string( "\n |r|", latexify("_2"), " = |x-z|", latexify("_2") ), 
+        label = string( "|r|", latexify("_2") ),           
+        yticks = ymin : dy : ymax , 
+        ylim  = (ymin, ymax), 
+        ) 
+    plot!( p_r_norm, 1:K, vals2, 
+        label = "tol", 
+        ls = :dot, 
+        )
     
     # subplot 3 
-    p_s_norm = plot(1:K, hist.s_norm, 
-        title = "|s|₂ = |-ρ(z - z_old)|₂", label = "|s|₂" )
-    plot!(p_s_norm, 1:K, hist.eps_dual, 
-        label = "tol", ls = :dot )
+    vals1 = hist.s_norm[ind1:ind2] 
+    ymin, dy, ymax = min_d_max( vals1 ) 
+    vals2 = hist.eps_dual[ind1:ind2] 
+    if maximum(vals2) > maximum(vals1) 
+        ymin, dy, ymax = min_d_max( vals2 ) 
+    end 
+    p_s_norm = plot( 1:K, vals1, 
+        title = string( "\n |s|", latexify("_2"), " = |-ρ(z-z", latexify("_old"), ")|", latexify("_2") ), 
+        label = string( "|s|", latexify("_2") ),           
+        yticks = ymin : dy : ymax , 
+        ylim  = (ymin, ymax), 
+        ) 
+    plot!( p_s_norm, 1:K, vals2, 
+        label = "tol", 
+        ls = :dot, 
+        )
     
     # plot all 
     p_fig = plot(p_objval, p_r_norm, 
-        p_s_norm, layout = (3,1), size = [ 600,800 ], plot_title = "ADMM Lasso", lw = 2, xlabel = "iter" )
+        p_s_norm, layout = (1,3), size = [ 800,300 ],         
+        plot_title  = string( "ADMM Lasso, ", latexify( "x_$(var)" ) ), 
+        lw = 3, 
+        xlabel = "iter", 
+        # margin = 5Plots.mm,
+        top_margin = 7Plots.mm, 
+        legend = true, 
+        xticks = 0:K/2:K, 
+        )
+        println("K = ", K)
 
     return p_fig 
 
 end 
 
 
+## ============================================ ##
+# LASSO ADMM! 
+
+using Optim 
+using GaussianProcesses
+
+export lasso_admm_gp_opt 
+function lasso_admm_gp_opt( t, dx, Θx, f, g, n, λ, ρ, α, hist ) 
+
+    # define constants 
+    max_iter = 1000  
+    abstol   = 1e-4 
+    reltol   = 1e-2           # save matrix-vector multiply 
+
+    # ADMM solver 
+    ξ = z = u = zeros(n) 
+
+    # initial hyperparameters 
+    σ_f0 = log(1.0) ; σ_f = σ_f0  
+    l_0  = log(1.0) ; l   = l_0   
+    σ_n0 = log(0.1) ; σ_n = σ_n0 
+
+    # augmented Lagrangian (scaled form) 
+    aug_L( ξ, σ_f, l, σ_n, z, u) = f(ξ, σ_f, l, σ_n) + g(z) + ρ/2 .* norm( ξ - z + u )^2 
+
+    # counter 
+    iter = 0 
+
+    # update λ
+    # λ = log(f( ξ, σ_f, l, σ_n )) 
+    
+    # begin iterations 
+    for k = 1 : max_iter 
+
+        # increment counter 
+        iter += 1 
+
+        # ----------------------- #
+        # ξ-update (optimization) 
+
+        # optimization 
+        f_opt(ξ) = aug_L(ξ, exp(σ_f), exp(l), exp(σ_n), z, u) 
+        od       = OnceDifferentiable( f_opt, ξ ; autodiff = :forward ) 
+        result   = optimize( od, ξ, LBFGS() ) 
+        ξ        = result.minimizer 
+
+        # ----------------------- # 
+        # hp-update (optimization) 
+
+        # mean and covariance 
+        mZero = MeanZero() ;            # zero mean function 
+        kern  = SE( 1.0 , 0.0 ) ;          # squared eponential kernel (hyperparams on log scale) 
+        log_noise = log(0.1) ;              # (optional) log std dev of obs noise 
+
+        # fit GP 
+        y_train = dx - Θx*ξ   
+        println( "t size = ", size(t) )
+        println( "Θx*ξ size = ", size(Θx*ξ) )
+        println( "y_train size = ", size(y_train) )
+        gp  = GP(vec(t), y_train, mZero, kern, log_noise) 
+
+        result = optimize!(gp) 
+        σ_f = result.minimizer[1]
+        l   = result.minimizer[2] 
+        σ_n = result.minimizer[3] 
+
+        # ----------------------- #
+        # ξ-update (optimization) 
+
+        # optimization 
+        f_opt(ξ) = aug_L(ξ, exp(σ_f), exp(l), exp(σ_n), z, u) 
+        od       = OnceDifferentiable( f_opt, ξ ; autodiff = :forward ) 
+        result   = optimize( od, ξ, LBFGS() ) 
+        ξ        = result.minimizer 
+        
+        # ----------------------- #
+        # z-update (soft thresholding) 
+    
+        # println( "f = ", f( ξ, σ_f, l, σ_n ) )
+        # λ = log( abs(f( ξ, σ_f, l, σ_n )) ) 
+
+        z_old = z 
+        ξ_hat = α*ξ + (1 .- α)*z_old 
+        z     = shrinkage(ξ_hat + u, λ/ρ) 
+
+        # ----------------------- #
+        # u-update 
+
+        u += (ξ_hat - z) 
+
+        # ----------------------- #
+        # diagnostics + termination checks 
+
+        p = f(ξ, σ_f, l, σ_n) + g(ξ)   
+        push!( hist.objval, p )
+        push!( hist.fval, f( ξ, σ_f, l, σ_n ) )
+        push!( hist.gval, g(z) )
+        push!( hist.hp, [ σ_f, l, σ_n ] )
+        push!( hist.r_norm, norm(ξ - z) )
+        push!( hist.s_norm, norm( -ρ*(z - z_old) ) )
+        push!( hist.eps_pri, sqrt(n)*abstol + reltol*max(norm(ξ), norm(-z)) ) 
+        push!( hist.eps_dual, sqrt(n)*abstol + reltol*norm(ρ*u) ) 
+
+        if hist.r_norm[k] < hist.eps_pri[k] && hist.s_norm[k] < hist.eps_dual[k] 
+            break 
+        end 
+
+    end 
+
+    return ξ, z, hist, iter 
+
+end 
+
+
+
+## ============================================ ##
+# LASSO ADMM! 
+
+using Optim 
+using GaussianProcesses
+
+export lasso_admm_hp_opt 
+function lasso_admm_hp_opt( t, f, g, n, λ, ρ, α, hist ) 
+
+    # define constants 
+    max_iter = 1000  
+    abstol   = 1e-4 
+    reltol   = 1e-2           # save matrix-vector multiply 
+
+    # ADMM solver 
+    x = z = u = zeros(n) 
+
+    # initial hyperparameters 
+    σ_f0 = 1.0 ; σ_f = σ_f0  
+    l_0  = 1.0 ; l   = l_0   
+    σ_n0 = 0.1 ; σ_n = σ_n0 
+
+    # bounds 
+    lower = [0.0, 0.0, 0.0]  
+    upper = [Inf, Inf, Inf] 
+
+    # augmented Lagrangian (scaled form) 
+    aug_L(x, σ_f, l, σ_n, z, u) = f(x, σ_f, l, σ_n) + g(z) + ρ/2 .* norm( x - z + u )^2 
+
+    # counter 
+    iter = 0 
+
+    # update λ
+    λ = log(f( x, σ_f, l, σ_n )) 
+    
+    
+    # begin iterations 
+    for k = 1 : max_iter 
+
+        # increment counter 
+        iter += 1 
+
+        # ----------------------- #
+        # x-update (optimization) 
+
+        # optimization 
+        f_opt(x) = aug_L(x, σ_f, l, σ_n, z, u) 
+        od       = OnceDifferentiable( f_opt, x ; autodiff = :forward ) 
+        result   = optimize( od, x, LBFGS() ) 
+        x        = result.minimizer 
+
+        # ----------------------- # 
+        # hp-update (optimization) 
+
+        σ_0    = [σ_f, l, σ_n]  
+        hp_opt(( σ_f, l, σ_n )) = aug_L(x, σ_f, l, σ_n, z, u)  
+        od     = OnceDifferentiable( hp_opt, σ_0 ; autodiff = :forward ) 
+        # result = optimize( od, lower, upper, σ_0, Fminbox(LBFGS()) ) 
+        result = optimize( od, σ_0, Fminbox(LBFGS()) ) 
+        
+        # # assign optimized hyperparameters 
+        σ_f = result.minimizer[1] 
+        l   = result.minimizer[2] 
+        σ_n = result.minimizer[3] 
+        # σ_f = 1.0 
+        # l   = 1.0 
+        # σ_n = 0.1 
+        
+        # ----------------------- #
+        # z-update (soft thresholding) 
+    
+        # println( "f = ", f( x, σ_f, l, σ_n ) )
+        λ = log( abs(f( x, σ_f, l, σ_n )) ) 
+
+        z_old = z 
+        x_hat = α*x + (1 .- α)*z_old 
+        z     = shrinkage(x_hat + u, λ/ρ) 
+
+        # ----------------------- #
+        # u-update 
+
+        u += (x_hat - z) 
+
+        # ----------------------- #
+        # diagnostics + termination checks 
+
+        p = f(x, σ_f, l, σ_n) + g(z)   
+        push!( hist.objval, p )
+        push!( hist.fval, f( x, σ_f, l, σ_n ) )
+        push!( hist.gval, g(z) )
+        push!( hist.hp, [ σ_f, l, σ_n ] )
+        push!( hist.r_norm, norm(x - z) )
+        push!( hist.s_norm, norm( -ρ*(z - z_old) ) )
+        push!( hist.eps_pri, sqrt(n)*abstol + reltol*max(norm(x), norm(-z)) ) 
+        push!( hist.eps_dual, sqrt(n)*abstol + reltol*norm(ρ*u) ) 
+
+        if hist.r_norm[k] < hist.eps_pri[k] && hist.s_norm[k] < hist.eps_dual[k] 
+            break 
+        end 
+
+    end 
+
+    return x, z, hist, iter 
+
+end 
+
+
+    
 ## ============================================ ##
 # LASSO ADMM! 
 
@@ -320,99 +597,3 @@ function lasso_admm_test( f, g, n, λ, ρ, α, hist )
 
 end 
 
-
-    
-
-## ============================================ ##
-# LASSO ADMM! 
-
-using  Optim 
-export lasso_admm_hp_opt
-
-function lasso_admm_hp_opt( f, g, n, λ, ρ, α, hist ) 
-
-    # define constants 
-    max_iter = 1000  
-    abstol   = 1e-4 
-    reltol   = 1e-2           # save matrix-vector multiply 
-
-    # ADMM solver 
-    x = z = u = zeros(n) 
-
-    # initial hyperparameters 
-    σ_f0 = 1.0 ; σ_f = σ_f0  
-    l_0  = 1.0 ; l   = l_0   
-    σ_n0 = 0.1 ; σ_n = σ_n0 
-
-    # bounds 
-    lower = [0.0, 0.0, 0.0]  
-    upper = [Inf, Inf, Inf] 
-
-    # augmented Lagrangian (scaled form) 
-    aug_L(x, σ_f, l, σ_n, z, u) = f(x, σ_f, l, σ_n) + g(z) + ρ/2 .* norm( x - z + u )^2 
-
-    # counter 
-    iter = 0 
-    
-    # begin iterations 
-    for k = 1 : max_iter 
-
-        # increment counter 
-        iter += 1 
-
-        # ----------------------- #
-        # x-update (optimization) 
-
-        # optimization 
-        f_opt(x) = aug_L(x, σ_f, l, σ_n, z, u) 
-        od       = OnceDifferentiable( f_opt, x ; autodiff = :forward ) 
-        result   = optimize( od, x, LBFGS() ) 
-        x        = result.minimizer 
-
-        # ----------------------- # 
-        # hp-update (optimization) 
-
-        σ_0    = [σ_f, l, σ_n]  
-        hp_opt(( σ_f, l, σ_n )) = aug_L(x, σ_f, l, σ_n, z, u) 
-        od     = OnceDifferentiable( hp_opt, σ_0 ; autodiff = :forward ) 
-        result = optimize( od, lower, upper, σ_0, Fminbox(LBFGS()) ) 
-        
-        # assign optimized hyperparameters 
-        σ_f = result.minimizer[1] 
-        l   = result.minimizer[2] 
-        σ_n = result.minimizer[3] 
-        
-        # ----------------------- #
-        # z-update (soft thresholding) 
-
-        z_old = z 
-        x_hat = α*x + (1 .- α)*z_old 
-        z     = shrinkage(x_hat + u, λ/ρ) 
-
-        # ----------------------- #
-        # u-update 
-
-        u += (x_hat - z) 
-
-        # ----------------------- #
-        # diagnostics + termination checks 
-
-        p = f(x, σ_f, l, σ_n) + g(z)   
-        push!( hist.objval, p )
-        push!( hist.r_norm, norm(x - z) )
-        push!( hist.s_norm, norm( -ρ*(z - z_old) ) )
-        push!( hist.eps_pri, sqrt(n)*abstol + reltol*max(norm(x), norm(-z)) ) 
-        push!( hist.eps_dual, sqrt(n)*abstol + reltol*norm(ρ*u) ) 
-
-        if hist.r_norm[k] < hist.eps_pri[k] && hist.s_norm[k] < hist.eps_dual[k] 
-            break 
-        end 
-
-    end 
-
-    return x, z, hist, iter 
-
-end 
-
-
-    
