@@ -52,7 +52,6 @@ dx_train, dx_test = split_train_test( dx_fd, test_fraction, portion )
 
 ## ============================================ ##
 
-
 # x_GP,  Σ_xGP,  hp = post_dist_SE( t_train, x_train, t_train )              # step -1 
 # dx_GP, Σ_dxGP, hp = post_dist_SE( x_GP, dx_train, x_GP )    # step 0 
 
@@ -66,7 +65,7 @@ dx_GP_test  = gp_post( x_GP_test, 0*dx_test, x_GP_test, 0*dx_test, dx_test )
 # plot smoothed data 
 
 p_nvars = [] 
-for i = 1 : n_vars 
+for i = 1 : x_vars 
     plt = plot( legend = :outerright, title = string("dx", i) )
         scatter!( plt, t_train, dx_train[:,i], label = "FD" ) 
         plot!( plt, t_train, dx_GP_train[:,i], label = "GP" ) 
@@ -83,11 +82,6 @@ display(p_nvars)
 ## ============================================ ##
 # SINDy vs. GPSINDy 
 
-n_vars = size( [x_train u_train], 2 )
-x_vars = size(x_train, 2)
-u_vars = size(u_train, 2) 
-poly_order = n_vars 
-
 λ = 0.1 
 # Ξ = SINDy_c_test( x, u, dx_fd, λ ) 
 Ξ_sindy       = SINDy_test( x_train, dx_train, λ, u_train ) 
@@ -95,7 +89,6 @@ poly_order = n_vars
 
 Ξ_gpsindy       = SINDy_test( x_GP_train, dx_GP_train, λ, u_train ) 
 Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
-
 
 ## ============================================ ##
 
@@ -119,13 +112,19 @@ plot!( plt, t_train, dx_gpsindy[:,1], c = :green, ls = :dashdot, label = "GPSIND
 
 
 ## ============================================ ##
+# validate 
 
-dt = 0.02 
+n_vars = size( [x_train u_train], 2 )
+x_vars = size(x_train, 2)
+u_vars = size(u_train, 2) 
+poly_order = x_vars 
 
-dx_sindy_fn      = build_dx_fn(poly_order, Ξ_sindy) 
-dx_gpsindy_fn    = build_dx_fn(poly_order, Ξ_gpsindy) 
+dx_fn_true      = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
+dx_fn_sindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
+dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
 
-t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, dx_sindy_fn, dt) 
+x_sindy_test    = integrate_euler( dx_fn_sindy, x_test, t_test, u_test ) 
+x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x_test, t_test, u_test ) 
 
 ## ============================================ ##
 

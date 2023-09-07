@@ -5,19 +5,12 @@ using DifferentialEquations
 export ode_train_test 
 function ode_train_test( fn ) 
 
-    x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2) 
+    x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
     # noise 
     noise = 0.01 
     x_noise  = x_true + noise*randn( size(x_true, 1), size(x_true, 2) )
     dx_noise = dx_true + noise*randn( size(dx_true, 1), size(dx_true, 2) )
-
-    u = [] 
-    for i = 1 : length(t) 
-        # push!( u, [ 1/2*sin(t[i]), cos(t[i]) ] ) 
-        push!( u, 2sin(t[i]) + 2sin(t[i]/10) ) 
-    end 
-    # u = vv2m(u) 
 
     # split into training and test data 
     test_fraction = 0.2 
@@ -41,11 +34,6 @@ end
 export solve_ode 
 function solve_ode(fn, x0, str, p, ts, dt, plot_option)
 
-    # x0, str, p, ts, dt = init_params(fn) 
-
-    # ----------------------- #
-    # solve ODE, plot states 
-
     # solve ODE 
     prob = ODEProblem(fn, x0, ts, p) 
     sol  = solve(prob, saveat = dt) 
@@ -55,11 +43,14 @@ function solve_ode(fn, x0, str, p, ts, dt, plot_option)
     x = sol.u ; x = mapreduce(permutedims, vcat, x) 
     t = sol.t 
 
+    # get control inputs (if they exist) 
+    u = fn_control_inputs( fn, t ) 
+
     if plot_option == 1 
         plot_dyn(t, x, str)
     end 
 
-    return t, x 
+    return t, x, u 
 
 end 
 
@@ -70,24 +61,19 @@ export ode_states
 function ode_states(fn, plot_option, fd_method)
 
     x0, str, p, ts, dt = init_params(fn) 
-    t, x = solve_ode(fn, x0, str, p, ts, dt, plot_option) 
+    t, x, u = solve_ode(fn, x0, str, p, ts, dt, plot_option) 
 
     # ----------------------- #
     # derivatives 
     dx_fd   = fdiff(t, x, fd_method)    # finite difference 
     dx_true = dx_true_fn(t, x, p, fn)   # true derivatives 
-    # dx_tv   = dx_tv_fn(x)               # variational derivatives 
-    # dx_gp   = dx_gp_fn(t, dx_fd)        # gaussian process derivatives 
-
-    # error 
-    dx_err  = dx_true - dx_fd 
 
     # plot derivatives 
     if plot_option == 1 
         plot_deriv(t, dx_true, dx_fd, dx_tv, str) 
     end 
 
-    return x0, dt, t, x, dx_true, dx_fd, p 
+    return x0, dt, t, x, dx_true, dx_fd, p, u 
 
 end 
 
@@ -123,34 +109,53 @@ end
 # (5) Function to integrate an ODE using forward Euler integration.
 
 export integrate_euler 
-function integrate_euler(dx_fn, x₀, p, T; u = false)
+function integrate_euler(dx_fn, x0, t, u = false)
     # TODO: Euler integration consists of setting x(t + δt) ≈ x(t) + δt * ẋ(t, x(t), u(t)).
     #       Returns x(T) given x(0) = x₀.
 
-    xt  = x₀ 
+    xt = x0 
+    z  = zeros(size(x0, 1)) 
+    dt = t[2] - t[1] 
+    n  = length(t) 
 
+    x_hist = [] 
+    # t_hist = [] 
+    push!( x_hist, xt ) 
+    # push!( t_hist, t[1] ) 
     if u == false 
 
-        t  = 0 : 0.01 : T 
-        n  = length(t) 
-
-        for i = 1 : n 
-            xt += δt * dx_fn( xt, t[i] ) 
+        for i = 1 : n - 1 
+            xt += dt * dx_fn( xt, t[i] ) 
+            push!( x_hist, xt ) 
+            # push!( t_hist, t[1] + i * dt ) 
         end     
 
     else 
 
-        n  = length(u) 
-        dt = T / n 
-        t  = 0 : dt : T     
+        u_vars = size(u, 2) 
 
-        for i = 1 : n 
-            xt += δt * dx_fn( xt, t[i], u[i] ) 
+        for i = 1 : n - 1 
+
+            xut = copy( xt ) 
+            if u_vars > 1 
+                for j = 1 : u_vars 
+                    push!( xut, u[i,j] ) 
+                end 
+            else
+                ut = u[i]  
+                push!( xut, ut ) 
+            end 
+            xt += dt * dx_fn( xut, t[i] ) 
+            push!( x_hist, xt ) 
+            # push!( t_hist, t[1] + i * dt ) 
+
         end 
     
     end 
 
-    return xt 
+    x_hist = vv2m(x_hist) 
+
+    return x_hist 
 end
 
 ## ============================================ ##
@@ -188,13 +193,17 @@ function build_dx_fn(poly_order, x_vars, u_vars, z_fd)
     dx_fn_vec = Vector{Function}(undef,0) 
     for i = 1 : x_vars 
         # define the differential equation 
-        push!( dx_fn_vec, (xu,p,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
+        push!( dx_fn_vec, (xu,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
     end 
 
-    dx_fn(xu,p,t) = [ f(xu,p,t) for f in dx_fn_vec ] 
+    dx_fn(xu,t) = [ f(xu,t) for f in dx_fn_vec ] 
 
     return dx_fn 
 
 end 
+
+## ============================================ ##
+
+
 
 
