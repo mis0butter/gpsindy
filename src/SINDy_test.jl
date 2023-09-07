@@ -271,8 +271,6 @@ function pool_data_vecfn_test(n_vars, poly_order)
             push!( Θx, x -> x[i] .* cos.( x[j] ) ) 
         end 
     end 
-
-    println("ind = ", ind)
     
     return Θx 
 

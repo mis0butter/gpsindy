@@ -74,7 +74,7 @@ x_vars     = size(x_true, 2)
 poly_order = x_vars 
 
 if u == false 
-    u_vars     = 0 
+    u_vars = 0 
 else 
     u_vars = size(u, 2) 
 end 

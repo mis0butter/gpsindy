@@ -5,19 +5,12 @@ using DifferentialEquations
 export ode_train_test 
 function ode_train_test( fn ) 
 
-    x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2) 
+    x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
     # noise 
     noise = 0.01 
     x_noise  = x_true + noise*randn( size(x_true, 1), size(x_true, 2) )
     dx_noise = dx_true + noise*randn( size(dx_true, 1), size(dx_true, 2) )
-
-    u = [] 
-    for i = 1 : length(t) 
-        # push!( u, [ 1/2*sin(t[i]), cos(t[i]) ] ) 
-        push!( u, 2sin(t[i]) + 2sin(t[i]/10) ) 
-    end 
-    # u = vv2m(u) 
 
     # split into training and test data 
     test_fraction = 0.2 
@@ -116,38 +109,48 @@ end
 # (5) Function to integrate an ODE using forward Euler integration.
 
 export integrate_euler 
-function integrate_euler(dx_fn, x0, p, T; u = false)
+function integrate_euler(dx_fn, x0, t, u = false)
     # TODO: Euler integration consists of setting x(t + δt) ≈ x(t) + δt * ẋ(t, x(t), u(t)).
     #       Returns x(T) given x(0) = x₀.
 
-    xt  = x0 
-    z = zeros(size(x0,1)) 
-
+    xt = x0 
+    z  = zeros(size(x0, 1)) 
+    dt = t[2] - t[1] 
+    n  = length(t) 
+    
+    x_hist = [] 
+    push!( x_hist, xt ) 
     if u == false 
 
-        t  = 0 : 0.01 : T 
-        n  = length(t) 
-
         for i = 1 : n 
-            xt += δt * dx_fn( xt, t[i] ) 
+            xt += dt * dx_fn( xt, t[i] ) 
+            push!( x_hist, xt ) 
         end     
 
     else 
 
-        n  = length(u) 
-        dt = T / n 
-        t  = 0 : dt : T     
+        u_vars = size(u, 2) 
 
         for i = 1 : n 
 
-            ut = u[i,:] 
-            dxt = dt * dx_fn( z, xt, p, t[i] ) 
+            if u_vars > 1 
+                ut = u[i,:] 
+            else
+                ut = u[i]  
+            end 
+            
+            xut = copy( xt ) 
+            xut = push!( xut, ut ) 
+            xt += dt * dx_fn( xut, t[i] ) 
+            push!( x_hist, xt ) 
 
         end 
     
     end 
 
-    return xt 
+    x_hist = vv2m(x_hist) 
+
+    return x_hist 
 end
 
 ## ============================================ ##
