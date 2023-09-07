@@ -12,7 +12,7 @@ function fn_control_inputs( fn, t )
         u = [ 1/2*sin(t), cos(t) ] 
 
     elseif fn == quadcopter 
-
+        u = [ sin(t), cos(t), sin(t/10) ]
 
     end 
 
@@ -144,7 +144,7 @@ end
 ## ============================================ ##
 
 export quadcopter 
-function quadcopter( dx, x, p, t )
+function quadcopter( dx, x, p, t, u = [ sin(t), cos(t), sin(t/10) ] )
 # ----------------------- #
 # PURPOSE: 
 #       quadcopter dynamics 
