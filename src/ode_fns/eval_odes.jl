@@ -41,11 +41,6 @@ end
 export solve_ode 
 function solve_ode(fn, x0, str, p, ts, dt, plot_option)
 
-    # x0, str, p, ts, dt = init_params(fn) 
-
-    # ----------------------- #
-    # solve ODE, plot states 
-
     # solve ODE 
     prob = ODEProblem(fn, x0, ts, p) 
     sol  = solve(prob, saveat = dt) 
@@ -76,11 +71,6 @@ function ode_states(fn, plot_option, fd_method)
     # derivatives 
     dx_fd   = fdiff(t, x, fd_method)    # finite difference 
     dx_true = dx_true_fn(t, x, p, fn)   # true derivatives 
-    # dx_tv   = dx_tv_fn(x)               # variational derivatives 
-    # dx_gp   = dx_gp_fn(t, dx_fd)        # gaussian process derivatives 
-
-    # error 
-    dx_err  = dx_true - dx_fd 
 
     # plot derivatives 
     if plot_option == 1 
