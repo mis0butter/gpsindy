@@ -11,7 +11,7 @@ function fn_control_inputs( fn, t )
     elseif fn == unicycle 
         t0 = 0*t
         # u = [ 1/2*sin.(t) cos.(t) ] 
-        u = [ -1/2.+t0 cos.(t) ] 
+        u = [ -1 ./ (t .+ 1)     1/2*cos.(t) ] 
         # u = [ -1/2.+t0 -2.+t0 ] 
 
     elseif fn == quadcopter 
@@ -26,7 +26,7 @@ end
 ## ============================================ ##
 
 export unicycle 
-function unicycle( dx, x, p, t, u = [ -1/2 cos(t) ] ) 
+function unicycle( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] ) 
     # x[1] x position 
     # x[2] y position 
     # x[3] forward velocity    
