@@ -6,13 +6,13 @@ using GaussianSINDy
 fn = predator_prey_forcing 
 # data_train, data_test = ode_train_test( fn ) 
 
-x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2) 
+x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
-u = [] 
-for i = 1 : length(t) 
-    # push!( u, [ 1/2*sin(t[i]), cos(t[i]) ] ) 
-    push!( u, 2sin(t[i]) + 2sin(t[i]/10) ) 
-end 
+# u = [] 
+# for i = 1 : length(t) 
+#     # push!( u, [ 1/2*sin(t[i]), cos(t[i]) ] ) 
+#     push!( u, 2sin(t[i]) + 2sin(t[i]/10) ) 
+# end 
 # u = vv2m()
 
 ## ============================================ ##
@@ -40,7 +40,7 @@ end
 Θx = pool_data_test(data, n_vars, poly_order) 
 
 # first cut - SINDy 
-Ξ = sparsify_dynamics_test(Θx, dx, λ, x_vars) 
+Ξ  = sparsify_dynamics_test(Θx, dx, λ, x_vars) 
 
 
 

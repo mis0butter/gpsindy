@@ -3,16 +3,16 @@ function fn_control_inputs( fn, t )
     
     # control inputs 
     if fn == lorenz || fn == ode_sine || fn == predator_prey || fn == pendulum || fn == double_pendulum || fn == dyn_car 
-        u = 0        
+        u = false 
 
     elseif fn == predator_prey_forcing 
-        u = 2sin(t) + 2sin(t/10) 
+        u = 2sin.(t) + 2sin.(t/10) 
         
     elseif fn == unicycle 
-        u = [ 1/2*sin(t), cos(t) ] 
+        u = [ 1/2*sin.(t), cos.(t) ] 
 
     elseif fn == quadcopter 
-        u = [ sin(t), cos(t), sin(t/10) ]
+        u = [ sin.(t), cos.(t), sin.(t/10) ]
 
     end 
 

@@ -31,15 +31,20 @@ using GaussianSINDy
 
 fn = predator_prey 
 
-x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2) 
+x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
 λ = 0.1 
 Ξ_true = SINDy_test( x_true, dx_true, λ ) 
 
 z_fd       = Ξ_true 
-x_vars     = size(x0, 1) 
+x_vars     = size(x_true, 2) 
 poly_order = x_vars 
-u_vars     = 0 
+
+if u == false 
+    u_vars     = 0 
+else 
+    u_vars = size(u, 2) 
+end 
 
 # build function 
 dx_fn_true = build_dx_fn(poly_order, x_vars, u_vars, z_fd) 
@@ -58,24 +63,35 @@ println( "dxf_test = ", dxf_test )
 
 fn = predator_prey_forcing 
 
-x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2) 
+x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
 λ = 0.1 
-Ξ_true = SINDy_test( x_true, dx_true, λ ) 
+# function SINDy_test( x, dx, λ, u = false )
+Ξ_true = SINDy_test( x_true, dx_true, λ, u ) 
 
 z_fd       = Ξ_true 
-x_vars     = size(x0, 1) 
+x_vars     = size(x_true, 2) 
 poly_order = x_vars 
-u_vars     = 0 
+
+if u == false 
+    u_vars     = 0 
+else 
+    u_vars = size(u, 2) 
+end 
 
 # build function 
-dx_fn_true = build_dx_fn(poly_order, x_vars, u_vars, z_fd) 
+dx_fn_true_ctrl = build_dx_fn(poly_order, x_vars, u_vars, z_fd) 
 
+xu0 = copy( x0 ) 
+push!( xu0, u[1] ) 
 # test that it works 
-dx0_test = dx_fn_true( x0, 0 ) 
+dx0_test = dx_fn_true_ctrl( xu0, 0 ) 
 println( "dx0_true = ", dx_true[1,:] )
 println( "dx0_test = ", dx0_test )  
-dxf_test = dx_fn_true( x_true[end,:], 0 ) 
+
+xuf = x_true[end,:] 
+push!( xuf, u[end] ) 
+dxf_test = dx_fn_true_ctrl( xuf, 0 ) 
 println( "dxf_true = ", dx_true[end,:] )
 println( "dxf_test = ", dxf_test )  
 

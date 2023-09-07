@@ -50,11 +50,14 @@ function solve_ode(fn, x0, str, p, ts, dt, plot_option)
     x = sol.u ; x = mapreduce(permutedims, vcat, x) 
     t = sol.t 
 
+    # get control inputs (if they exist) 
+    u = fn_control_inputs( fn, t ) 
+
     if plot_option == 1 
         plot_dyn(t, x, str)
     end 
 
-    return t, x 
+    return t, x, u 
 
 end 
 
@@ -65,7 +68,7 @@ export ode_states
 function ode_states(fn, plot_option, fd_method)
 
     x0, str, p, ts, dt = init_params(fn) 
-    t, x = solve_ode(fn, x0, str, p, ts, dt, plot_option) 
+    t, x, u = solve_ode(fn, x0, str, p, ts, dt, plot_option) 
 
     # ----------------------- #
     # derivatives 
@@ -77,7 +80,7 @@ function ode_states(fn, plot_option, fd_method)
         plot_deriv(t, dx_true, dx_fd, dx_tv, str) 
     end 
 
-    return x0, dt, t, x, dx_true, dx_fd, p 
+    return x0, dt, t, x, dx_true, dx_fd, p, u 
 
 end 
 
