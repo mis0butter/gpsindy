@@ -126,32 +126,10 @@ dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy )
 x_sindy_test    = integrate_euler( dx_fn_sindy, x_test, t_test, u_test ) 
 x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x_test, t_test, u_test ) 
 
-## ============================================ ##
 
-using DifferentialEquations 
-
-n_vars = size(x_test, 2) 
-x0     = [ x_test[1] ] 
-if n_vars > 1 
-    x0 = x_test[1,:] 
-end 
-
-# dt    = t_test[2] - t_test[1] 
-tspan = (t_test[1], t_test[end])
-prob  = ODEProblem(dx_sindy_fn, x0, tspan) 
-
-
-# solve the ODE
-sol   = solve(prob, saveat = dt)
-# sol = solve(prob,  reltol = 1e-8, abstol = 1e-8)
-x_validate = sol.u ; 
-x_validate = mapreduce(permutedims, vcat, x_validate) 
-t_validate = sol.t 
 
 
 ## ============================================ ##
-
-
 
 # t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, fn, dt) 
 t_gpsindy_val,    x_gpsindy_val    = validate_data(t, x_GP_train, dx_gpsindy_fn, dt) 

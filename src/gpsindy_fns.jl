@@ -196,7 +196,7 @@ end
 # compare sindy, gpsindy, and gpsindy_gpsindy 
 
 export gpsindy_x2
-function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist ) 
+function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option ) 
     
     # generate true states 
     x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2)
@@ -292,12 +292,24 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist )
     # t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, fn, dt) 
     t_gpsindy_val, x_gpsindy_val       = validate_data(t_test, x_test_noise, dx_gpsindy_fn, dt)
     t_gpsindy_x2_val, x_gpsindy_x2_val = validate_data(t_test, x_test_noise, dx_gpsindy_x2_fn, dt)
-    t_nn_val, x_nn_val                 = validate_data(t_test, x_test_noise, dx_nn_fn, dt)
+    t_nn_val, x_nn_val                 = validate_data(t_test, x_test_noise, dx_nn_fn, dt) 
+
+    # x_sindy_val       = integrate_euler( dx_sindy_fn, x_test_noise, t_test ) 
+    # x_gpsindy_val     = integrate_euler( dx_gpsindy_fn, x_test_noise, t_test ) 
+    # x_gpsindy_x2_val  = integrate_euler( dx_gpsindy_x2_fn, x_test_noise, t_test ) 
+    # x_nn_val          = integrate_euler( dx_nn_fn, x_test_noise, t_test ) 
 
     # plot!! 
-    plot_states(t_train, x_train_noise, t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
-    plot_test_data(t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
-    
+    if plot_option == 1 
+
+        # plot_states(t_train, x_train_noise, t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
+        # plot_test_data(t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
+
+        plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
+        plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
+
+    end 
+
     # ----------------------- # 
     # save outputs  
 
@@ -306,11 +318,13 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist )
     push!( Ξ_hist.sindy,      Ξ_sindy ) 
     push!( Ξ_hist.gpsindy,    Ξ_gpsindy ) 
     push!( Ξ_hist.gpsindy_x2, Ξ_gpsindy_x2 ) 
+    push!( Ξ_hist.nn,         Ξ_nn ) 
 
     # save Ξ_err_hist 
     push!( Ξ_err_hist.sindy,      norm( Ξ_true - Ξ_sindy ) ) 
     push!( Ξ_err_hist.gpsindy,    norm( Ξ_true - Ξ_gpsindy ) ) 
     push!( Ξ_err_hist.gpsindy_x2, norm( Ξ_true - Ξ_gpsindy_x2 ) ) 
+    push!( Ξ_err_hist.nn,         norm( Ξ_true - Ξ_nn ) ) 
 
     return Ξ_hist, Ξ_err_hist 
 

@@ -132,9 +132,7 @@ function pool_data_test(xmat, n_vars, poly_order)
         for i = 1 : n_vars 
             for j = i : n_vars 
                 ind += 1 ; 
-                println( "i = ", i, ". j = ", j ) 
                 vec  = xmat[:,i] .* xmat[:,j] 
-                println("done") 
                 Θx   = [Θx vec] 
             end 
         end 

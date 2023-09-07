@@ -4,6 +4,18 @@ Discovering Equations of Motion from Data
 
 # Research Notes 
 
+## Sept 7, 2023 
+
+Adam: 
+- 4 plots: 
+  - 1: predator_prey single case 
+  - 2: predator_prey batch median quartile plots 
+  - 3: unicycle sim 
+  - 4: Jake's car data 
+
+Somi: 
+- Use neural network as another baseline (can fit into fig 1 and 2) 
+
 ## Sept 5, 2023 
 
 Junette: 

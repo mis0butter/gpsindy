@@ -16,12 +16,14 @@ struct Ξ_struct
     sindy 
     gpsindy 
     gpsindy_x2 
+    nn 
 end
 
 struct Ξ_err_struct 
     sindy 
     gpsindy 
     gpsindy_x2 
+    nn 
 end 
 
 struct data_struct

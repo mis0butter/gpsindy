@@ -400,7 +400,7 @@ end
 
 
 export plot_med_quarts_gpsindy_x2
-function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, gpsindy_gpsindy_err_vec, noise_vec)
+function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, nnsindy_err_vec, noise_vec)
 
     n_vars = size(sindy_err_vec, 2)
     unique_i = unique(i -> noise_vec[i], 1:length(noise_vec))
@@ -410,8 +410,8 @@ function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, gpsindy_gpsi
     sindy_q13 = []
     gpsindy_med = []
     gpsindy_q13 = []
-    gpsindy_gpsindy_med = []
-    gpsindy_gpsindy_q13 = []
+    nnsindy_med = []
+    nnsindy_q13 = []
     for i = 1:length(unique_i)-1
 
         ji = unique_i[i]
@@ -419,33 +419,33 @@ function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, gpsindy_gpsi
 
         smed = []
         gpsmed = []
-        gpsgpsmed = []
+        nnsmed = []
         sq13 = []
         gpsq13 = []
-        gpsgpsq13 = []
+        nnsq13 = []
         for j = 1:n_vars
             push!(smed, median(sindy_err_vec[ji:jf, j]))
             push!(gpsmed, median(gpsindy_err_vec[ji:jf, j]))
-            push!(gpsgpsmed, median(gpsindy_gpsindy_err_vec[ji:jf, j]))
+            push!(nnsmed, median(nnsindy_err_vec[ji:jf, j]))
             push!(sq13, [quantile(sindy_err_vec[ji:jf, j], 0.25), quantile(sindy_err_vec[ji:jf, j], 0.75)])
             push!(gpsq13, [quantile(gpsindy_err_vec[ji:jf, j], 0.25), quantile(gpsindy_err_vec[ji:jf, j], 0.75)])
-            push!(gpsgpsq13, [quantile(gpsindy_gpsindy_err_vec[ji:jf, j], 0.25), quantile(gpsindy_gpsindy_err_vec[ji:jf, j], 0.75)])
+            push!(nnsq13, [quantile(nnsindy_err_vec[ji:jf, j], 0.25), quantile(nnsindy_err_vec[ji:jf, j], 0.75)])
         end
 
         push!(sindy_med, smed)
         push!(sindy_q13, sq13)
         push!(gpsindy_med, gpsmed)
         push!(gpsindy_q13, gpsq13)
-        push!(gpsindy_gpsindy_med, gpsgpsmed)
-        push!(gpsindy_gpsindy_q13, gpsgpsq13)
+        push!(nnsindy_med, nnsmed)
+        push!(nnsindy_q13, nnsq13)
 
     end
     sindy_med = vv2m(sindy_med)
     sindy_q13 = vv2m(sindy_q13)
     gpsindy_med = vv2m(gpsindy_med)
     gpsindy_q13 = vv2m(gpsindy_q13)
-    gpsindy_gpsindy_med = vv2m(gpsindy_gpsindy_med)
-    gpsindy_gpsindy_q13 = vv2m(gpsindy_gpsindy_q13)
+    nnsindy_med = vv2m(nnsindy_med)
+    nnsindy_q13 = vv2m(nnsindy_q13)
 
     noise_vec_iter = unique(noise_vec)
     p_nvars = []
@@ -465,10 +465,10 @@ function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, gpsindy_gpsi
         scatter!(plt, noise_vec, gpsindy_err_vec[:, i], c=:orange, markerstrokewidth=0, ms=3, markeralpha=0.35, label="GPSINDy")
 
         # gpsindy_gpsindy
-        ymed = gpsindy_gpsindy_med[:, i]
-        yq13 = vv2m(gpsindy_gpsindy_q13[:, i])
+        ymed = nnsindy_med[:, i]
+        yq13 = vv2m(nnsindy_q13[:, i])
         plot!(plt, noise_vec_iter, ymed, c=:cyan, ls=:dashdot, ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.25)
-        scatter!(plt, noise_vec, gpsindy_gpsindy_err_vec[:, i], c=:cyan, markerstrokewidth=0, ms=3, markeralpha=0.35, label="GPSINDy x2")
+        scatter!(plt, noise_vec, nnsindy_err_vec[:, i], c=:cyan, markerstrokewidth=0, ms=3, markeralpha=0.35, label="NNSINDy")
 
         push!(p_nvars, plt)
     end
