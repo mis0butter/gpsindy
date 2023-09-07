@@ -19,20 +19,20 @@ fn = predator_prey
 #         push!(noise_vec, i)
 #     end
 # end
-# noise_vec = collect( 0 : 0.05 : 0.2 ) 
-noise = 0.2
+noise_vec = [ 0.01 ] 
+# noise = 0.2
 
 # ----------------------- # 
 # start MC loop 
 
-# Ξ_vec = []
-# Ξ_hist = Ξ_struct([], [], [], [])
-# Ξ_err_hist = Ξ_err_struct([], [], [])
-# for noise = noise_vec 
-#     Ξ_hist, Ξ_err_hist = gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist ) 
-# end 
+Ξ_vec = []
+Ξ_hist = Ξ_struct([], [], [], [])
+Ξ_err_hist = Ξ_err_struct([], [], [])
+for noise = noise_vec 
+    Ξ_hist, Ξ_err_hist = gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist ) 
+end 
 
-# ----------------------- # 
+## ============================================ ##
 
 # generate true states 
 x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2)
