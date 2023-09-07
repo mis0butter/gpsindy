@@ -126,8 +126,8 @@ dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy )
 x_sindy_test    = integrate_euler( dx_fn_sindy, x_test, t_test, u_test ) 
 x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x_test, t_test, u_test ) 
 
-
-
+plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
+plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
 
 ## ============================================ ##
 
