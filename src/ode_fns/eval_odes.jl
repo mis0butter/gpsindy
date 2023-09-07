@@ -125,7 +125,7 @@ function integrate_euler(dx_fn, x0, t, u = false)
     if u == false 
 
         for i = 1 : n - 1 
-            xt += dt * dx_fn( xt, t[i] ) 
+            xt += dt * dx_fn( xt, 0, t[i] ) 
             push!( x_hist, xt ) 
             # push!( t_hist, t[1] + i * dt ) 
         end     
@@ -139,13 +139,13 @@ function integrate_euler(dx_fn, x0, t, u = false)
             xut = copy( xt ) 
             if u_vars > 1 
                 for j = 1 : u_vars 
-                    push!( xut, u[i,j] ) 
+                    push!( xut, 0, u[i,j] ) 
                 end 
             else
                 ut = u[i]  
                 push!( xut, ut ) 
             end 
-            xt += dt * dx_fn( xut, t[i] ) 
+            xt += dt * dx_fn( xut, 0, t[i] ) 
             push!( x_hist, xt ) 
             # push!( t_hist, t[1] + i * dt ) 
 
@@ -193,10 +193,10 @@ function build_dx_fn(poly_order, x_vars, u_vars, z_fd)
     dx_fn_vec = Vector{Function}(undef,0) 
     for i = 1 : x_vars 
         # define the differential equation 
-        push!( dx_fn_vec, (xu,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
+        push!( dx_fn_vec, (xu,p,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
     end 
 
-    dx_fn(xu,t) = [ f(xu,t) for f in dx_fn_vec ] 
+    dx_fn(xu,p,t) = [ f(xu,p,t) for f in dx_fn_vec ] 
 
     return dx_fn 
 

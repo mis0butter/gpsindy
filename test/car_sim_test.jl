@@ -35,7 +35,7 @@ dx_fn_gpsindy    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy )
 xu0 = data_train.x_true[1,:] 
 push!( xu0, data_train.u[1,1] ) 
 push!( xu0, data_train.u[1,2] ) 
-dx0_test = dx_fn_true( xu0, 0 ) 
+dx0_test = dx_fn_true( xu0, 0, 0 ) 
 
 x_true_test    = integrate_euler( dx_fn_true, data_test.x_true[1,:], data_test.t, data_test.u ) 
 x_sindy_test   = integrate_euler( dx_fn_sindy, data_test.x_true[1,:], data_test.t, data_test.u ) 
