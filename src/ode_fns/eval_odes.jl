@@ -136,14 +136,15 @@ function integrate_euler(dx_fn, x0, t, u = false)
 
         for i = 1 : n - 1 
 
+            xut = copy( xt ) 
             if u_vars > 1 
-                ut = u[i,:] 
+                for j = 1 : u_vars 
+                    push!( xut, u[i,j] ) 
+                end 
             else
                 ut = u[i]  
+                push!( xut, ut ) 
             end 
-            
-            xut = copy( xt ) 
-            xut = push!( xut, ut ) 
             xt += dt * dx_fn( xut, t[i] ) 
             push!( x_hist, xt ) 
             # push!( t_hist, t[1] + i * dt ) 

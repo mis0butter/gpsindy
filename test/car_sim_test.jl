@@ -4,7 +4,7 @@ using GaussianSINDy
 ## ============================================ ##
 # truth 
 
-fn = predator_prey_forcing 
+fn = unicycle 
 data_train, data_test = ode_train_test( fn ) 
 
 λ = 0.1 
@@ -33,7 +33,8 @@ dx_fn_sindy      = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy )
 dx_fn_gpsindy    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
 
 xu0 = data_train.x_true[1,:] 
-push!( xu0, data_train.u[1] ) 
+push!( xu0, data_train.u[1,1] ) 
+push!( xu0, data_train.u[1,2] ) 
 dx0_test = dx_fn_true( xu0, 0 ) 
 
 x_true_test    = integrate_euler( dx_fn_true, data_test.x_true[1,:], data_test.t, data_test.u ) 
