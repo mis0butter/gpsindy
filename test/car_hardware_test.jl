@@ -40,8 +40,7 @@ end
 dx_fd = fdiff(t, x, 2) 
 # dx_true = dx_true_fn
 
-## ============================================ ##
-
+# ----------------------- #
 # split into training and test data 
 test_fraction = 0.2 
 portion       = 5 
@@ -51,6 +50,7 @@ x_train,  x_test  = split_train_test( x, test_fraction, portion )
 dx_train, dx_test = split_train_test( dx_fd, test_fraction, portion ) 
 
 ## ============================================ ##
+# SINDy vs. GPSINDy 
 
 # x_GP,  Σ_xGP,  hp = post_dist_SE( t_train, x_train, t_train )              # step -1 
 # dx_GP, Σ_dxGP, hp = post_dist_SE( x_GP, dx_train, x_GP )    # step 0 
@@ -60,6 +60,16 @@ dx_GP_train = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train 
 
 x_GP_test   = gp_post( t_test, 0*x_test, t_test, 0*x_test, x_test ) 
 dx_GP_test  = gp_post( x_GP_test, 0*dx_test, x_GP_test, 0*dx_test, dx_test ) 
+
+# ----------------------- #
+
+λ = 0.1 
+# Ξ = SINDy_c_test( x, u, dx_fd, λ ) 
+Ξ_sindy       = SINDy_test( x_train, dx_train, λ, u_train ) 
+Ξ_sindy_terms = pretty_coeffs( Ξ_sindy, x_train, u_train ) 
+
+Ξ_gpsindy       = SINDy_test( x_GP_train, dx_GP_train, λ, u_train ) 
+Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
 
 ## ============================================ ##
 # plot smoothed data 
@@ -77,18 +87,6 @@ p_nvars = plot( p_nvars ... ,
     plot_title = "FD vs GP training data"
 ) 
 display(p_nvars) 
-
-
-## ============================================ ##
-# SINDy vs. GPSINDy 
-
-λ = 0.1 
-# Ξ = SINDy_c_test( x, u, dx_fd, λ ) 
-Ξ_sindy       = SINDy_test( x_train, dx_train, λ, u_train ) 
-Ξ_sindy_terms = pretty_coeffs( Ξ_sindy, x_train, u_train ) 
-
-Ξ_gpsindy       = SINDy_test( x_GP_train, dx_GP_train, λ, u_train ) 
-Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
 
 ## ============================================ ##
 
@@ -114,27 +112,82 @@ plot!( plt, t_train, dx_gpsindy[:,1], c = :green, ls = :dashdot, label = "GPSIND
 ## ============================================ ##
 # validate 
 
-n_vars = size( [x_train u_train], 2 )
 x_vars = size(x_train, 2)
 u_vars = size(u_train, 2) 
 poly_order = x_vars 
 
-dx_fn_true      = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
 dx_fn_sindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
 dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
 
-x_sindy_test    = integrate_euler( dx_fn_sindy, x_test, t_test, u_test ) 
-x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x_test, t_test, u_test ) 
+xu0 = x_test[1,:] 
+push!( xu0, u_test[1,1] ) 
+push!( xu0, u_test[1,2] ) 
+dx0_test = dx_fn_sindy( xu0, 0, 0 ) 
 
-plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
-plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
+x_sindy_test    = integrate_euler( dx_fn_sindy, x_test[1,:], t_test, u_test ) 
+x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x_test[1,:], t_test, u_test ) 
+
+# plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
+# plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
 
 ## ============================================ ##
+# plot 
 
-# t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, fn, dt) 
-t_gpsindy_val,    x_gpsindy_val    = validate_data(t, x_GP_train, dx_gpsindy_fn, dt) 
+using Plots 
+using Latexify
 
-# plot!! 
-plot_states( t, x, t, x, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_val, x_gpsindy_val ) 
+xmin, dx, xmax = min_d_max(t_test)
 
+p_vec = [] 
+for i = 1 : x_vars 
 
+    # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_test[:,i] ])
+    ymin = -5 
+    ymax = 4 
+    dy   = 3 
+
+    p = plot( t_test, x_test[:,i], 
+        c      = :gray, 
+        label  = "test", 
+        xlabel = "Time (s)", 
+        xticks = xmin:dx:xmax,
+        yticks = ymin:dy:ymax,
+        ylim   = (ymin, ymax), 
+        title  = string(latexify("x_$(i)")),
+    ) 
+    plot!( p, t_test, x_sindy_test[:,i], 
+        c       = :red, 
+        label   = "SINDy", 
+        xticks  = xmin:dx:xmax,
+        yticks  = ymin:dy:ymax,
+        ls      = :dash, 
+        title   = string(latexify("x_$(i)")),
+    ) 
+    plot!( p, t_test, x_gpsindy_test[:,i], 
+        c       = :blue, 
+        label   = "GPSINDy", 
+        xticks  = xmin:dx:xmax,
+        yticks = ymin:dy:ymax,
+        ls      = :dashdot, 
+        title   = string(latexify("x_$(i)")),
+    )
+    push!( p_vec, p ) 
+
+end 
+
+p = deepcopy( p_vec[end] ) 
+plot!( p, 
+    legend = ( -0.1, 0.6 ), 
+    framestyle = :none, 
+    title = "",      
+)  
+push!( p_vec, p ) 
+
+pfig = plot(  p_vec ... , 
+    layout = grid(1, x_vars + 1, widths=[0.2, 0.2, 0.2, 0.2, 0.25]), 
+    size   = [ x_vars * 400 250 ],         
+    margin = 5Plots.mm,
+    bottom_margin = 14Plots.mm,
+)
+
+display(pfig) 

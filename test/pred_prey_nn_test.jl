@@ -2,14 +2,13 @@ using GaussianSINDy
 using Flux
 # using LineSearches 
 
-
-## ============================================ ##
-
 # choose ODE, plot states --> measurements 
 fn = predator_prey
 
 # constants 
 λ = 0.1
+
+## ============================================ ##
 
 # set up noise vec 
 noise_vec = []
@@ -20,7 +19,6 @@ for i in noise_vec_iter
     end
 end
 # noise_vec = [ 0.01 ] 
-# noise = 0.2
 
 # ----------------------- # 
 # start MC loop 
@@ -60,9 +58,11 @@ jldsave(string( dir_name, "\\Ξ_err_hist.jld2" ); Ξ_err_hist)
 
 ## ============================================ ##
 ## ============================================ ##
+# single test case
 
 # generate true states 
 x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2)
+noise = 0.1 
 
 # truth coeffs 
 n_vars = size(x_true, 2);
@@ -93,6 +93,7 @@ dx_stand_noise = dx_stand_true + noise * randn(size(dx_stand_true, 1), size(dx_s
 # set training data for GPSINDy 
 x_train = x_stand_noise 
 dx_train = dx_stand_noise
+
 
 ## ============================================ ##
 # SINDy vs. GPSINDy vs. GPSINDy_x2 
