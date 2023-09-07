@@ -123,11 +123,12 @@ end
 # (5) Function to integrate an ODE using forward Euler integration.
 
 export integrate_euler 
-function integrate_euler(dx_fn, x₀, p, T; u = false)
+function integrate_euler(dx_fn, x0, p, T; u = false)
     # TODO: Euler integration consists of setting x(t + δt) ≈ x(t) + δt * ẋ(t, x(t), u(t)).
     #       Returns x(T) given x(0) = x₀.
 
-    xt  = x₀ 
+    xt  = x0 
+    z = zeros(size(x0,1)) 
 
     if u == false 
 
@@ -145,7 +146,10 @@ function integrate_euler(dx_fn, x₀, p, T; u = false)
         t  = 0 : dt : T     
 
         for i = 1 : n 
-            xt += δt * dx_fn( xt, t[i], u[i] ) 
+
+            ut = u[i,:] 
+            dxt = dt * dx_fn( z, xt, p, t[i] ) 
+
         end 
     
     end 
@@ -188,13 +192,17 @@ function build_dx_fn(poly_order, x_vars, u_vars, z_fd)
     dx_fn_vec = Vector{Function}(undef,0) 
     for i = 1 : x_vars 
         # define the differential equation 
-        push!( dx_fn_vec, (xu,p,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
+        push!( dx_fn_vec, (xu,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
     end 
 
-    dx_fn(xu,p,t) = [ f(xu,p,t) for f in dx_fn_vec ] 
+    dx_fn(xu,t) = [ f(xu,t) for f in dx_fn_vec ] 
 
     return dx_fn 
 
 end 
+
+## ============================================ ##
+
+
 
 

@@ -12,7 +12,8 @@
 #     return dx 
 # end 
 
-# ----------------------- #
+# ----------------------- # 
+
 # function dx_true_fn(t, x, p, fn)
 
 #     # true derivatives 
@@ -44,9 +45,13 @@ x_hist = []
 push!( x_hist, xt )
 for i = 1 : N 
 
-    ut = u[i,:]
-    xt == xt + dt * fn( z, xt, p, t[i] ) 
+    ut  = u[i,:]
+    dxt = dt * fn( z, xt, p, t[i], ut ) 
+    xt  += xt + dxt  
     push!( x_hist, xt )
+
+    println( "dxt = ", dxt )
+    println( "xt = ", xt ) 
 
 end 
 

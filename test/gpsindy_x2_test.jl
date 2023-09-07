@@ -111,9 +111,14 @@ dx_post  = gp_post( x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train )
 ## ============================================ ##
 # validate data 
 
-dx_sindy_fn      = build_dx_fn(poly_order, Ξ_sindy) 
-dx_gpsindy_fn    = build_dx_fn(poly_order, Ξ_gpsindy) 
-dx_gpsindy_x2_fn = build_dx_fn(poly_order, Ξ_gpsindy_x2) 
+# function build_dx_fn(poly_order, x_vars, u_vars, z_fd) 
+
+x_vars = size( x_true, 2 )
+u_vars = 0  
+dx_true_f        = build_dx_fn(poly_order, x_vars, u_vars, Ξ_true) 
+dx_sindy_fn      = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy) 
+dx_gpsindy_fn    = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy) 
+dx_gpsindy_x2_fn = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy_x2) 
 
 t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test_noise, dx_sindy_fn, dt) 
 # t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, fn, dt) 
