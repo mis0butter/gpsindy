@@ -36,7 +36,17 @@ xu0 = data_train.x_true[1,:]
 push!( xu0, data_train.u[1] ) 
 dx0_test = dx_fn_true( xu0, 0 ) 
 
-x_hist = integrate_euler( dx_fn_true, data_test.x_true[1,:], data_test.t, data_test.u ) 
+x_true_test    = integrate_euler( dx_fn_true, data_test.x_true[1,:], data_test.t, data_test.u ) 
+x_sindy_test   = integrate_euler( dx_fn_sindy, data_test.x_true[1,:], data_test.t, data_test.u ) 
+x_gpsindy_test = integrate_euler( dx_fn_gpsindy, data_test.x_true[1,:], data_test.t, data_test.u ) 
+t_test = data_test.t 
+
+using Plots 
+
+i = 1 
+plot( t_test, data_test.x_true[:,1], label = "true", legend = true ) 
+plot!( t_test, x_sindy_test[:,1], ls = :dash, label = "sindy" ) 
+plot!( t_test, x_gpsindy_test[:,1], ls = :dashdot, label = "gpsindy" ) 
 
 
 # dt = data_train.t[2] - data_train.t[1] 

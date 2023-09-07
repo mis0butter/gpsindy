@@ -117,21 +117,24 @@ function integrate_euler(dx_fn, x0, t, u = false)
     z  = zeros(size(x0, 1)) 
     dt = t[2] - t[1] 
     n  = length(t) 
-    
+
     x_hist = [] 
+    # t_hist = [] 
     push!( x_hist, xt ) 
+    # push!( t_hist, t[1] ) 
     if u == false 
 
-        for i = 1 : n 
+        for i = 1 : n - 1 
             xt += dt * dx_fn( xt, t[i] ) 
             push!( x_hist, xt ) 
+            # push!( t_hist, t[1] + i * dt ) 
         end     
 
     else 
 
         u_vars = size(u, 2) 
 
-        for i = 1 : n 
+        for i = 1 : n - 1 
 
             if u_vars > 1 
                 ut = u[i,:] 
@@ -143,6 +146,7 @@ function integrate_euler(dx_fn, x0, t, u = false)
             xut = push!( xut, ut ) 
             xt += dt * dx_fn( xut, t[i] ) 
             push!( x_hist, xt ) 
+            # push!( t_hist, t[1] + i * dt ) 
 
         end 
     
