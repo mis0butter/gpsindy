@@ -1,6 +1,129 @@
 using Plots
 using StatsPlots
-using Statistics
+using Statistics 
+using Latexify 
+## ============================================ ##
+# plot 
+
+export plot_validation_test 
+function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_gpsindy_test)  
+    
+    xmin, dx, xmax = min_d_max(t_test)
+    
+    x_vars = size(x_test, 2) 
+    p_vec = [] 
+    for i = 1 : x_vars 
+    
+        # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_test[:,i] ])
+        ymin = -5 
+        ymax = 4 
+        dy   = 3 
+    
+        p = plot( t_test, x_test[:,i], 
+            c       = :gray, 
+            label   = "test", 
+            legend  = :outerright, 
+            xlabel  = "Time (s)", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ylim    = (ymin, ymax), 
+            title   = string(latexify("x_$(i)")),
+        ) 
+        plot!( p, t_test, x_unicycle_test[:,i], 
+            c       = :green, 
+            label   = "unicycle", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ls      = :dash, 
+        ) 
+        plot!( p, t_test, x_sindy_test[:,i], 
+            c       = :red, 
+            label   = "SINDy", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ls      = :dashdot, 
+        ) 
+        plot!( p, t_test, x_gpsindy_test[:,i], 
+            c       = :blue, 
+            label   = "GPSINDy", 
+            xticks  = xmin:dx:xmax,
+            yticks = ymin:dy:ymax,
+            ls      = :dot, 
+        )
+        push!( p_vec, p ) 
+    
+    end 
+    
+    # p = deepcopy( p_vec[end] ) 
+    # plot!( p, 
+    #     legend = ( -0.1, 0.6 ), 
+    #     framestyle = :none, 
+    #     title = "",      
+    # )  
+    # push!( p_vec, p ) 
+    
+    pfig = plot(  p_vec ... , 
+        layout = grid( x_vars, 1 ), 
+        size   = [ 600 x_vars * 400 ],         
+        margin = 5Plots.mm,
+        bottom_margin = 14Plots.mm,
+    )
+    
+    display(pfig)     
+
+end 
+
+## ============================================ ##
+# compare computed mean with training data 
+
+export plot_dx_mean 
+function plot_dx_mean( t_train, x_train, x_GP_train, u_train, dx_train, dx_GP_train, Ξ_sindy, Ξ_gpsindy, poly_order ) 
+
+    x_vars = size(x_train, 2) 
+    u_vars = size(u_train, 2) 
+    n_vars = x_vars + u_vars 
+
+    # SINDy alone 
+    Θx = pool_data_test( [x_train u_train], n_vars, poly_order) 
+    dx_sindy = Θx * Ξ_sindy 
+
+    # GPSINDy 
+    Θx = pool_data_test( [x_GP_train u_train], n_vars, poly_order) 
+    dx_gpsindy = Θx * Ξ_gpsindy 
+
+    plt = plot( title = "dx: meas vs. sindy", legend = :outerright )
+    scatter!( plt, t_train, dx_train[:,1], c = :black, ms = 3, label = "meas (finite diff)" )
+    plot!( plt, t_train, dx_GP_train[:,1], c = :blue, label = "GP" )
+    plot!( plt, t_train, dx_sindy[:,1], c = :red, ls = :dash, label = "SINDy" )   
+    plot!( plt, t_train, dx_gpsindy[:,1], c = :green, ls = :dashdot, label = "GPSINDy" )   
+
+    display(plt) 
+
+end 
+
+## ============================================ ##
+# plotting finite difference vs gp derivative training data  
+
+export plot_fd_gp_train 
+function plot_fd_gp_train( t_train, dx_train, dx_GP_train ) 
+
+    x_vars  = size(dx_train, 2) 
+    p_nvars = [] 
+    for i = 1 : x_vars 
+        plt = plot( legend = :outerright, title = string("dx", i) )
+            scatter!( plt, t_train, dx_train[:,i], label = "FD" ) 
+            plot!( plt, t_train, dx_GP_train[:,i], label = "GP" ) 
+        push!( p_nvars, plt ) 
+    end 
+    p_nvars = plot( p_nvars ... ,  
+        layout = (x_vars, 1), 
+        size   = [600 1200], 
+        plot_title = "FD vs GP training data"
+    ) 
+    display(p_nvars) 
+
+end 
+
 
 ## ============================================ ##
 # plot sindy and gpsindy stats boxplot 

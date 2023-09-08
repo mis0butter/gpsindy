@@ -85,44 +85,8 @@ dx_post  = gp_post( x_GP_train, dx_mean, x_GP_train, dx_mean, dx_train )
 Ξ_gpsindy_x2_terms = pretty_coeffs( Ξ_gpsindy_x2, x_GP_train, u_train ) 
 
 
-## ============================================ ##
+# ----------------------- #
 # plot smoothed data 
-
-p_nvars = [] 
-for i = 1 : x_vars 
-    plt = plot( legend = :outerright, title = string("dx", i) )
-        scatter!( plt, t_train, dx_train[:,i], label = "FD" ) 
-        plot!( plt, t_train, dx_GP_train[:,i], label = "GP" ) 
-    push!( p_nvars, plt ) 
-end 
-p_nvars = plot( p_nvars ... ,  
-    layout = (x_vars, 1), 
-    size   = [600 1200], 
-    plot_title = "FD vs GP training data"
-) 
-display(p_nvars) 
-
-
-## ============================================ ##
-
-using Plots 
-
-# SINDy alone 
-Θx = pool_data_test( [x_train u_train], n_vars, poly_order) 
-# Ξ_sindy = sparsify_dynamics_test( Θx, dx_fd, λ, x_vars ) 
-dx_sindy = Θx * Ξ_sindy 
-
-# GPSINDy 
-Θx = pool_data_test( [x_GP_train u_train], n_vars, poly_order) 
-# Ξ_gpsindy = sparsify_dynamics_test( Θx, dx_GP, λ, x_vars ) 
-dx_gpsindy = Θx * Ξ_gpsindy 
-
-plt = plot( title = "dx: meas vs. sindy", legend = :outerright )
-scatter!( plt, t_train, dx_train[:,1], c = :black, ms = 3, label = "meas (finite diff)" )
-plot!( plt, t_train, dx_GP_train[:,1], c = :blue, label = "GP" )
-plot!( plt, t_train, dx_sindy[:,1], c = :red, ls = :dash, label = "SINDy" )   
-plot!( plt, t_train, dx_gpsindy[:,1], c = :green, ls = :dashdot, label = "GPSINDy" )   
-
 
 ## ============================================ ##
 # validate 
@@ -146,73 +110,9 @@ x_sindy_test      = integrate_euler( dx_fn_sindy, x0, t_test, u_test )
 x_gpsindy_test    = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
 x_gpsindy_x2_test = integrate_euler( dx_fn_gpsindy_x2, x0, t_test, u_test ) 
 
-# plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
-# plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
-
 ## ============================================ ##
-# plot 
+# plot smoothed data and validation test data 
 
-using Plots 
-using Latexify
-
-xmin, dx, xmax = min_d_max(t_test)
-
-p_vec = [] 
-for i = 1 : x_vars 
-
-    # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_test[:,i] ])
-    ymin = -5 
-    ymax = 4 
-    dy   = 3 
-
-    p = plot( t_test, x_test[:,i], 
-        c       = :gray, 
-        label   = "test", 
-        legend  = :outerright, 
-        xlabel  = "Time (s)", 
-        xticks  = xmin:dx:xmax,
-        yticks  = ymin:dy:ymax,
-        ylim    = (ymin, ymax), 
-        title   = string(latexify("x_$(i)")),
-    ) 
-    plot!( p, t_test, x_unicycle_test[:,i], 
-        c       = :green, 
-        label   = "unicycle", 
-        xticks  = xmin:dx:xmax,
-        yticks  = ymin:dy:ymax,
-        ls      = :dash, 
-    ) 
-    plot!( p, t_test, x_sindy_test[:,i], 
-        c       = :red, 
-        label   = "SINDy", 
-        xticks  = xmin:dx:xmax,
-        yticks  = ymin:dy:ymax,
-        ls      = :dashdot, 
-    ) 
-    plot!( p, t_test, x_gpsindy_test[:,i], 
-        c       = :blue, 
-        label   = "GPSINDy", 
-        xticks  = xmin:dx:xmax,
-        yticks = ymin:dy:ymax,
-        ls      = :dot, 
-    )
-    push!( p_vec, p ) 
-
-end 
-
-# p = deepcopy( p_vec[end] ) 
-# plot!( p, 
-#     legend = ( -0.1, 0.6 ), 
-#     framestyle = :none, 
-#     title = "",      
-# )  
-# push!( p_vec, p ) 
-
-pfig = plot(  p_vec ... , 
-    layout = grid( x_vars, 1 ), 
-    size   = [ 600 x_vars * 400 ],         
-    margin = 5Plots.mm,
-    bottom_margin = 14Plots.mm,
-)
-
-display(pfig) 
+plot_fd_gp_train( t_train, dx_train, dx_GP_train )
+plot_dx_mean( t_train, x_train, x_GP_train, u_train, dx_train, dx_GP_train, Ξ_sindy, Ξ_gpsindy, poly_order ) 
+plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_gpsindy_test) 
