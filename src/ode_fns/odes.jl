@@ -25,6 +25,33 @@ end
 
 ## ============================================ ##
 
+export unicycle_realistic  
+function unicycle_realistic( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] ) 
+    # x[1] x position 
+    # x[2] y position 
+    # x[3] forward velocity    
+    # x[4] heading angle 
+    
+    vel_drag = 0.55 
+    turn_drag = 0.0 
+    accel_scale = 11.25 
+    turn_rate_scale = 6.50 
+    turn_rate_bias = -0.1 
+
+    v = x[3]    # forward velocity 
+    θ = x[4]    # heading angle 
+
+    dx[1] = v * cos(θ)      # x velocity 
+    dx[2] = v * sin(θ)      # y velocity 
+    dx[3] = accel_scale * u[1] - vel_drag * x[3]^2            # acceleration  
+    dx[4] = ( turn_rate_scale * u[2] - turn_rate_bias ) * x[3]            # turn rate 
+    
+    return dx 
+end 
+
+
+## ============================================ ##
+
 export unicycle 
 function unicycle( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] ) 
     # x[1] x position 
@@ -43,6 +70,26 @@ function unicycle( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] )
     return dx 
 end 
     
+
+## ============================================ ##
+
+export car 
+function car( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] ) 
+    # x[1] x position 
+    # x[2] y position 
+    # x[3] car orientation w.r.t. world frame  
+    # x[4] steering angle 
+
+    v = x[3]    # forward velocity 
+    θ = x[4]    # heading angle 
+
+    dx[1] = v * cos(θ)      # x velocity 
+    dx[2] = v * sin(θ)      # y velocity 
+    dx[3] = u[1]            # acceleration  
+    dx[4] = u[2]            # turn rate 
+    
+    return dx 
+end 
 
 ## ============================================ ##
 

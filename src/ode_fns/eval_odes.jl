@@ -156,6 +156,52 @@ function integrate_euler(dx_fn, x0, t, u = false)
     x_hist = vv2m(x_hist) 
 
     return x_hist 
+end 
+
+## ============================================ ##
+# (5) Function to integrate an ODE using forward Euler integration.
+
+export integrate_euler_unicycle 
+function integrate_euler_unicycle(fn, x0, t, u = false)
+    # TODO: Euler integration consists of setting x(t + δt) ≈ x(t) + δt * ẋ(t, x(t), u(t)).
+    #       Returns x(T) given x(0) = x₀.
+
+    xt = x0 
+    ut = u[1] 
+    z  = zeros(size(x0, 1)) 
+    dt = t[2] - t[1] 
+    n  = length(t) 
+
+    x_hist = [] 
+    push!( x_hist, xt ) 
+    if u == false 
+
+        for i = 1 : n - 1 
+            xt += dt * fn( z, xt, 0, t[i] ) 
+            push!( x_hist, xt ) 
+            # push!( t_hist, t[1] + i * dt ) 
+        end     
+
+    else 
+
+        u_vars = size(u, 2) 
+
+        for i = 1 : n - 1 
+
+            println( "xt = ", xt ) 
+
+            ut = u[i,:] 
+            xt += dt * fn( z, xt, 0, t[i], ut ) 
+            push!( x_hist, xt ) 
+            # push!( t_hist, t[1] + i * dt ) 
+
+        end 
+    
+    end 
+
+    x_hist = vv2m(x_hist) 
+
+    return x_hist 
 end
 
 ## ============================================ ##

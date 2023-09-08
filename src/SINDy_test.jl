@@ -20,31 +20,82 @@ function SINDy_test( x, dx, λ, u = false )
     Θx = pool_data_test(data, n_vars, poly_order) 
 
     # first cut - SINDy 
-    Ξ = sparsify_dynamics_test(Θx, dx, λ, x_vars) 
+    Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
+    # Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
 
     return Ξ
 
 end 
 
 
+# ## ============================================ ##
+# # putting it together (with control) 
+
+# export SINDy_c_test 
+# function SINDy_c_test( x, u, dx, λ )
+
+#     x_vars = size(x, 2)
+#     u_vars = size(u, 2) 
+#     n_vars = x_vars + u_vars 
+#     poly_order = x_vars 
+
+#     # construct data library 
+#     Θx = pool_data_test( [x u], n_vars, poly_order ) 
+
+#     # first cut - SINDy 
+#     # Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
+#     Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
+
+#     return Ξ
+
+# end 
+
+
 ## ============================================ ##
-# putting it together (with control) 
+# solve sparse regression 
 
-export SINDy_c_test 
-function SINDy_c_test( x, u, dx, λ )
+export sparsify_dynamics_lasso 
+function sparsify_dynamics_lasso( Θx, dx, λ, n_vars ) 
+# ----------------------- #
+# Purpose: Solve for active terms in dynamics through sparse regression 
+# 
+# Inputs: 
+#   Θx     = data matrix (of input states) 
+#   dx     = state derivatives 
+#   lambda = sparsification knob (threshold) 
+#   n_vars = # elements in state 
+# 
+# Outputs: 
+#   Ξ      = sparse coefficients of dynamics 
+# ----------------------- #
 
-    x_vars = size(x, 2)
-    u_vars = size(u, 2) 
-    n_vars = x_vars + u_vars 
-    poly_order = x_vars 
+    # first perform least squares 
+    Ξ = Θx \ dx 
 
-    # construct data library 
-    Θx = pool_data_test( [x u], n_vars, poly_order ) 
+    # sequentially thresholded least squares = LASSO. Do 10 iterations 
+    # for k = 1 : 10 
 
-    # first cut - SINDy 
-    # Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
-    Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, n_vars ) 
+        # for each element in state 
+        for j = 1 : n_vars 
 
+            # # small_inds = rows of |Ξ| < λ
+            # small_inds = findall( <(λ), abs.(Ξ[:,j]) ) 
+
+            # # set elements < λ to 0 
+            # Ξ[small_inds, j] .= 0 
+
+            # # big_inds --> select columns of Θx
+            # big_inds = findall( >=(λ), abs.( Ξ[:,j] ) ) 
+
+            # # regress dynamics onto remaining terms to find sparse Ξ
+            # Ξ[big_inds, j] = Θx[:, big_inds] \ dx[:,j] 
+
+            Ξ[:, j] = lasso_admm( Θx, dx, λ ) 
+
+        end 
+
+    # end 
+        
     return Ξ
 
 end 
@@ -129,7 +180,7 @@ end
 using Optim 
 
 export sparsify_dynamics_cstrnd 
-function sparsify_dynamics_cstrnd( Θx, dx, λ, n_vars ) 
+function sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
 # ----------------------- #
 # Purpose: Solve for active terms in dynamics through sparse CONSTRAINED regression 
 # 

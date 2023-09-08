@@ -362,6 +362,113 @@ end
 ## ============================================ ##
 # LASSO ADMM! 
 
+export lasso_admm
+function lasso_admm( A, b, λ, ρ = 1.0, α = 1.0, hist = false ) 
+# ----------------------- # 
+# lasso  Solve lasso problem via ADMM
+#
+# [z, history] = lasso(A, b, λ, ρ, α);
+#
+# Solves the following problem via ADMM:
+#
+#   minimize 1/2 || Ax - b ||₂² + λ || x ||₁
+#
+# The solution is returned in the vector x.
+#
+# history is a structure that contains:
+#   objval   = objective function values 
+#   r_norm   = primal residual norms 
+#   s_norm   = dual residual norms 
+#   eps_pri  = tolerances for the primal norms at each iteration
+#   eps_dual = tolerance for dual residual norms at each iteration
+#
+# ρ is the augmented Lagrangian parameter.
+#
+# α is the over-relaxation parameter (typical values for α are
+# between 1.0 and 1.8).
+# 
+# Reference: 
+# http://www.stanford.edu/~boyd/papers/distr_opt_stat_learning_admm.html
+# ----------------------- #
+
+    # define constants 
+    max_iter = 1000  
+    abstol   = 1e-4 
+    reltol   = 1e-2 
+
+    # data pre-processing 
+    m, n = size(A) 
+    Atb = A'*b                          # save matrix-vector multiply 
+
+    # ADMM solver 
+    x = 0*Atb 
+    z = 0*Atb 
+    u = 0*Atb 
+
+    # cache factorization 
+    L, U = factor(A, ρ) 
+
+    # begin iterations 
+    for k = 1 : max_iter 
+
+        # ----------------------- #
+        # x-update 
+
+        q = Atb + ρ * (z - u)           # temp value 
+        if m >= n                       # if skinny 
+            x = U \ ( L \ q ) 
+        else                            # if fat 
+            x = q / ρ - ( A' * ( U \ ( L \ (A*q) ) ) ) / ρ^2 
+        end 
+
+        # ----------------------- #
+        # z-update 
+
+        z_old = z 
+        x_hat = α*x + (1 .- α)*z_old 
+        # x_hat = x 
+        z = shrinkage(x_hat + u, λ/ρ) 
+
+        # ----------------------- #
+        # u-update 
+
+        u = u + (x_hat - z) 
+
+        # ----------------------- #
+        # diagnostics + termination checks 
+
+        p = objective(A, b, λ, x, z) 
+        r_norm   = norm(x - z) 
+        s_norm   = norm( -ρ*( z - z_old ) ) 
+        eps_pri  = sqrt(n)*abstol + reltol*max(norm(x), norm(-z))
+        eps_dual = sqrt(n)*abstol + reltol*norm(ρ*u)  
+
+        if hist == false 
+
+            hist = hist_lasso_struct( [], [], [], [], [] ) 
+
+        end 
+
+        push!( hist.objval, p )
+        push!( hist.r_norm, r_norm )
+        push!( hist.s_norm, z_old )
+        push!( hist.eps_pri, eps_pri ) 
+        push!( hist.eps_dual, eps_dual ) 
+    
+        if r_norm < eps_pri && s_norm < eps_dual 
+            break 
+        end 
+
+    end 
+
+    return x, z, hist 
+end 
+
+
+    
+## ============================================ ##
+# LASSO ADMM! 
+
 export lasso_admm_boyd 
 
 function lasso_admm_boyd(A, b, λ, ρ, α, hist) 

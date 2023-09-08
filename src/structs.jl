@@ -11,6 +11,14 @@ struct Hist
     eps_dual 
 end 
 
+struct hist_lasso_struct  
+    objval 
+    r_norm 
+    s_norm 
+    eps_pri 
+    eps_dual 
+end 
+
 struct Ξ_struct 
     truth 
     sindy 
@@ -35,5 +43,5 @@ struct data_struct
     dx_noise 
 end 
 
-export Hist, Ξ_struct, Ξ_err_struct, data_struct 
+export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct 
 
