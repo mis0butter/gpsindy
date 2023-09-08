@@ -276,7 +276,7 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
     dx_noise_nn = hcat(dx_noise_nn_x1, dx_noise_nn_x2)
 
     Θx_nn = pool_data_test(x_train_noise, n_vars, poly_order)
-    Ξ_nn = SINDy_test(x_train_noise, dx_noise_nn, λ)
+    Ξ_nn  = SINDy_test(x_train_noise, dx_noise_nn, λ)
 
     # ----------------------- #
     # validate data 

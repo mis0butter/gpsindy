@@ -16,7 +16,10 @@ t = data[:,1]
 x = data[:,2:end-2]
 u = data[:,end-1:end] 
 
-n_vars = size(x, 2) 
+x_vars = size(x_train, 2)
+u_vars = size(u_train, 2) 
+poly_order = x_vars 
+n_vars = x_vars + u_vars 
 
 # use forward finite differencing 
 dx_fd = fdiff(t, x, 1) 
@@ -68,8 +71,20 @@ dx_GP_test  = gp_post( x_GP_test, 0*dx_test, x_GP_test, 0*dx_test, dx_test )
 Ξ_sindy       = SINDy_test( x_train, dx_train, λ, u_train ) 
 Ξ_sindy_terms = pretty_coeffs( Ξ_sindy, x_train, u_train ) 
 
-Ξ_gpsindy       = SINDy_test( x_GP_train, dx_GP_train, λ, u_train ) 
+# Ξ_gpsindy       = SINDy_test( x_GP_train, dx_GP_train, λ, u_train ) 
+Θx_gpsindy = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order )
+Ξ_gpsindy  = SINDy_test( x_GP_train, dx_GP_train, λ, u_train )
 Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
+
+# round 2 of gpsindy 
+dx_mean  = Θx_gpsindy * Ξ_gpsindy 
+dx_post  = gp_post( x_GP_train, dx_mean, x_GP_train, dx_mean, dx_train ) 
+Θx_gpsindy   = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order )
+Ξ_gpsindy_x2 = SINDy_test( x_GP_train, dx_post, λ, u_train )
+Ξ_gpsindy_x2_terms = pretty_coeffs( Ξ_gpsindy_x2, x_GP_train, u_train ) 
+
+
+
 
 ## ============================================ ##
 # plot smoothed data 
@@ -82,7 +97,7 @@ for i = 1 : x_vars
     push!( p_nvars, plt ) 
 end 
 p_nvars = plot( p_nvars ... ,  
-    layout = (n_vars,1), 
+    layout = (x_vars, 1), 
     size   = [600 1200], 
     plot_title = "FD vs GP training data"
 ) 
@@ -116,16 +131,18 @@ x_vars = size(x_train, 2)
 u_vars = size(u_train, 2) 
 poly_order = x_vars 
 
-dx_fn_sindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
-dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+dx_fn_sindy      = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
+dx_fn_gpsindy    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+dx_fn_gpsindy_x2 = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy_x2 ) 
 
 xu0 = x_test[1,:] 
 push!( xu0, u_test[1,1] ) 
 push!( xu0, u_test[1,2] ) 
 dx0_test = dx_fn_sindy( xu0, 0, 0 ) 
 
-x_sindy_test    = integrate_euler( dx_fn_sindy, x_test[1,:], t_test, u_test ) 
-x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x_test[1,:], t_test, u_test ) 
+x_sindy_test      = integrate_euler( dx_fn_sindy, x_test[1,:], t_test, u_test ) 
+x_gpsindy_test    = integrate_euler( dx_fn_gpsindy, x_test[1,:], t_test, u_test ) 
+x_gpsindy_x2_test = integrate_euler( dx_fn_gpsindy_x2, x_test[1,:], t_test, u_test ) 
 
 # plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
 # plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
