@@ -42,7 +42,8 @@ function SINDy_c_test( x, u, dx, λ )
     Θx = pool_data_test( [x u], n_vars, poly_order ) 
 
     # first cut - SINDy 
-    Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
+    # Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
+    Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, n_vars ) 
 
     return Ξ
 
@@ -127,10 +128,10 @@ end
 
 using Optim 
 
-export sparsify_dynamics_cstrnt 
-function sparsify_dynamics_cstrnt( Θx, dx, λ, n_vars ) 
+export sparsify_dynamics_cstrnd 
+function sparsify_dynamics_cstrnd( Θx, dx, λ, n_vars ) 
 # ----------------------- #
-# Purpose: Solve for active terms in dynamics through sparse regression 
+# Purpose: Solve for active terms in dynamics through sparse CONSTRAINED regression 
 # 
 # Inputs: 
 #   Θx     = data matrix (of input states) 

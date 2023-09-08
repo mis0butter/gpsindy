@@ -25,8 +25,7 @@ function min_Ax_b( A, b, bound = 10 )
 
 end 
 
-
-## ============================================ ##
+# ----------------------- #
 # test function 
 
 m  = 15            # number of examples 
@@ -58,13 +57,6 @@ poly_order = x_vars
 
 # construct data library 
 Θx = pool_data_test([x u], n_vars, poly_order) 
-
-# m  = 15            # number of examples 
-# n  = 50            # number of features 
-# p  = 10/n           # sparsity density 
-# Θx = randn(m,n) 
-# dx = randn(m,1) 
-
 
 ## ============================================ ##
 # test with SINDy 
