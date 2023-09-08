@@ -86,7 +86,7 @@ function sparsify_dynamics_test( Θx, dx, λ, n_vars )
             big_inds = findall( >=(λ), abs.( Ξ[:,j] ) ) 
 
             # regress dynamics onto remaining terms to find sparse Ξ
-            Ξ[big_inds, j] = Θx[:, big_inds] \ dx[:,j]
+            Ξ[big_inds, j] = Θx[:, big_inds] \ dx[:,j] 
 
         end 
 
@@ -95,6 +95,85 @@ function sparsify_dynamics_test( Θx, dx, λ, n_vars )
     return Ξ
 
 end 
+
+
+## ============================================ ##
+# define min function 
+
+using Optim 
+
+export min_Ax_b 
+function min_Ax_b( A, b, bound = 10 ) 
+
+    x0 = 0 * ( A \ b ) 
+
+    # Optim stuff 
+    upper = bound * ones(size(x0)) 
+    lower = -upper 
+    f_test(x) = 1/2 * norm(A*x - b)^2 
+
+    # optimization 
+    od     = OnceDifferentiable( f_test, x0 ; autodiff = :forward ) 
+    result = optimize( od, lower, upper, x0, Fminbox(LBFGS()) ) 
+    x_opt  = result.minimizer 
+
+    return x_opt 
+
+end 
+
+
+## ============================================ ##
+# solve sparse regression 
+
+using Optim 
+
+export sparsify_dynamics_cstrnt 
+function sparsify_dynamics_cstrnt( Θx, dx, λ, n_vars ) 
+# ----------------------- #
+# Purpose: Solve for active terms in dynamics through sparse regression 
+# 
+# Inputs: 
+#   Θx     = data matrix (of input states) 
+#   dx     = state derivatives 
+#   lambda = sparsification knob (threshold) 
+#   n_vars = # elements in state 
+# 
+# Outputs: 
+#   Ξ      = sparse coefficients of dynamics 
+# ----------------------- #
+
+    # first perform least squares 
+    Ξ = Θx \ dx 
+
+    # sequentially thresholded least squares = LASSO. Do 10 iterations 
+    for k = 1 : 10 
+
+        # for each element in state 
+        for j = 1 : x_vars 
+
+            # small_inds = rows of |Ξ| < λ
+            small_inds = findall( <(λ), abs.(Ξ[:,j]) ) 
+
+            # set elements < λ to 0 
+            Ξ[small_inds, j] .= 0 
+
+            # big_inds --> select columns of Θx
+            big_inds = findall( >=(λ), abs.( Ξ[:,j] ) ) 
+
+            # regress dynamics onto remaining terms to find sparse Ξ
+            A     = Θx[:, big_inds] 
+            b     = dx[:,j] 
+            x_opt = min_Ax_b( A, b ) 
+            Ξ[big_inds, j] = x_opt 
+
+        end 
+
+    end 
+        
+    return Ξ
+
+end 
+
 
 ## ============================================ ##
 # build data matrix 

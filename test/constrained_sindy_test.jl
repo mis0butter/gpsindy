@@ -2,20 +2,23 @@ using Optim
 
 
 ## ============================================ ##
+# define min function 
 
-function min_Ax_b( A, b ) 
+using Optim 
+
+export min_Ax_b 
+function min_Ax_b( A, b, bound = 10 ) 
 
     x0 = 0 * ( A \ b ) 
 
     # Optim stuff 
-    upper = 10 * ones(size(x0)) 
+    upper = bound * ones(size(x0)) 
     lower = -upper 
     f_test(x) = 1/2 * norm(A*x - b)^2 
 
     # optimization 
     od     = OnceDifferentiable( f_test, x0 ; autodiff = :forward ) 
-    result    = optimize( od, lower, upper, x0, Fminbox(LBFGS()) ) 
-    # result = optimize( od, x0, LBFGS() ) 
+    result = optimize( od, lower, upper, x0, Fminbox(LBFGS()) ) 
     x_opt  = result.minimizer 
 
     return x_opt 
@@ -24,7 +27,7 @@ end
 
 
 ## ============================================ ##
-# setup 
+# test function 
 
 m  = 15            # number of examples 
 n  = 50            # number of features 
@@ -39,23 +42,43 @@ x_opt = min_Ax_b( A, b )
 
 
 ## ============================================ ##
+# setup for test with SINDy 
+
+fn = unicycle 
+data_train, data_test = ode_train_test( fn ) 
+
+x  = data_train.x_true 
+dx = data_train.dx_true  
+u  = data_train.u 
+
+x_vars = size(x, 2) 
+u_vars = size(u, 2) 
+n_vars = x_vars + u_vars 
+poly_order = x_vars 
+
+# construct data library 
+Θx = pool_data_test([x u], n_vars, poly_order) 
+
+# m  = 15            # number of examples 
+# n  = 50            # number of features 
+# p  = 10/n           # sparsity density 
+# Θx = randn(m,n) 
+# dx = randn(m,1) 
 
 
-m  = 15            # number of examples 
-n  = 50            # number of features 
-p  = 10/n           # sparsity density 
-Θx = randn(m,n) 
-dx = randn(m,1) 
+## ============================================ ##
+# test with SINDy 
 
 λ  = 0.1 
 
 # first perform least squares 
 Ξ = Θx \ dx 
+
 # sequentially thresholded least squares = LASSO. Do 10 iterations 
 for k = 1 : 10 
 
     # for each element in state 
-    for j = 1 : n_vars 
+    for j = 1 : x_vars 
     # j = 1 
     # k = 1 
 
