@@ -22,6 +22,12 @@ Adam:
     - use default hyperparameters of 1.0, 1.0, 0.1, or take hyperparameters from unicycle sim test 
     - and then cross-validation, optimize for lambda 
 
+Yue: 
+- to make x smaller, add lambda_2 ||x||^2 penalty to obj fn 
+
+Somi: 
+- he'll get quadcopter data, and he'll make the plots 
+
 ## Sept 7, 2023 
 
 Adam: 
