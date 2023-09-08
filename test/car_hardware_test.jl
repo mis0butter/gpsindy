@@ -67,7 +67,7 @@ dx_GP_test  = gp_post( x_GP_test, 0*dx_test, x_GP_test, 0*dx_test, dx_test )
 
 # ----------------------- #
 
-λ = 0.1 
+λ = 1e-3 
 # Ξ = SINDy_c_test( x, u, dx_fd, λ ) 
 Ξ_sindy       = SINDy_test( x_train, dx_train, λ, u_train ) 
 Ξ_sindy_terms = pretty_coeffs( Ξ_sindy, x_train, u_train ) 
@@ -168,6 +168,7 @@ for i = 1 : x_vars
     p = plot( t_test, x_test[:,i], 
         c       = :gray, 
         label   = "test", 
+        legend  = :outerright, 
         xlabel  = "Time (s)", 
         xticks  = xmin:dx:xmax,
         yticks  = ymin:dy:ymax,
@@ -199,17 +200,17 @@ for i = 1 : x_vars
 
 end 
 
-p = deepcopy( p_vec[end] ) 
-plot!( p, 
-    legend = ( -0.1, 0.6 ), 
-    framestyle = :none, 
-    title = "",      
-)  
-push!( p_vec, p ) 
+# p = deepcopy( p_vec[end] ) 
+# plot!( p, 
+#     legend = ( -0.1, 0.6 ), 
+#     framestyle = :none, 
+#     title = "",      
+# )  
+# push!( p_vec, p ) 
 
 pfig = plot(  p_vec ... , 
-    layout = grid(1, x_vars + 1, widths=[0.2, 0.2, 0.2, 0.2, 0.25]), 
-    size   = [ x_vars * 400 250 ],         
+    layout = grid( x_vars, 1 ), 
+    size   = [ 600 x_vars * 400 ],         
     margin = 5Plots.mm,
     bottom_margin = 14Plots.mm,
 )

@@ -7,7 +7,7 @@ using GaussianSINDy
 fn = unicycle 
 data_train, data_test = ode_train_test( fn ) 
 
-λ = 0.1 
+λ = 0.000001 
 Ξ_true = SINDy_test( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 Ξ_true_terms = pretty_coeffs(Ξ_true, data_train.x_true, data_train.u) 
 

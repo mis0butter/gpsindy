@@ -4,6 +4,24 @@ Discovering Equations of Motion from Data
 
 # Research Notes 
 
+## Sept 8, 2023 
+
+Adam: 
+- gradient based optimizer can be very slow, probably not good for our problem 
+- discuss what SINDy is actually doing 
+  - one way of promoting sparsity is by doing LASSO 
+  - however LASSO is actually rarely sparse 
+  - another thing to do is sequentially thresholded least squares 
+  - discuss problems with STLS, including manually tuning lambda at each step to determine magnitude so that you don't cut out useful terms in your dynamics 
+- car data 
+  - tune lambda from 1e-5 to 1e4 increments of 10 
+  - right now GPSINDy is overfitting 
+  - cross-validation 
+    - find different lambdas that look good, cut value of lambda in half 
+  - optimizing for hyperparameters and lambda 
+    - use default hyperparameters of 1.0, 1.0, 0.1, or take hyperparameters from unicycle sim test 
+    - and then cross-validation, optimize for lambda 
+
 ## Sept 7, 2023 
 
 Adam: 

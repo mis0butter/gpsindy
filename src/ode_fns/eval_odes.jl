@@ -106,6 +106,21 @@ function validate_data(t_test, xu_test, dx_fn, dt)
 end 
 
 ## ============================================ ##
+# function to check Inf --> NaN 
+
+export inf_nan 
+function inf_nan( x )
+    
+    for i in 1:length(x) 
+        if x[i] == Inf || x[i] == -Inf 
+            x[i] = NaN   
+        end 
+    end    
+
+    return x 
+end 
+
+## ============================================ ##
 # (5) Function to integrate an ODE using forward Euler integration.
 
 export integrate_euler 
@@ -125,6 +140,7 @@ function integrate_euler(dx_fn, x0, t, u = false)
     if u == false 
 
         for i = 1 : n - 1 
+            xt  = inf_nan( xt )
             xt += dt * dx_fn( xt, 0, t[i] ) 
             push!( x_hist, xt ) 
             # push!( t_hist, t[1] + i * dt ) 
@@ -136,6 +152,7 @@ function integrate_euler(dx_fn, x0, t, u = false)
 
         for i = 1 : n - 1 
 
+            xt  = inf_nan( xt )
             xut = copy( xt ) 
             if u_vars > 1 
                 for j = 1 : u_vars 

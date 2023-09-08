@@ -31,6 +31,9 @@ function unicycle_realistic( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] )
     # x[2] y position 
     # x[3] forward velocity    
     # x[4] heading angle 
+
+    # u[1] acceleration 
+    # u[2] turn rate 
     
     vel_drag = 0.55 
     turn_drag = 0.0 
@@ -43,8 +46,8 @@ function unicycle_realistic( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] )
 
     dx[1] = v * cos(θ)      # x velocity 
     dx[2] = v * sin(θ)      # y velocity 
-    dx[3] = accel_scale * u[1] - vel_drag * x[3]^2            # acceleration  
-    dx[4] = ( turn_rate_scale * u[2] - turn_rate_bias ) * x[3]            # turn rate 
+    dx[3] = accel_scale * u[1] - vel_drag * x[3]^2            
+    dx[4] = ( turn_rate_scale * u[2] - turn_rate_bias ) * x[3]            
     
     return dx 
 end 
