@@ -4,6 +4,46 @@ using LinearAlgebra
 using Statistics 
 using Plots 
 
+
+## ============================================ ##
+
+export gpsindy_Ξ_fn
+function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train, plot_option = 0 ) 
+
+    # get sizes 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train, u_train ) 
+
+    # GP smooth data 
+    x_GP_train      = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+    dx_GP_train     = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
+
+    # run SINDy 
+    Ξ_sindy         = SINDy_test( x_train, dx_train, λ, u_train ) 
+    Ξ_sindy_terms   = pretty_coeffs( Ξ_sindy, x_train, u_train ) 
+
+    # run GPSINDy 
+    Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order ) 
+    Ξ_gpsindy       = SINDy_test( x_GP_train, dx_GP_train, λ, u_train ) 
+    Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
+
+    # round 2 of GPSINDy  
+    dx_mean         = Θx_gpsindy * Ξ_gpsindy 
+    dx_post         = gp_post( x_GP_train, dx_mean, x_GP_train, dx_mean, dx_train ) 
+    Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order )
+    Ξ_gpsindy_x2    = SINDy_test( x_GP_train, dx_post, λ, u_train )
+    Ξ_gpsindy_x2_terms = pretty_coeffs( Ξ_gpsindy_x2, x_GP_train, u_train ) 
+
+    # plot 
+    if plot_option == 1 
+        plot_fd_gp_train( t_train, dx_train, dx_GP_train )
+        plot_dx_mean( t_train, x_train, x_GP_train, u_train, dx_train, dx_GP_train, Ξ_sindy, Ξ_gpsindy, poly_order )     
+    end 
+
+    return Ξ_sindy, Ξ_gpsindy, Ξ_gpsindy_x2, Ξ_sindy_terms, Ξ_gpsindy_terms, Ξ_gpsindy_x2_terms 
+
+end 
+
+
 ## ============================================ ##
 
 export admm_lasso 
@@ -278,7 +318,7 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
     Θx_nn = pool_data_test(x_train_noise, n_vars, poly_order)
     Ξ_nn  = SINDy_test(x_train_noise, dx_noise_nn, λ)
 
-    # ----------------------- #
+    # ----------------------- # 
     # validate data 
 
     x_vars = size(x_true, 2)

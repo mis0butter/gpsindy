@@ -136,120 +136,6 @@ function plot_admm( hist, var )
 end 
 
 
-## ============================================ ##
-# LASSO ADMM! 
-
-using Optim 
-using GaussianProcesses
-
-export lasso_admm_gp_opt 
-function lasso_admm_gp_opt( t, dx, Θx, f, g, n, λ, ρ, α, hist ) 
-
-    # define constants 
-    max_iter = 1000  
-    abstol   = 1e-4 
-    reltol   = 1e-2           # save matrix-vector multiply 
-
-    # ADMM solver 
-    ξ = z = u = zeros(n) 
-
-    # initial hyperparameters 
-    σ_f0 = log(1.0) ; σ_f = σ_f0  
-    l_0  = log(1.0) ; l   = l_0   
-    σ_n0 = log(0.1) ; σ_n = σ_n0 
-
-    # augmented Lagrangian (scaled form) 
-    aug_L( ξ, σ_f, l, σ_n, z, u) = f(ξ, σ_f, l, σ_n) + g(z) + ρ/2 .* norm( ξ - z + u )^2 
-
-    # counter 
-    iter = 0 
-
-    # update λ
-    # λ = log(f( ξ, σ_f, l, σ_n )) 
-    
-    # begin iterations 
-    for k = 1 : max_iter 
-
-        # increment counter 
-        iter += 1 
-
-        # ----------------------- #
-        # ξ-update (optimization) 
-
-        # optimization 
-        f_opt(ξ) = aug_L(ξ, exp(σ_f), exp(l), exp(σ_n), z, u) 
-        od       = OnceDifferentiable( f_opt, ξ ; autodiff = :forward ) 
-        result   = optimize( od, ξ, LBFGS() ) 
-        ξ        = result.minimizer 
-
-        # ----------------------- # 
-        # hp-update (optimization) 
-
-        # mean and covariance 
-        mZero = MeanZero() ;            # zero mean function 
-        kern  = SE( 1.0 , 0.0 ) ;          # squared eponential kernel (hyperparams on log scale) 
-        log_noise = log(0.1) ;              # (optional) log std dev of obs noise 
-
-        # fit GP 
-        y_train = dx - Θx*ξ   
-        println( "t size = ", size(t) )
-        println( "Θx*ξ size = ", size(Θx*ξ) )
-        println( "y_train size = ", size(y_train) )
-        gp  = GP(vec(t), y_train, mZero, kern, log_noise) 
-
-        result = optimize!(gp) 
-        σ_f = result.minimizer[1]
-        l   = result.minimizer[2] 
-        σ_n = result.minimizer[3] 
-
-        # ----------------------- #
-        # ξ-update (optimization) 
-
-        # optimization 
-        f_opt(ξ) = aug_L(ξ, exp(σ_f), exp(l), exp(σ_n), z, u) 
-        od       = OnceDifferentiable( f_opt, ξ ; autodiff = :forward ) 
-        result   = optimize( od, ξ, LBFGS() ) 
-        ξ        = result.minimizer 
-        
-        # ----------------------- #
-        # z-update (soft thresholding) 
-    
-        # println( "f = ", f( ξ, σ_f, l, σ_n ) )
-        # λ = log( abs(f( ξ, σ_f, l, σ_n )) ) 
-
-        z_old = z 
-        ξ_hat = α*ξ + (1 .- α)*z_old 
-        z     = shrinkage(ξ_hat + u, λ/ρ) 
-
-        # ----------------------- #
-        # u-update 
-
-        u += (ξ_hat - z) 
-
-        # ----------------------- #
-        # diagnostics + termination checks 
-
-        p = f(ξ, σ_f, l, σ_n) + g(ξ)   
-        push!( hist.objval, p )
-        push!( hist.fval, f( ξ, σ_f, l, σ_n ) )
-        push!( hist.gval, g(z) )
-        push!( hist.hp, [ σ_f, l, σ_n ] )
-        push!( hist.r_norm, norm(ξ - z) )
-        push!( hist.s_norm, norm( -ρ*(z - z_old) ) )
-        push!( hist.eps_pri, sqrt(n)*abstol + reltol*max(norm(ξ), norm(-z)) ) 
-        push!( hist.eps_dual, sqrt(n)*abstol + reltol*norm(ρ*u) ) 
-
-        if hist.r_norm[k] < hist.eps_pri[k] && hist.s_norm[k] < hist.eps_dual[k] 
-            break 
-        end 
-
-    end 
-
-    return ξ, z, hist, iter 
-
-end 
-
-
 
 ## ============================================ ##
 # LASSO ADMM! 
@@ -703,4 +589,119 @@ function lasso_admm_test( f, g, n, λ, ρ, α, hist )
     return x, z, hist
 
 end 
+
+
+## ============================================ ##
+# LASSO ADMM! 
+
+# using Optim 
+# using GaussianProcesses
+
+# export lasso_admm_gp_opt 
+# function lasso_admm_gp_opt( t, dx, Θx, f, g, n, λ, ρ, α, hist ) 
+
+#     # define constants 
+#     max_iter = 1000  
+#     abstol   = 1e-4 
+#     reltol   = 1e-2           # save matrix-vector multiply 
+
+#     # ADMM solver 
+#     ξ = z = u = zeros(n) 
+
+#     # initial hyperparameters 
+#     σ_f0 = log(1.0) ; σ_f = σ_f0  
+#     l_0  = log(1.0) ; l   = l_0   
+#     σ_n0 = log(0.1) ; σ_n = σ_n0 
+
+#     # augmented Lagrangian (scaled form) 
+#     aug_L( ξ, σ_f, l, σ_n, z, u) = f(ξ, σ_f, l, σ_n) + g(z) + ρ/2 .* norm( ξ - z + u )^2 
+
+#     # counter 
+#     iter = 0 
+
+#     # update λ
+#     # λ = log(f( ξ, σ_f, l, σ_n )) 
+    
+#     # begin iterations 
+#     for k = 1 : max_iter 
+
+#         # increment counter 
+#         iter += 1 
+
+#         # ----------------------- #
+#         # ξ-update (optimization) 
+
+#         # optimization 
+#         f_opt(ξ) = aug_L(ξ, exp(σ_f), exp(l), exp(σ_n), z, u) 
+#         od       = OnceDifferentiable( f_opt, ξ ; autodiff = :forward ) 
+#         result   = optimize( od, ξ, LBFGS() ) 
+#         ξ        = result.minimizer 
+
+#         # ----------------------- # 
+#         # hp-update (optimization) 
+
+#         # mean and covariance 
+#         mZero = MeanZero() ;            # zero mean function 
+#         kern  = SE( 1.0 , 0.0 ) ;          # squared eponential kernel (hyperparams on log scale) 
+#         log_noise = log(0.1) ;              # (optional) log std dev of obs noise 
+
+#         # fit GP 
+#         y_train = dx - Θx*ξ   
+#         println( "t size = ", size(t) )
+#         println( "Θx*ξ size = ", size(Θx*ξ) )
+#         println( "y_train size = ", size(y_train) )
+#         gp  = GP(vec(t), y_train, mZero, kern, log_noise) 
+
+#         result = optimize!(gp) 
+#         σ_f = result.minimizer[1]
+#         l   = result.minimizer[2] 
+#         σ_n = result.minimizer[3] 
+
+#         # ----------------------- #
+#         # ξ-update (optimization) 
+
+#         # optimization 
+#         f_opt(ξ) = aug_L(ξ, exp(σ_f), exp(l), exp(σ_n), z, u) 
+#         od       = OnceDifferentiable( f_opt, ξ ; autodiff = :forward ) 
+#         result   = optimize( od, ξ, LBFGS() ) 
+#         ξ        = result.minimizer 
+        
+#         # ----------------------- #
+#         # z-update (soft thresholding) 
+    
+#         # println( "f = ", f( ξ, σ_f, l, σ_n ) )
+#         # λ = log( abs(f( ξ, σ_f, l, σ_n )) ) 
+
+#         z_old = z 
+#         ξ_hat = α*ξ + (1 .- α)*z_old 
+#         z     = shrinkage(ξ_hat + u, λ/ρ) 
+
+#         # ----------------------- #
+#         # u-update 
+
+#         u += (ξ_hat - z) 
+
+#         # ----------------------- #
+#         # diagnostics + termination checks 
+
+#         p = f(ξ, σ_f, l, σ_n) + g(ξ)   
+#         push!( hist.objval, p )
+#         push!( hist.fval, f( ξ, σ_f, l, σ_n ) )
+#         push!( hist.gval, g(z) )
+#         push!( hist.hp, [ σ_f, l, σ_n ] )
+#         push!( hist.r_norm, norm(ξ - z) )
+#         push!( hist.s_norm, norm( -ρ*(z - z_old) ) )
+#         push!( hist.eps_pri, sqrt(n)*abstol + reltol*max(norm(ξ), norm(-z)) ) 
+#         push!( hist.eps_dual, sqrt(n)*abstol + reltol*norm(ρ*u) ) 
+
+#         if hist.r_norm[k] < hist.eps_pri[k] && hist.s_norm[k] < hist.eps_dual[k] 
+#             break 
+#         end 
+
+#     end 
+
+#     return ξ, z, hist, iter 
+
+# end 
+
 

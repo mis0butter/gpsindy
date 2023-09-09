@@ -1,10 +1,75 @@
 using Statistics 
+using CSV 
+using DataFrames 
+
+## ============================================ ##
+# extract Jake's car data 
+
+export extract_car_data 
+function extract_car_data(  ) 
+
+    csv_file = "test/data/jake_robot_data.csv" 
+
+    # wrap in data frame --> Matrix 
+    df   = CSV.read(csv_file, DataFrame) 
+    data = Matrix(df) 
+    
+    # extract variables 
+    t = data[:,1] 
+    x = data[:,2:end-2]
+    u = data[:,end-1:end] 
+
+    return t, x, u 
+end 
+
+## ============================================ ##
+# get sizes of things 
+
+export size_x_n_vars 
+function size_x_n_vars( x, u ) 
+
+    x_vars = size(x, 2)
+    u_vars = size(u, 2) 
+    poly_order = x_vars 
+    n_vars = x_vars + u_vars 
+
+    return x_vars, u_vars, poly_order, n_vars 
+end 
+
+## ============================================ ##
+# rollover indices 
+
+export unroll 
+function unroll( t, x ) 
+
+    # use forward finite differencing 
+    dx_fd = fdiff(t, x, 1) 
+
+    # massage data, generate rollovers  
+    rollover_up_ind = findall( x -> x > 100, dx_fd[:,4] ) 
+    rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
+    for i = 1 : length(rollover_up_ind) 
+
+        i0   = rollover_up_ind[i] + 1 
+        ifin = rollover_dn_ind[i] 
+        rollover_rng = x[ i0 : ifin , 4 ]
+        dθ = π .- rollover_rng 
+        θ  = -π .- dθ 
+        x[ i0 : ifin , 4 ] = θ
+
+    end 
+    
+    # use central finite differencing now  
+    dx_fd = fdiff(t, x, 2) 
+
+    return x, dx_fd 
+end 
 
 ## ============================================ ##
 # standardize data for x and dx 
 
 export stand_data 
-function stand_data( t, x )
+function stand_data( t, x ) 
 
     n_vars = size(x, 2) 
     
