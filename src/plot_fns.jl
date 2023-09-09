@@ -15,7 +15,7 @@ function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_
     for i = 1 : x_vars 
     
         # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_test[:,i] ])
-        ymin = -5 
+        ymin = -10 
         ymax = 4 
         dy   = 3 
     
