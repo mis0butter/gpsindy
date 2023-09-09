@@ -7,13 +7,14 @@ using GaussianSINDy
 fn = unicycle 
 data_train, data_test = ode_train_test( fn ) 
 
+
 λ = 0.1 
 Ξ_true = SINDy_test( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 Ξ_true_terms = pretty_coeffs(Ξ_true, data_train.x_true, data_train.u) 
 Ξ_sindy, Ξ_gpsindy, Ξ_gpsindy_x2, Ξ_sindy_terms, Ξ_gpsindy_terms, Ξ_gpsindy_x2_terms = gpsindy_Ξ_fn( data_train.t, data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 
-## ============================================ ##
 
+## ============================================ ## 
 
 Ξ_true = SINDy_test( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 Ξ_true_terms = pretty_coeffs(Ξ_true, data_train.x_true, data_train.u) 
@@ -61,7 +62,7 @@ t_test = data_test.t
 ## ============================================ ##
 
 # plot smoothed data and validation test data 
-plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_gpsindy_test) 
+plot_validation_test( t_test, data_test.x_true, x_unicycle_test, x_sindy_test, x_gpsindy_test) 
 
 
 
