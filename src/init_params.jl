@@ -35,7 +35,7 @@ function init_params(fn)
 
         str = "double_pendulum"
         
-    elseif fn == unicycle 
+    elseif fn == unicycle || fn == unicycle_realistic 
         x0  = [ 0, 0, 0.5, 0.5 ] 
         p   = zeros(4) 
         str = "double_pendulum" 

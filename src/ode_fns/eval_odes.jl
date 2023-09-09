@@ -1,5 +1,6 @@
 using DifferentialEquations
 
+
 ## ============================================ ##
 
 export ode_train_test 
@@ -202,16 +203,11 @@ function integrate_euler_unicycle(fn, x0, t, u = false)
     else 
 
         u_vars = size(u, 2) 
-
         for i = 1 : n - 1 
-
-            println( "xt = ", xt ) 
-
             ut = u[i,:] 
             xt += dt * fn( z, xt, 0, t[i], ut ) 
             push!( x_hist, xt ) 
             # push!( t_hist, t[1] + i * dt ) 
-
         end 
     
     end 

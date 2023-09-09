@@ -8,7 +8,7 @@ function fn_control_inputs( fn, t )
     elseif fn == predator_prey_forcing 
         u = 2sin.(t) + 2sin.(t/10) 
         
-    elseif fn == unicycle 
+    elseif fn == unicycle || fn == unicycle_realistic 
         t0 = 0*t
         # u = [ 1/2*sin.(t) cos.(t) ] 
         u = [ -1 ./ (t .+ 1)     1/2*cos.(t) ] 
