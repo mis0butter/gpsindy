@@ -2,6 +2,7 @@ using Statistics
 using CSV 
 using DataFrames 
 
+
 ## ============================================ ##
 # extract Jake's car data 
 
@@ -22,19 +23,27 @@ function extract_car_data(  )
     return t, x, u 
 end 
 
+
 ## ============================================ ##
 # get sizes of things 
 
 export size_x_n_vars 
-function size_x_n_vars( x, u ) 
+function size_x_n_vars( x, u = false ) 
 
     x_vars = size(x, 2)
-    u_vars = size(u, 2) 
-    poly_order = x_vars 
+        
+    if isequal(u, false)      # if u_data = false 
+        u_vars = 0  
+    else            # there are u_data inputs 
+        u_vars = size(u, 2) 
+    end 
+
     n_vars = x_vars + u_vars 
+    poly_order = x_vars 
 
     return x_vars, u_vars, poly_order, n_vars 
 end 
+
 
 ## ============================================ ##
 # rollover indices 
@@ -65,6 +74,7 @@ function unroll( t, x )
     return x, dx_fd 
 end 
 
+
 ## ============================================ ##
 # standardize data for x and dx 
 
@@ -82,6 +92,7 @@ function stand_data( t, x )
     return x_stand 
 end 
 
+
 ## ============================================ ##
 # convert vector of vectors into matrix 
 
@@ -92,6 +103,7 @@ function vv2m( vecvec )
 
     return mat 
 end 
+
 
 ## ============================================ ##
 # split into training and validation data 

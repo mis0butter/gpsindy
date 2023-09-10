@@ -4,15 +4,11 @@
 export SINDy_test 
 function SINDy_test( x, dx, λ, u = false )
 
-    x_vars = size(x, 2)
-    u_vars = size(u, 2) 
-    poly_order = x_vars 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
     
     if isequal(u, false)      # if u_data = false 
-        n_vars = x_vars 
         data   = x 
     else            # there are u_data inputs 
-        n_vars = x_vars + u_vars 
         data   = [ x u ]
     end 
 
