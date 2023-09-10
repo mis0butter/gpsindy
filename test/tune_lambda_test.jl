@@ -45,10 +45,15 @@ dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy_stls )
 dx_sindy      = Θx_sindy * Ξ_sindy_stls  
 x_sindy_train = integrate_euler( dx_fn_sindy, x0, t_train, u_train ) 
 
+# integrate true function 
+dx_fn_true    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
+x_true_train  = integrate_euler( dx_fn_true, x0, t_train, u_train ) 
+
 # integrate unicycle (with GP) 
 x_unicycle_train = integrate_euler_unicycle( fn, x0, t_train, u_train ) 
 for i = 1 : x_vars 
-    println( "norm err = ", norm( x_unicycle_train[:,i] - x_true[:,i] )  ) 
+    println( "dx_fn_true norm err = ", norm( x_true_train[:,i] - x_true[:,i] )  ) 
+    println( "unicycle norm err = ", norm( x_unicycle_train[:,i] - x_true[:,i] )  ) 
 end 
 
 ## ============================================ ##

@@ -131,7 +131,7 @@ function integrate_euler(dx_fn, x0, t, u = false)
 
     xt = x0 
     z  = zeros(size(x0, 1)) 
-    dt = t[2] - t[1] 
+    # dt = t[2] - t[1] 
     n  = length(t) 
 
     x_hist = [] 
@@ -141,6 +141,7 @@ function integrate_euler(dx_fn, x0, t, u = false)
     if u == false 
 
         for i = 1 : n - 1 
+            dt  = t[i+1] - t[i] 
             xt  = inf_nan( xt )
             xt += dt * dx_fn( xt, 0, t[i] ) 
             push!( x_hist, xt ) 
@@ -153,11 +154,12 @@ function integrate_euler(dx_fn, x0, t, u = false)
 
         for i = 1 : n - 1 
 
+            dt  = t[i+1] - t[i] 
             xt  = inf_nan( xt )
             xut = copy( xt ) 
             if u_vars > 1 
                 for j = 1 : u_vars 
-                    push!( xut, 0, u[i,j] ) 
+                    push!( xut, u[i,j] ) 
                 end 
             else
                 ut = u[i]  
@@ -187,7 +189,7 @@ function integrate_euler_unicycle(fn, x0, t, u = false)
     xt = x0 
     ut = u[1] 
     z  = zeros(size(x0, 1)) 
-    dt = t[2] - t[1] 
+    # dt = t[2] - t[1] 
     n  = length(t) 
 
     x_hist = [] 
@@ -195,6 +197,7 @@ function integrate_euler_unicycle(fn, x0, t, u = false)
     if u == false 
 
         for i = 1 : n - 1 
+            dt  = t[i+1] - t[i] 
             xt += dt * fn( z, xt, 0, t[i] ) 
             push!( x_hist, xt ) 
             # push!( t_hist, t[1] + i * dt ) 
@@ -204,6 +207,7 @@ function integrate_euler_unicycle(fn, x0, t, u = false)
 
         u_vars = size(u, 2) 
         for i = 1 : n - 1 
+            dt  = t[i+1] - t[i] 
             ut = u[i,:] 
             xt += dt * fn( z, xt, 0, t[i], ut ) 
             push!( x_hist, xt ) 
