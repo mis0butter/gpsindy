@@ -1,19 +1,18 @@
 using GaussianSINDy 
 
-
-## ============================================ ##
-# truth 
-
+# generate data 
 fn = unicycle 
 data_train, data_test = ode_train_test( fn ) 
 
+## ============================================ ##
+# SINDy vs GPSINDy 
 
 λ = 0.001 
 Ξ_true = sindy_stls( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 Ξ_true_terms = pretty_coeffs(Ξ_true, data_train.x_true, data_train.u) 
 Ξ_sindy, Ξ_gpsindy, Ξ_gpsindy_x2, Ξ_sindy_terms, Ξ_gpsindy_terms, Ξ_gpsindy_x2_terms = gpsindy_Ξ_fn( data_train.t, data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
 
-# ----------------------- #
+# ----------------------- # 
 # validate 
 
 x_vars = size( data_train.x_true, 2 ) 

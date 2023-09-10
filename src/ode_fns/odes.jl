@@ -62,11 +62,8 @@ function unicycle( dx, x, p, t, u = [ -1/(t+1)      1/2*cos(t) ] )
     # x[3] forward velocity    
     # x[4] heading angle 
 
-    v = x[3]    # forward velocity 
-    θ = x[4]    # heading angle 
-
-    dx[1] = v * cos(θ)      # x velocity 
-    dx[2] = v * sin(θ)      # y velocity 
+    dx[1] = x[3] * cos( x[4] )      # x velocity 
+    dx[2] = x[3] * sin( x[4] )      # y velocity 
     dx[3] = u[1]            # acceleration  
     dx[4] = u[2]            # turn rate 
     

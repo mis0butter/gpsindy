@@ -28,7 +28,7 @@ function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train, plot_option = 0
 
     # round 2 of GPSINDy  
     dx_mean         = Θx_gpsindy * Ξ_gpsindy 
-    dx_post         = gp_post( x_GP_train, dx_mean, x_GP_train, dx_mean, dx_train ) 
+    dx_post         = gp_post( x_GP_train, dx_mean, x_GP_train, dx_mean, dx_GP_train ) 
     Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order )
     Ξ_gpsindy_x2    = sindy_lasso( x_GP_train, dx_post, λ, u_train )
     Ξ_gpsindy_x2_terms = pretty_coeffs( Ξ_gpsindy_x2, x_GP_train, u_train ) 
