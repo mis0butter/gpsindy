@@ -76,10 +76,12 @@ for j = 1 : x_vars
     a_x = Animation() 
 
     # DX PLOT 
+    ymin, dy, ymax = min_d_max( dx_true[:,j] ) 
     plt_dx = plot( t_train, dx_true[:,j], 
         label = "true", 
         xlabel = "t (s)", 
         ylabel = "dx", 
+        ylim   = ( ymin, ymax ), 
         title = string("dx", j, ": true vs GP vs SINDy vs GPSINDy"), 
         legend = :outerright,
         size = (1000, 400), 
@@ -99,10 +101,12 @@ for j = 1 : x_vars
     ) ; frame(a_dx, plt_dx) 
 
     # X PLOT 
+    ymin, dy, ymax = min_d_max( x_true[:,j] ) 
     plt_x = plot( t_train, x_true[:,j], 
         label = "true", 
         xlabel = "t (s)", 
         ylabel = "x", 
+        ylim   = ( ymin, ymax ), 
         title = string("x", j, ": true vs GP vs SINDy vs GPSINDy"), 
         legend = :outerright,
         size = (1000, 400), 
@@ -115,10 +119,14 @@ for j = 1 : x_vars
         label = "GP", 
         ls    = :dashdot,   
     ) ; frame(a_x, plt_x) 
+    plot!( plt_x, t_train, x_unicycle_train[:,j], 
+        label = "unicycle", 
+        ls    = :dashdotdot,   
+    ) ; frame(a_x, plt_x) 
     plt_x_sindy = deepcopy(plt_x) 
     plot!( plt_x_sindy, t_train, x_sindy_train[:,j], 
         label = "SINDy",
-        ls    = :dashdotdot,  
+        ls    = :dot,  
     ) ; frame(a_x, plt_x_sindy) 
 
     for i = 1 : length(λ_vec) 
@@ -152,11 +160,13 @@ for j = 1 : x_vars
             ls    = :dot,  
         ) ; frame(a_dx, plt_gpsindy_dx) 
         display( plt_gpsindy_dx )
+
         plt_gpsindy_x = deepcopy( plt_x )
         plot!( plt_gpsindy_x, t_train, x_gpsindy_train[:,j], 
-            label = "GPSINDy", 
-            ls    = :dot,   
+        label = string("GPSINDy λ = ", @sprintf "%.1e" λ),
+        ls    = :dot,   
         ) ; frame(a_x, plt_gpsindy_x) 
+        display( plt_gpsindy_x )
 
         push!( err_ξ_vec, err_ξ_norm ) 
         push!( err_xj_vec, err_xj_norm ) 
