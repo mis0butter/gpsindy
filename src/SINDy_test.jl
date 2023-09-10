@@ -4,7 +4,7 @@
 export sindy_stls 
 function sindy_stls( x, dx, λ, u = false )
 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
     
     if isequal(u, false)      # if u_data = false 
         data   = x 
@@ -20,18 +20,20 @@ function sindy_stls( x, dx, λ, u = false )
 
     return Ξ
 
-end ## ============================================ ##
+end 
+
+## ============================================ ##
 # putting it together (no control) 
 
 export sindy_lasso 
 function sindy_lasso( x, dx, λ, u = false )
 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
     
     if isequal(u, false)      # if u_data = false 
-        data   = x 
+        data = x 
     else            # there are u_data inputs 
-        data   = [ x u ]
+        data = [ x u ] 
     end 
 
     # construct data library 
