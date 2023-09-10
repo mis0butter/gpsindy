@@ -1,8 +1,8 @@
 ## ============================================ ##
 # putting it together (no control) 
 
-export SINDy_test 
-function SINDy_test( x, dx, λ, u = false )
+export sindy_stls 
+function sindy_stls( x, dx, λ, u = false )
 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
     
@@ -17,8 +17,28 @@ function SINDy_test( x, dx, λ, u = false )
 
     # SINDy 
     Ξ = sparsify_dynamics_stls( Θx, dx, λ, x_vars ) 
-    # Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
-    # Ξ = sparsify_dynamics_lasso( Θx, dx, λ, x_vars ) 
+
+    return Ξ
+
+end ## ============================================ ##
+# putting it together (no control) 
+
+export sindy_lasso 
+function sindy_lasso( x, dx, λ, u = false )
+
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+    
+    if isequal(u, false)      # if u_data = false 
+        data   = x 
+    else            # there are u_data inputs 
+        data   = [ x u ]
+    end 
+
+    # construct data library 
+    Θx = pool_data_test(data, n_vars, poly_order) 
+
+    # SINDy 
+    Ξ = sparsify_dynamics_lasso( Θx, dx, λ, x_vars ) 
 
     return Ξ
 

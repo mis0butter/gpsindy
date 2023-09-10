@@ -34,7 +34,7 @@ fn = predator_prey
 x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
 λ = 0.1 
-Ξ_true = SINDy_test( x_true, dx_true, λ ) 
+Ξ_true = sindy_stls( x_true, dx_true, λ ) 
 
 z_fd       = Ξ_true 
 x_vars     = size(x_true, 2) 
@@ -66,8 +66,8 @@ fn = predator_prey_forcing
 x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
 λ = 0.1 
-# function SINDy_test( x, dx, λ, u = false )
-Ξ_true = SINDy_test( x_true, dx_true, λ, u ) 
+# function sindy_stls( x, dx, λ, u = false )
+Ξ_true = sindy_stls( x_true, dx_true, λ, u ) 
 
 z_fd       = Ξ_true 
 x_vars     = size(x_true, 2) 

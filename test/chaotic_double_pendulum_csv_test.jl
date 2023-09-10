@@ -45,7 +45,7 @@ dx_train = fdiff(t_train, x_train, 2)
 
 # SINDy by itself 
 Θx_sindy = pool_data_test( x_train, n_vars, poly_order ) 
-Ξ_sindy  = SINDy_test( x_train, dx_train, λ ) 
+Ξ_sindy  = sindy_stls( x_train, dx_train, λ ) 
  
 
 # ----------------------- #
@@ -60,7 +60,7 @@ dx_train_GP, Σ_dxsmooth, hp = post_dist_SE( x_train_GP, dx_train, x_train_GP )
 
 # SINDy 
 Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order) 
-Ξ_gpsindy  = SINDy_test( x_train_GP, dx_train_GP, λ ) 
+Ξ_gpsindy  = sindy_stls( x_train_GP, dx_train_GP, λ ) 
 
 # ----------------------- #
 # GPSINDy (second) 
@@ -71,5 +71,5 @@ dx_post = gp_post( x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train )
 
 # step 3: SINDy 
 Θx_gpsindy   = pool_data_test( x_train_GP, n_vars, poly_order ) 
-Ξ_gpsindy_x2 = SINDy_test( x_train_GP, dx_post, λ ) 
+Ξ_gpsindy_x2 = sindy_stls( x_train_GP, dx_post, λ ) 
 

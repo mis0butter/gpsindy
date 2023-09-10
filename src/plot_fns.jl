@@ -6,7 +6,7 @@ using Latexify
 # plot 
 
 export plot_validation_test 
-function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_gpsindy_test)  
+function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_stls, x_gpsindy_stls)  
     
     xmin, dx, xmax = min_d_max(t_test)
     
@@ -14,7 +14,7 @@ function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_
     p_vec = [] 
     for i = 1 : x_vars 
     
-        # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_test[:,i] ])
+        # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_stls[:,i] ])
         ymin = -10 
         ymax = 4 
         dy   = 3 
@@ -36,14 +36,14 @@ function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_
             yticks  = ymin:dy:ymax,
             ls      = :dash, 
         ) 
-        plot!( p, t_test, x_sindy_test[:,i], 
+        plot!( p, t_test, x_sindy_stls[:,i], 
             c       = :red, 
             label   = "SINDy", 
             xticks  = xmin:dx:xmax,
             yticks  = ymin:dy:ymax,
             ls      = :dashdot, 
         ) 
-        plot!( p, t_test, x_gpsindy_test[:,i], 
+        plot!( p, t_test, x_gpsindy_stls[:,i], 
             c       = :blue, 
             label   = "GPSINDy", 
             xticks  = xmin:dx:xmax,

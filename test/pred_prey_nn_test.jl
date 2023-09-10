@@ -67,7 +67,7 @@ noise = 0.1
 # truth coeffs 
 n_vars = size(x_true, 2);
 poly_order = n_vars;
-Ξ_true = SINDy_test(x_true, dx_true, λ)
+Ξ_true = sindy_stls(x_true, dx_true, λ)
 
 # add noise 
 println("noise = ", noise)
@@ -100,7 +100,7 @@ dx_train = dx_stand_noise
 
 # SINDy by itself 
 Θx_sindy = pool_data_test(x_train, n_vars, poly_order)
-Ξ_sindy = SINDy_test(x_train, dx_train, λ)
+Ξ_sindy = sindy_stls(x_train, dx_train, λ)
 
 # ----------------------- #
 # GPSINDy (first) 
@@ -113,7 +113,7 @@ dx_train_GP = gp_post(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_tra
 
 # SINDy 
 Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order)
-Ξ_gpsindy = SINDy_test(x_train_GP, dx_train_GP, λ)
+Ξ_gpsindy = sindy_stls(x_train_GP, dx_train_GP, λ)
 
 # ----------------------- #
 # GPSINDy (second) 
@@ -125,7 +125,7 @@ dx_post  = gp_post(x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train)
 
 # step 3: SINDy 
 Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order)
-Ξ_gpsindy_x2 = SINDy_test(x_train_GP, dx_post, λ)
+Ξ_gpsindy_x2 = sindy_stls(x_train_GP, dx_post, λ)
 
 
 ## ============================================ ##
@@ -140,7 +140,7 @@ dx_noise_nn_x2 = train_nn_predict(x_train_noise, dx_train_noise[:, 2], 100, 2)
 dx_noise_nn = hcat(dx_noise_nn_x1, dx_noise_nn_x2)
 
 Θx_nn = pool_data_test(x_train_noise, n_vars, poly_order)
-Ξ_nn = SINDy_test(x_train_noise, dx_noise_nn, λ)
+Ξ_nn = sindy_stls(x_train_noise, dx_noise_nn, λ)
 
 ## ============================================ ##
 # validate data 

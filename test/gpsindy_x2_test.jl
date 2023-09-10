@@ -38,7 +38,7 @@ x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2)
 
 # truth coeffs 
 n_vars = size(x_true, 2) ; poly_order = n_vars 
-Ξ_true = SINDy_test( x_true, dx_true, λ ) 
+Ξ_true = sindy_stls( x_true, dx_true, λ ) 
 
 # add noise 
 println( "noise = ", noise ) 
@@ -73,7 +73,7 @@ dx_train = dx_stand_noise
 
 # SINDy by itself 
 Θx_sindy = pool_data_test( x_train, n_vars, poly_order ) 
-Ξ_sindy  = SINDy_test( x_train, dx_train, λ ) 
+Ξ_sindy  = sindy_stls( x_train, dx_train, λ ) 
 
 # ----------------------- #
 # GPSINDy (first) 
@@ -88,7 +88,7 @@ dx_train_GP = gp_post( x_train_GP, 0*dx_train, x_train_GP, 0*dx_train, dx_train 
 
 # SINDy 
 Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order) 
-Ξ_gpsindy  = SINDy_test( x_train_GP, dx_train_GP, λ ) 
+Ξ_gpsindy  = sindy_stls( x_train_GP, dx_train_GP, λ ) 
 
 # ----------------------- #
 # GPSINDy (second) 
@@ -105,7 +105,7 @@ dx_post  = gp_post( x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train )
 
 # step 3: SINDy 
 Θx_gpsindy   = pool_data_test( x_train_GP, n_vars, poly_order ) 
-Ξ_gpsindy_x2 = SINDy_test( x_train_GP, dx_post, λ ) 
+Ξ_gpsindy_x2 = sindy_stls( x_train_GP, dx_post, λ ) 
 
 
 ## ============================================ ##
@@ -148,7 +148,7 @@ x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2)
     
 # truth coeffs 
 n_vars = size(x_true, 2) ; poly_order = n_vars 
-Ξ_true = SINDy_test( x_true, dx_true, λ ) 
+Ξ_true = sindy_stls( x_true, dx_true, λ ) 
             
 ## ============================================ ##
 # CASE 7
@@ -157,20 +157,20 @@ n_vars = size(x_true, 2) ; poly_order = n_vars
 println( "noise = ", noise ) 
 x_true   = stand_data( t, x_true ) 
 dx_true  = dx_true_fn( t, x_true, p, fn ) 
-Ξ_true   = SINDy_test( x_true, dx_true, λ ) 
+Ξ_true   = sindy_stls( x_true, dx_true, λ ) 
 
 x_noise  = x_true + noise*randn( size(x_true, 1), size(x_true, 2) )
 dx_noise = dx_true + noise*randn( size(dx_true, 1), size(dx_true, 2) )
 
 Θx_sindy = pool_data_test( x_noise, n_vars, poly_order ) 
-Ξ_sindy  = SINDy_test( x_noise, dx_noise, λ ) 
+Ξ_sindy  = sindy_stls( x_noise, dx_noise, λ ) 
 
 # smooth measurements 
 x_GP, Σ_xsmooth, hp   = post_dist_SE( t, x_noise, t )  
 dx_GP, Σ_dxsmooth, hp = post_dist_SE( x_GP, dx_noise, x_GP )  
 
 Θx_gpsindy = pool_data_test(x_GP, n_vars, poly_order) 
-Ξ_gpsindy  = SINDy_test( x_GP, dx_GP, λ ) 
+Ξ_gpsindy  = sindy_stls( x_GP, dx_GP, λ ) 
 
 # ----------------------- #
 
@@ -207,7 +207,7 @@ for i = 1 : size(x_true, 2)
 end 
 
 Θx_gpsindy = pool_data_test(x_GP, n_vars, poly_order) 
-Ξ_gpsindy_gpsindy  = SINDy_test( x_GP, dx_post, λ ) 
+Ξ_gpsindy_gpsindy  = sindy_stls( x_GP, dx_post, λ ) 
 
 println( "Ξ_true - Ξ_sindy = ", norm( Ξ_true - Ξ_sindy ) ) 
 println( "Ξ_true - Ξ_gpsindy = ", norm( Ξ_true - Ξ_gpsindy ) ) 

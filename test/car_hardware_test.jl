@@ -1,5 +1,6 @@
 using GaussianSINDy 
 
+
 ## ============================================ ##
 # setup 
 
@@ -42,9 +43,9 @@ dx_fn_gpsindy_x2 = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy_x2 )
 
 x0 = x_test[1,:] 
 x_unicycle_test   = integrate_euler_unicycle(unicycle_realistic, x0, t_test, u_test) 
-x_sindy_test      = integrate_euler( dx_fn_sindy, x0, t_test, u_test ) 
-x_gpsindy_test    = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
+x_sindy_stls      = integrate_euler( dx_fn_sindy, x0, t_test, u_test ) 
+x_gpsindy_stls    = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
 x_gpsindy_x2_test = integrate_euler( dx_fn_gpsindy_x2, x0, t_test, u_test ) 
 
 # plot smoothed data and validation test data 
-plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_gpsindy_test) 
+plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_stls, x_gpsindy_stls) 

@@ -11,7 +11,7 @@ include("init_params.jl")
 # ----------------------- #
 # redo fns 
 
-include("SINDy_test.jl")
+include("sindy_stls.jl")
 include("opt_fns.jl")
 include("gpsindy_fns.jl")
 include("plot_fns.jl")
@@ -108,8 +108,8 @@ end
 #     n_vars     = size(x, 2) 
 #     poly_order = n_vars 
 
-#     Ξ_true  = SINDy_test( x, dx_true, λ ) 
-#     Ξ_sindy = SINDy_test( x, dx_fd, λ ) 
+#     Ξ_true  = sindy_stls( x, dx_true, λ ) 
+#     Ξ_sindy = sindy_stls( x, dx_fd, λ ) 
 
 
 #     ## ============================================ ##

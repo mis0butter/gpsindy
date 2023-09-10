@@ -11,7 +11,7 @@ end
 u = vv2m(u) 
 
 λ = 0.1 
-Ξ_true = SINDy_test( x_true, dx_true, λ, u ) 
+Ξ_true = sindy_stls( x_true, dx_true, λ, u ) 
 
 
 ## ============================================ ##

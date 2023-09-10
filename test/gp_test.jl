@@ -112,7 +112,7 @@ x_GP, Σ_xGP, hp   = post_dist_SE( t, x_noise, t )
 dx_GP, Σ_dxGP, hp = post_dist_SE( x_GP, dx_noise, x_GP )  
 
 Θx_gpsindy = pool_data_test(x_GP, n_vars, poly_order) 
-Ξ_gpsindy  = SINDy_test( x_GP, dx_GP, λ ) 
+Ξ_gpsindy  = sindy_stls( x_GP, dx_GP, λ ) 
 
 dx_mean = Θx_gpsindy * Ξ_gpsindy
 
