@@ -144,9 +144,8 @@ function sparsify_dynamics_stls( Θx, dx, λ, n_vars )
         end 
 
     end 
-        
+    
     return Ξ
-
 end 
 
 

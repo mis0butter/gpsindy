@@ -17,35 +17,45 @@ t_train,  t_test  = split_train_test( t, test_fraction, portion )
 x_train,  x_test  = split_train_test( x, test_fraction, portion ) 
 dx_train, dx_test = split_train_test( dx_fd, test_fraction, portion ) 
 
+data_train.t_train  = t_train
+data_train.x_train  = x_train 
+data_train.dx_train = dx_train 
+data_train.u_train  = u_train 
+
+data_test.t_test  = t_test 
+data_test.x_test  = x_test 
+data_test.dx_test = dx_test 
+data_test.u_test  = u_test 
+
+
+
 
 ## ============================================ ##
 # SINDy vs. GPSINDy 
 
-λ = 1e-3 
+λ = 100.0 
 Ξ_sindy, Ξ_gpsindy, Ξ_gpsindy_x2, Ξ_sindy_terms, Ξ_gpsindy_terms, Ξ_gpsindy_x2_terms = gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train )  
 
-
-## ============================================ ## 
+# ----------------------- #
 # validate 
 
 x_vars = size(x_train, 2) 
 u_vars = size(u_train, 2) 
 poly_order = x_vars 
 
+# build dx functions 
 dx_fn_sindy      = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
 dx_fn_gpsindy    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
 dx_fn_gpsindy_x2 = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy_x2 ) 
 
-# xu0 = x_test[1,:] 
-# push!( xu0, u_test[1,1] ) 
-# push!( xu0, u_test[1,2] ) 
-# dx0_test = dx_fn_sindy( xu0, 0, 0 ) 
-
+# integrate 
 x0 = x_test[1,:] 
 x_unicycle_test   = integrate_euler_unicycle(unicycle_realistic, x0, t_test, u_test) 
-x_sindy_stls      = integrate_euler( dx_fn_sindy, x0, t_test, u_test ) 
-x_gpsindy_stls    = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
+x_sindy_test      = integrate_euler( dx_fn_sindy, x0, t_test, u_test ) 
+x_gpsindy_test    = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
 x_gpsindy_x2_test = integrate_euler( dx_fn_gpsindy_x2, x0, t_test, u_test ) 
 
 # plot smoothed data and validation test data 
-plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_stls, x_gpsindy_stls) 
+plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_test, x_gpsindy_x2_test) 
+
+
