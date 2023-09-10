@@ -16,7 +16,7 @@ function SINDy_test( x, dx, λ, u = false )
     Θx = pool_data_test(data, n_vars, poly_order) 
 
     # SINDy 
-    Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
+    Ξ = sparsify_dynamics_stls( Θx, dx, λ, x_vars ) 
     # Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
     # Ξ = sparsify_dynamics_lasso( Θx, dx, λ, x_vars ) 
 
@@ -40,7 +40,7 @@ end
 #     Θx = pool_data_test( [x u], n_vars, poly_order ) 
 
 #     # first cut - SINDy 
-#     # Ξ = sparsify_dynamics_test( Θx, dx, λ, x_vars ) 
+#     # Ξ = sparsify_dynamics_stls( Θx, dx, λ, x_vars ) 
 #     Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
 
 #     return Ξ
@@ -72,7 +72,7 @@ function sparsify_dynamics_lasso( Θx, dx, λ, n_vars )
     # for each element in state 
     for j = 1 : n_vars 
 
-        x, z, hist = lasso_admm( Θx, dx, λ ) 
+        x, z, hist = lasso_admm( Θx, dx[:,j], λ ) 
         Ξ[:, j]    = z  
 
     end 
@@ -85,8 +85,8 @@ end
 ## ============================================ ##
 # solve sparse regression 
 
-export sparsify_dynamics_test 
-function sparsify_dynamics_test( Θx, dx, λ, n_vars ) 
+export sparsify_dynamics_stls 
+function sparsify_dynamics_stls( Θx, dx, λ, n_vars ) 
 # ----------------------- #
 # Purpose: Solve for active terms in dynamics through sparse regression 
 # 

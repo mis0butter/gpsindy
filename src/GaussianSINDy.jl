@@ -33,7 +33,7 @@ function sindy_gp_admm(t, x, dx_fd, λ, hist_hp_opt)
     Θx = pool_data_test(x, n_vars, poly_order)
 
     # first cut - SINDy 
-    Ξ = sparsify_dynamics_test(Θx, dx_fd, λ, n_vars)
+    Ξ = sparsify_dynamics_stls(Θx, dx_fd, λ, n_vars)
 
     # ----------------------- #
     # objective function 

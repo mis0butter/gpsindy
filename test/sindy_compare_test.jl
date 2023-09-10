@@ -18,8 +18,8 @@ end
 Θx = pool_data_test(data, n_vars, poly_order) 
 
 # SINDy 
-Ξ_test  = sparsify_dynamics_test( Θx, data_train.dx_true, λ, x_vars ) 
+Ξ_test  = sparsify_dynamics_stls( Θx, data_train.dx_true, λ, x_vars ) 
 # Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
-# Ξ_lasso = sparsify_dynamics_lasso( Θx, data_train.dx_true, λ, x_vars ) 
+Ξ_lasso = sparsify_dynamics_lasso( Θx, data_train.dx_true, λ, x_vars ) 
 
 
