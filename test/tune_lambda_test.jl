@@ -6,8 +6,10 @@ using LinearAlgebra
 ## ============================================ ##
 
 fn = unicycle 
+
+λ = 0.1 
 data_train, data_test = ode_train_test( fn ) 
-Ξ_true   = sindy_stls( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
+Ξ_true       = sindy_stls( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 Ξ_true_terms = pretty_coeffs( Ξ_true, data_train.x_true, data_train.u ) 
 
 x_train  = data_train.x_noise 
@@ -48,34 +50,42 @@ while λ_vec[end] < 500
     push!( λ_vec, 10 + λ_vec[end] ) 
 end 
 
+
 err_Ξ_vec = [] 
 err_x_vec = [] 
-# for i = 1 : x_vars 
+for j = 1 : x_vars 
+    
+    err_ξ_vec  = [] 
+    err_xj_vec = [] 
     for i = 1 : length(λ_vec) 
-
+        # j = 1 
+    
         λ = λ_vec[i] 
-        println( "λ = ", λ ) 
+        println( "i = ", i, ". λ = ", λ ) 
 
-        Ξ_gpsindy       = sindy_lasso( x_GP_train, dx_GP_train, λ, u_train ) 
+        Ξ_gpsindy = sindy_lasso( x_GP_train, dx_GP_train, λ, u_train ) 
 
-        if sum(Ξ_gpsindy) == 0 
+        if sum(Ξ_gpsindy[:,j]) == 0 
             break 
         end 
 
         Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
-
         display(Ξ_gpsindy_terms) 
 
         dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
         x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0, t_train, u_train ) 
-        err_Ξ_norm      = norm( Ξ_true - Ξ_gpsindy ) 
-        err_x_norm      = norm( x_gpsindy_train - x_train ) 
+        err_ξ_norm      = norm( Ξ_true[:,j] - Ξ_gpsindy[:,j] ) 
+        err_x_norm      = norm( x_gpsindy_train[:,j] - x_train[:,j] ) 
 
         # plot_validation_test( t_train, x_train, x_unicycle_train, x_sindy_train, x_gpsindy_train ) 
 
-        push!( err_Ξ_vec, err_Ξ_norm ) 
-        push!( err_x_vec, err_x_norm ) 
+        push!( err_ξ_vec, err_ξ_norm ) 
+        push!( err_xj_vec, err_x_norm ) 
 
     end 
-# end 
+
+    push!( err_Ξ_vec, err_ξ_vec ) 
+    push!( err_x_vec, err_xj_vec ) 
+
+end 
 
