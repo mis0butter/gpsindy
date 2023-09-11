@@ -61,13 +61,13 @@ x_train_sindy = integrate_euler( dx_fn_sindy, x0_train_GP, t_train, u_train )
 dx_fn_true    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
 x_train_true  = integrate_euler( dx_fn_true, x0_train_GP, t_train, u_train ) 
 
-# integrate unicycle (with GP) 
-x_unicycle_train = integrate_euler_unicycle( fn, x0_train_GP, t_train, u_train ) 
-x_unicycle_test  = integrate_euler_unicycle( fn, x0_test_GP, t_test, u_test ) 
-for i = 1 : x_vars 
-    println( "dx_fn_true norm err = ", norm( x_train_true[:,i] - x_train_true[:,i] )  ) 
-    println( "unicycle norm err = ", norm( x_unicycle_train[:,i] - x_train_true[:,i] )  ) 
-end 
+# # integrate unicycle (with GP) 
+# x_unicycle_train = integrate_euler_unicycle( fn, x0_train_GP, t_train, u_train ) 
+# x_unicycle_test  = integrate_euler_unicycle( fn, x0_test_GP, t_test, u_test ) 
+# for i = 1 : x_vars 
+#     println( "dx_fn_true norm err = ", norm( x_train_true[:,i] - x_train_true[:,i] )  ) 
+#     println( "unicycle norm err = ", norm( x_unicycle_train[:,i] - x_train_true[:,i] )  ) 
+# end 
 
 ## ============================================ ##
 
@@ -133,10 +133,10 @@ for j = 1 : x_vars
         label = "GP", 
         ls    = :dashdot,   
     ) ; frame(a_x, plt_x) 
-    plot!( plt_x, t_train, x_unicycle_train[:,j], 
-        label = "unicycle", 
-        ls    = :dashdotdot,   
-    ) ; frame(a_x, plt_x) 
+    # plot!( plt_x, t_train, x_unicycle_train[:,j], 
+    #     label = "unicycle", 
+    #     ls    = :dashdotdot,   
+    # ) ; frame(a_x, plt_x) 
     plt_x_sindy = deepcopy(plt_x) 
     plot!( plt_x_sindy, t_train, x_train_sindy[:,j], 
         label = "SINDy",
@@ -221,16 +221,23 @@ for i = 1 : x_vars
 
     err_xi_vec = err_x_vec[i]
     ξi_vec     = Ξ_gpsindy_vec[i] 
-    
+
+    for i = eachindex(err_xi_vec) 
+        if isnan(err_xi_vec[i])  
+            err_xi_vec[i] = 1e10 
+        end 
+    end 
+
     # find index with smallest element 
     min_idx = argmin( err_xi_vec ) 
     ξi      = ξi_vec[min_idx] 
+    println( "min_idx = ", min_idx ) 
 
     Ξ_gpsindy_minerr[:,i] = ξi 
 
-    println( "min_idx = ", min_idx ) 
-
 end 
+
+## ============================================ ##
 
 # integrate with ξ with smallest x error for training data 
 dx_fn_gpsindy_minerr = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy_minerr ) 
@@ -256,10 +263,10 @@ for j = 1 : x_vars
         label = "GP", 
         ls    = :dashdot,   
     ) 
-    plot!( plt_x, t_train, x_unicycle_train[:,j], 
-        label = "unicycle", 
-        ls    = :dashdotdot,   
-    ) 
+    # plot!( plt_x, t_train, x_unicycle_train[:,j], 
+    #     label = "unicycle", 
+    #     ls    = :dashdotdot,   
+    # ) 
     plot!( plt_x, t_train, x_gpsindy_train[:,j], 
     label = string("GPSINDy"),
     ls    = :dot,   
@@ -300,10 +307,10 @@ for j = 1 : x_vars
         label = "GP", 
         ls    = :dashdot,   
     ) 
-    plot!( plt_x, t_test, x_unicycle_test[:,j], 
-        label = "unicycle", 
-        ls    = :dashdotdot,   
-    ) 
+    # plot!( plt_x, t_test, x_unicycle_test[:,j], 
+    #     label = "unicycle", 
+    #     ls    = :dashdotdot,   
+    # ) 
     plot!( plt_x, t_test, x_gpsindy_test[:,j], 
     label = string("GPSINDy"),
     ls    = :dot,   
