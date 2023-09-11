@@ -47,6 +47,7 @@ dx_test_GP  = gp_post( x_test_GP, 0*dx_test_noise, x_test_GP, 0*dx_test_noise, d
 
 # get x0 from smoothed data 
 x0_train_GP = x_train_GP[1,:] 
+x0_test_GP  = x_test_GP[1,:] 
 
 # SINDy (STLS) 
 λ = 0.1 
@@ -62,6 +63,7 @@ x_train_true  = integrate_euler( dx_fn_true, x0_train_GP, t_train, u_train )
 
 # integrate unicycle (with GP) 
 x_unicycle_train = integrate_euler_unicycle( fn, x0_train_GP, t_train, u_train ) 
+x_unicycle_test  = integrate_euler_unicycle( fn, x0_test_GP, t_test, u_test ) 
 for i = 1 : x_vars 
     println( "dx_fn_true norm err = ", norm( x_train_true[:,i] - x_train_true[:,i] )  ) 
     println( "unicycle norm err = ", norm( x_unicycle_train[:,i] - x_train_true[:,i] )  ) 
@@ -211,6 +213,7 @@ end
 
 
 ## ============================================ ##
+# TRAINING 
 
 # save ξ with smallest x error  
 Ξ_gpsindy_minerr = 0 * Ξ_gpsindy 
@@ -269,5 +272,46 @@ pfig = plot( plt_x_vec ... ,
     plot_title = "training data", 
 )
 
+display(pfig) 
+
+## ============================================ ##
+# TESTING 
+
 # integrate with ξ with smallest x error for test data 
-x_gpsindy_test = integrate_euler( dx_fn_gpsindy_minerr, x0, t_test, u_test )
+x_gpsindy_test = integrate_euler( dx_fn_gpsindy_minerr, x0_test_GP, t_test, u_test )
+
+plt_x_vec = [] 
+for j = 1 : x_vars 
+    ymin, dy, ymax = min_d_max( x_test_true[:,j] ) 
+    plt_x = plot( t_test, x_test_true[:,j], 
+        label = "true", 
+        xlabel = "t (s)", 
+        ylabel = "x", 
+        ylim   = ( ymin, ymax ), 
+        title = string("x", j, ": true vs GP vs SINDy vs GPSINDy"), 
+        legend = :outerright,
+        size = (1000, 400), 
+    ) 
+    plot!( plt_x, t_test, x_test_noise[:,j], 
+        label = "noise", 
+        ls    = :dash,  
+    ) 
+    plot!( plt_x, t_test, x_test_GP[:,j], 
+        label = "GP", 
+        ls    = :dashdot,   
+    ) 
+    plot!( plt_x, t_test, x_unicycle_test[:,j], 
+        label = "unicycle", 
+        ls    = :dashdotdot,   
+    ) 
+    plot!( plt_x, t_test, x_gpsindy_test[:,j], 
+    label = string("GPSINDy"),
+    ls    = :dot,   
+    ) 
+    push!( plt_x_vec, plt_x ) 
+end 
+pfig = plot( plt_x_vec ... , 
+    layout = ( x_vars, 1 ), 
+    size = (1000, 400*x_vars), 
+    plot_title = "testing data", 
+)
