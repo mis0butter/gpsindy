@@ -34,6 +34,9 @@ poly_order = 4
 x_GP_train  = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
 dx_GP_train = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
 
+# build function library from smoothed data 
+Θx_gpsindy  = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order ) 
+
 # get x0 from smoothed data 
 x0 = x_GP_train[1,:] 
 
@@ -72,10 +75,6 @@ err_x_vec  = []
 err_dx_vec = [] 
 Ξ_gpsindy_vec = [] 
 for j = 1 : x_vars 
-    
-    err_ξ_vec   = [] 
-    err_xj_vec  = [] 
-    err_dxj_vec = [] 
 
     a_dx = Animation() 
     a_x = Animation() 
@@ -133,14 +132,19 @@ for j = 1 : x_vars
         label = "SINDy",
         ls    = :dot,  
     ) ; frame(a_x, plt_x_sindy) 
+    
+    err_ξ_vec     = [] 
+    err_xj_vec    = [] 
+    err_dxj_vec   = [] 
+    ξ_gpsindy_vec = []
 
+    # CROSS-VALIDATION 
     for i = 1 : length(λ_vec) 
         # j = 1 
     
         λ = λ_vec[i] 
         println( "i = ", i, ". λ = ", λ ) 
 
-        Θx_gpsindy = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order ) 
         Ξ_gpsindy  = sindy_lasso( x_GP_train, dx_GP_train, λ, poly_order, u_train ) 
         dx_gpsindy = Θx_gpsindy * Ξ_gpsindy 
 
@@ -173,6 +177,11 @@ for j = 1 : x_vars
         ) ; frame(a_x, plt_gpsindy_x) 
         display( plt_gpsindy_x )
 
+        # save ξ coefficients 
+        ξ = Ξ_gpsindy[:,j] 
+        push!( ξ_gpsindy_vec, ξ ) 
+
+        # push error stuff 
         push!( err_ξ_vec, err_ξ_norm ) 
         push!( err_xj_vec, err_xj_norm ) 
         push!( err_dxj_vec, err_dxj_norm ) 
@@ -188,6 +197,65 @@ for j = 1 : x_vars
     push!( err_Ξ_vec, err_ξ_vec ) 
     push!( err_x_vec, err_xj_vec ) 
     push!( err_dx_vec, err_dxj_vec ) 
+    push!( Ξ_gpsindy_vec, ξ_gpsindy_vec ) 
 
 end 
 
+
+## ============================================ ##
+
+# save ξ with smallest x error  
+Ξ_gpsindy_minerr = 0 * Ξ_gpsindy 
+for i = 1 : x_vars 
+
+    err_xi_vec = err_x_vec[i]
+    ξi_vec     = Ξ_gpsindy_vec[i] 
+    
+    # find index with smallest element 
+    min_idx = argmin( err_xi_vec ) 
+    ξi      = ξi_vec[min_idx] 
+
+    Ξ_gpsindy_minerr[:,i] = ξi 
+
+    println( "min_idx = ", min_idx ) 
+
+end 
+
+dx_fn_gpsindy_minerr = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy_minerr ) 
+x_gpsindy_train      = integrate_euler( dx_fn_gpsindy_minerr, x0, t_train, u_train ) 
+
+plt_x_vec = [] 
+for j = 1 : x_vars 
+    ymin, dy, ymax = min_d_max( x_true[:,j] ) 
+    plt_x = plot( t_train, x_true[:,j], 
+        label = "true", 
+        xlabel = "t (s)", 
+        ylabel = "x", 
+        ylim   = ( ymin, ymax ), 
+        title = string("x", j, ": true vs GP vs SINDy vs GPSINDy"), 
+        legend = :outerright,
+        size = (1000, 400), 
+    ) 
+    plot!( plt_x, t_train, x_train[:,j], 
+        label = "noise", 
+        ls    = :dash,  
+    ) 
+    plot!( plt_x, t_train, x_GP_train[:,j], 
+        label = "GP", 
+        ls    = :dashdot,   
+    ) 
+    plot!( plt_x, t_train, x_unicycle_train[:,j], 
+        label = "unicycle", 
+        ls    = :dashdotdot,   
+    ) 
+    plot!( plt_x, t_train, x_gpsindy_train[:,j], 
+    label = string("GPSINDy"),
+    ls    = :dot,   
+    ) 
+    push!( plt_x_vec, plt_x ) 
+end 
+pfig = plot( plt_x_vec ... , 
+    layout = ( x_vars, 1 ), 
+    size = (1000, 400*x_vars), 
+    plot_title = "training data", 
+)
