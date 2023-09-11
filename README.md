@@ -4,6 +4,21 @@ Discovering Equations of Motion from Data
 
 # Research Notes 
 
+## Sept 9, 2023 
+
+Somi: 
+- maybe choose 20 or 25 out of 45 collections of Jake's car data 
+- overlay MSE on top of error  
+- box plots show mean and quartile range 
+- maybe out of 45 collections of Jake's car data, one of them looks really good 
+
+Predator and prey AND simulated unicycle: 
+- 5 different noise levels 
+- 5 seeds for each noise level 
+- MSE 
+
+cherry-pick best 2 examples for predator-prey and unicycle: 
+
 ## Sept 8, 2023 
 
 Adam: 

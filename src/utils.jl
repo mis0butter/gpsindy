@@ -7,9 +7,7 @@ using DataFrames
 # extract Jake's car data 
 
 export extract_car_data 
-function extract_car_data(  ) 
-
-    csv_file = "test/data/jake_robot_data.csv" 
+function extract_car_data( csv_file ) 
 
     # wrap in data frame --> Matrix 
     df   = CSV.read(csv_file, DataFrame) 

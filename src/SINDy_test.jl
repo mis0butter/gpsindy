@@ -71,7 +71,7 @@ end
 #     # Ξ = sparsify_dynamics_stls( Θx, dx, λ, x_vars ) 
 #     Ξ = sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 
 
-#     return Ξ
+#     return Ξ 
 
 # end 
 
@@ -322,6 +322,32 @@ function pool_data_test(xmat, n_vars, poly_order)
         end 
     end 
 
+    # poly order 2 nonlinear combination with sine functions 
+    if poly_order >= 2 
+        for i = 1 : n_vars 
+            for j = i : n_vars 
+                for k = 1 : n_vars 
+                    ind  += 1 
+                    vec   = xmat[:,i] .* xmat[:,j] .* sin.(xmat[:,k]) 
+                    Θx    = [Θx vec]     
+                end
+            end 
+        end 
+    end 
+
+    # poly order 2 nonlinear combination with cosine functions 
+    if poly_order >= 2 
+        for i = 1 : n_vars 
+            for j = i : n_vars 
+                for k = 1 : n_vars 
+                    ind  += 1 
+                    vec   = xmat[:,i] .* xmat[:,j] .* cos.(xmat[:,k]) 
+                    Θx    = [Θx vec]     
+                end
+            end 
+        end 
+    end 
+
     return Θx  
 
 end 
@@ -408,6 +434,30 @@ function pool_data_vecfn_test(n_vars, poly_order)
             push!( Θx, x -> x[i] .* cos.( x[j] ) ) 
         end 
     end 
+
+    # poly order 2 nonlinear combination with sine functions 
+    if poly_order >= 2 
+        for i = 1 : n_vars 
+            for j = i : n_vars 
+                for k = 1 : n_vars 
+                    ind += 1 
+                    push!( Θx, x -> x[i] .* x[j] .* sin.( x[k] ) ) 
+                end
+            end 
+        end 
+    end 
+
+    # poly order 2 nonlinear combination with cosine functions 
+    if poly_order >= 2 
+        for i = 1 : n_vars 
+            for j = i : n_vars 
+                for k = 1 : n_vars 
+                    ind += 1 
+                    push!( Θx, x -> x[i] .* x[j] .* cos.( x[k] ) ) 
+                end
+            end 
+        end 
+    end
     
     return Θx 
 
@@ -488,6 +538,26 @@ function nonlinear_terms( x_data, u_data = false )
         for j = 1 : n_vars 
             ind += 1 
             push!( terms, string( var_string[i], "cos(", var_string[j], ")") ) 
+        end 
+    end 
+
+    # poly order 2 nonlinear combination with sine functions 
+    for i = 1 : n_vars 
+        for j = i : n_vars 
+            for k = 1 : n_vars 
+                ind += 1 
+                push!( terms, string( var_string[i], var_string[j], "sin(", var_string[k], ")") ) 
+            end
+        end 
+    end 
+
+    # poly order 2 nonlinear combination with cosine functions 
+    for i = 1 : n_vars 
+        for j = i : n_vars 
+            for k = 1 : n_vars 
+                ind += 1 
+                push!( terms, string( var_string[i], var_string[j], "cos(", var_string[k], ")") ) 
+            end
         end 
     end 
 

@@ -5,7 +5,9 @@ using GaussianSINDy
 # setup 
 
 # load data 
-t, x, u = extract_car_data() 
+csv_file = "test/data/jake_robot_data.csv" 
+
+t, x, u = extract_car_data( csv_file ) 
 x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
 x, dx_fd = unroll( t, x ) 
 
