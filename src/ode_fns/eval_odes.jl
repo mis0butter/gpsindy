@@ -2,6 +2,24 @@ using DifferentialEquations
 
 
 ## ============================================ ##
+# build dx_fn from Ξ and integrate 
+
+export dx_Ξ_integrate 
+function dx_Ξ_integrate( data_train, data_test, Ξ, x0_train_GP, x0_test_GP ) 
+    
+    # get sizes 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+
+    # build dx_fn from Ξ and integrate 
+    dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ ) 
+    x_train_sindy = integrate_euler( dx_fn_sindy, x0_train_GP, data_train.t, data_train.u ) 
+    x_test_sindy  = integrate_euler( dx_fn_sindy, x0_test_GP, data_test.t, data_test.u ) 
+
+    return x_train_sindy, x_test_sindy 
+end 
+
+
+## ============================================ ##
 
 export ode_train_test 
 function ode_train_test( fn ) 

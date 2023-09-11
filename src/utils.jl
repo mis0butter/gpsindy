@@ -2,6 +2,53 @@ using Statistics
 using CSV 
 using DataFrames 
 
+## ============================================ ##
+# for cross-validation 
+
+export λ_vec_fn 
+function λ_vec_fn(  ) 
+
+    λ_vec = [ 1e-6 ] 
+    while λ_vec[end] < 1e-1 
+        push!( λ_vec, 10 * λ_vec[end] ) 
+    end 
+    while λ_vec[end] < 1.0  
+        push!( λ_vec, 0.1 + λ_vec[end] ) 
+    end 
+    while λ_vec[end] < 10 
+        push!( λ_vec, 1.0 + λ_vec[end] ) 
+    end 
+    while λ_vec[end] < 100 
+        push!( λ_vec, 10.0 + λ_vec[end] ) 
+    end
+    
+    return λ_vec 
+end 
+
+## ============================================ ##
+# extract Jake's car data, export as structs 
+
+export car_data_struct 
+function car_data_struct( csv_file ) 
+
+    t, x, u = extract_car_data( csv_file ) 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+    x, dx_fd = unroll( t, x ) 
+    
+    # split into training and test data 
+    test_fraction = 0.2 
+    portion       = 5 
+    u_train,  u_test  = split_train_test( u, test_fraction, portion ) 
+    t_train,  t_test  = split_train_test( t, test_fraction, portion ) 
+    x_train_noise,  x_test_noise  = split_train_test( x, test_fraction, portion ) 
+    dx_train_noise, dx_test_noise = split_train_test( dx_fd, test_fraction, portion ) 
+    
+    data_train = data_struct( t_train, u_train, [], [], x_train_noise, dx_train_noise ) 
+    data_test  = data_struct( t_test, u_test, [], [], x_test_noise, dx_test_noise) 
+    
+    return data_train, data_test 
+end 
+
 
 ## ============================================ ##
 # extract Jake's car data 

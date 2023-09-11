@@ -11,7 +11,7 @@ include("init_params.jl")
 # ----------------------- #
 # redo fns 
 
-include("sindy_stls.jl")
+include("SINDy_test.jl")
 include("opt_fns.jl")
 include("gpsindy_fns.jl")
 include("plot_fns.jl")

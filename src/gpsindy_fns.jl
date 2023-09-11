@@ -6,6 +6,22 @@ using Plots
 
 
 ## ============================================ ##
+# smooth training and test data with GPs 
+
+export gp_train_test 
+function gp_train_test( data_train, data_test ) 
+
+    # first - smooth measurements with Gaussian processes 
+    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
+    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
+    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+
+    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+end 
+
+
+## ============================================ ##
 # return Ξ with minimum x error 
 
 export Ξ_minerr 
@@ -40,10 +56,34 @@ end
 
 
 ## ============================================ ##
+# for cross-validation 
+
+export λ_vec_fn 
+function λ_vec_fn(  ) 
+
+    λ_vec = [ 1e-6 ] 
+    while λ_vec[end] < 1e-1 
+        push!( λ_vec, 10 * λ_vec[end] ) 
+    end 
+    while λ_vec[end] < 1.0  
+        push!( λ_vec, 0.1 + λ_vec[end] ) 
+    end 
+    while λ_vec[end] < 10 
+        push!( λ_vec, 1.0 + λ_vec[end] ) 
+    end 
+    while λ_vec[end] < 100 
+        push!( λ_vec, 10.0 + λ_vec[end] ) 
+    end
+    
+    return λ_vec 
+end 
+
+
+## ============================================ ##
 # cross-validate λ 
 
 export cross_validate_λ 
-function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train ) 
+function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train, λ_vec ) 
 
     # get sizes 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train_GP, u_train ) 
@@ -66,7 +106,7 @@ function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train )
         ξ_gpsindy_vec = []
     
         # CROSS-VALIDATION 
-        for i = 1 : length(λ_vec) 
+        for i = eachindex(λ_vec) 
         
             λ = λ_vec[i] 
             println( "x", j, ": λ = ", λ ) 
