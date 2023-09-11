@@ -17,18 +17,6 @@ t_train,  t_test  = split_train_test( t, test_fraction, portion )
 x_train,  x_test  = split_train_test( x, test_fraction, portion ) 
 dx_train, dx_test = split_train_test( dx_fd, test_fraction, portion ) 
 
-data_train.t_train  = t_train
-data_train.x_train  = x_train 
-data_train.dx_train = dx_train 
-data_train.u_train  = u_train 
-
-data_test.t_test  = t_test 
-data_test.x_test  = x_test 
-data_test.dx_test = dx_test 
-data_test.u_test  = u_test 
-
-
-
 
 ## ============================================ ##
 # SINDy vs. GPSINDy 

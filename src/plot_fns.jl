@@ -2,6 +2,53 @@ using Plots
 using StatsPlots
 using Statistics 
 using Latexify 
+
+## ============================================ ##
+# plot noise, GP, SINDy, GPSINDy 
+
+export plot_noise_sindy_gpsindy 
+function plot_noise_sindy_gpsindy( t_train, x_train_noise, x_train_GP, x_train_sindy, x_train_gpsindy, plot_suptitle ) 
+    
+    # get sizes 
+    x_vars = size( x_train_noise, 2 ) 
+
+    plt_x_vec = [] 
+    for j = 1 : x_vars 
+        ymin, dy, ymax = min_d_max( x_train_noise[:,j] ) 
+        plt_x = plot( t_train, x_train_noise[:,j], 
+            xlabel = "t (s)", 
+            ylabel = "x", 
+            ylim   = ( ymin, ymax ), 
+            title  = string("x", j, ": noise vs GP vs SINDy vs GPSINDy"), 
+            legend = :outerright,
+            size   = (1000, 400), 
+            label  = "noise", 
+        ) 
+        plot!( plt_x, t_train, x_train_GP[:,j], 
+            label = "GP", 
+            ls    = :dash,   
+        ) 
+        plot!( plt_x, t_train, x_train_sindy[:,j], 
+            label = "SINDy", 
+            ls    = :dashdot,   
+        ) 
+        plot!( plt_x, t_train, x_train_gpsindy[:,j], 
+        label = string("GPSINDy"),
+        ls    = :dot,   
+        ) 
+        push!( plt_x_vec, plt_x ) 
+    end 
+    pfig = plot( plt_x_vec ... , 
+        layout = ( x_vars, 1 ), 
+        size = (1000, 400*x_vars), 
+        plot_title = plot_suptitle, 
+    )
+    
+    display(pfig)     
+
+end 
+
+
 ## ============================================ ##
 # plot 
 

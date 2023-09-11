@@ -59,7 +59,7 @@ x_train_sindy = integrate_euler( dx_fn_sindy, x0_train_GP, t_train, u_train )
 
 # integrate true function 
 dx_fn_true    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
-x_train_true  = integrate_euler( dx_fn_true, x0_train_GP, t_train, u_train ) 
+# x_train_true  = integrate_euler( dx_fn_true, x0_train_GP, t_train, u_train ) 
 
 # # integrate unicycle (with GP) 
 # x_unicycle_train = integrate_euler_unicycle( fn, x0_train_GP, t_train, u_train ) 
@@ -213,10 +213,9 @@ end
 
 
 ## ============================================ ##
-# TRAINING 
-
 # save ξ with smallest x error  
-Ξ_gpsindy_minerr = 0 * Ξ_gpsindy 
+
+Ξ_gpsindy_minerr = 0 * Ξ_sindy_stls
 for i = 1 : x_vars 
 
     err_xi_vec = err_x_vec[i]

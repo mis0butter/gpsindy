@@ -1,36 +1,21 @@
-# this is a script for tuning lambda for each dx based on the error from the TRAINING DATA 
-
 using GaussianSINDy 
-using LinearAlgebra 
-using Plots 
+
 
 ## ============================================ ##
+# setup 
 
-fn = unicycle 
+# load data 
+t, x, u = extract_car_data() 
+x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+x, dx_fd = unroll( t, x ) 
 
-λ = 0.1 
-data_train, data_test = ode_train_test( fn )
-
-x_train_noise  = data_train.x_noise 
-dx_train_noise = data_train.dx_noise 
-u_train        = data_train.u 
-t_train        = data_train.t 
-x_train_true   = data_train.x_true 
-dx_train_true  = data_train.dx_true 
-
-x_test_noise   = data_test.x_noise 
-dx_test_noise  = data_test.dx_noise 
-u_test         = data_test.u
-t_test         = data_test.t    
-x_test_true    = data_test.x_true 
-dx_test_true   = data_test.dx_true 
-
-# get sizes 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train_noise, u_train ) 
-poly_order = 4 
-
-Ξ_true       = sindy_stls( x_train_true, dx_train_true, λ, poly_order, u_train ) 
-Ξ_true_terms = pretty_coeffs( Ξ_true, x_train_true, u_train ) 
+# split into training and test data 
+test_fraction = 0.2 
+portion       = 5 
+u_train,  u_test  = split_train_test( u, test_fraction, portion ) 
+t_train,  t_test  = split_train_test( t, test_fraction, portion ) 
+x_train_noise,  x_test_noise  = split_train_test( x, test_fraction, portion ) 
+dx_train_noise, dx_test_noise = split_train_test( dx_fd, test_fraction, portion ) 
 
 
 ## ============================================ ##
@@ -59,15 +44,24 @@ x_test_sindy  = integrate_euler( dx_fn_sindy, x0_test_GP, t_test, u_test )
 ## ============================================ ##
 
 λ_vec = [ 1e-6 ] 
-while λ_vec[end] < 10 
+while λ_vec[end] < 1e-1 
     push!( λ_vec, 10 * λ_vec[end] ) 
 end 
-while λ_vec[end] < 500 
-    push!( λ_vec, 10 + λ_vec[end] ) 
+while λ_vec[end] < 1.0  
+    push!( λ_vec, 0.1 + λ_vec[end] ) 
 end 
+while λ_vec[end] < 10 
+    push!( λ_vec, 1.0 + λ_vec[end] ) 
+end 
+while λ_vec[end] < 100 
+    push!( λ_vec, 10.0 + λ_vec[end] ) 
+end
 
 # cross-validate !!!  
 Ξ_gpsindy_vec, err_x_vec, err_dx_vec = cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train ) 
+
+
+## ============================================ ## 
 
 # save ξ with smallest x error  
 Ξ_gpsindy_minerr = Ξ_minerr( Ξ_gpsindy_vec, err_x_vec ) 
@@ -86,3 +80,4 @@ plot_noise_sindy_gpsindy( t_train, x_train_noise, x_train_GP, x_train_sindy, x_t
 
 # plot testing 
 plot_noise_sindy_gpsindy( t_test, x_test_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
+

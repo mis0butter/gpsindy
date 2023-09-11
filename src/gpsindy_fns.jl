@@ -6,6 +6,106 @@ using Plots
 
 
 ## ============================================ ##
+# return Ξ with minimum x error 
+
+export Ξ_minerr 
+function Ξ_minerr( Ξ_gpsindy_vec, err_x_vec ) 
+
+    x_vars = size(Ξ_gpsindy_vec, 1) 
+    p      = size(Ξ_gpsindy_vec[1][1], 1)
+
+    Ξ_gpsindy_minerr = zeros(p, x_vars) 
+    for i = 1 : x_vars 
+    
+        err_xi_vec = err_x_vec[i]
+        ξi_vec     = Ξ_gpsindy_vec[i] 
+    
+        for i = eachindex(err_xi_vec) 
+            if isnan(err_xi_vec[i])  
+                err_xi_vec[i] = 1e10 
+            end 
+        end 
+    
+        # find index with smallest element 
+        min_idx = argmin( err_xi_vec ) 
+        ξi      = ξi_vec[min_idx] 
+        println( "min_idx = ", min_idx ) 
+    
+        Ξ_gpsindy_minerr[:,i] = ξi 
+    
+    end     
+
+    return Ξ_gpsindy_minerr 
+end 
+
+
+## ============================================ ##
+# cross-validate λ 
+
+export cross_validate_λ 
+function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train ) 
+
+    # get sizes 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train_GP, u_train ) 
+    
+    # build function library from smoothed data 
+    Θx_gp  = pool_data_test( [ x_train_GP u_train ], n_vars, poly_order ) 
+    
+    # get x0 from smoothed data
+    x0_train_GP = x_train_GP[1,:] 
+
+    err_x_vec  = [] 
+    err_dx_vec = [] 
+    Ξ_gpsindy_vec = [] 
+
+    # loop through each state 
+    for j = 1 : x_vars 
+    
+        err_xj_vec    = [] 
+        err_dxj_vec   = [] 
+        ξ_gpsindy_vec = []
+    
+        # CROSS-VALIDATION 
+        for i = 1 : length(λ_vec) 
+        
+            λ = λ_vec[i] 
+            println( "x", j, ": λ = ", λ ) 
+    
+            # GPSINDy-lasso ! 
+            Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, poly_order, u_train ) 
+            dx_gpsindy = Θx_gp * Ξ_gpsindy 
+    
+            if sum(Ξ_gpsindy[:,j]) == 0 
+                break 
+            end 
+    
+            # integrate discovered dynamics 
+            dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+            x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train ) 
+
+            # save ξ coefficients 
+            ξ = Ξ_gpsindy[:,j] 
+            push!( ξ_gpsindy_vec, ξ ) 
+    
+            # push error stuff 
+            err_xj_norm  = norm( x_gpsindy_train[:,j] - x_train_GP[:,j] ) 
+            err_dxj_norm = norm( dx_gpsindy[:,j] - dx_train_GP[:,j] ) 
+            push!( err_xj_vec, err_xj_norm ) 
+            push!( err_dxj_vec, err_dxj_norm ) 
+    
+        end 
+    
+        push!( err_x_vec, err_xj_vec ) 
+        push!( err_dx_vec, err_dxj_vec ) 
+        push!( Ξ_gpsindy_vec, ξ_gpsindy_vec ) 
+    
+    end 
+
+    return Ξ_gpsindy_vec, err_x_vec, err_dx_vec 
+end 
+
+
+## ============================================ ##
 
 export gpsindy_Ξ_fn
 function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train, plot_option = 0 ) 
