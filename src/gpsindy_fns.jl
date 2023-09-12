@@ -159,7 +159,7 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
 
     end 
 
-    return Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy
+    return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy 
 end 
 
 
