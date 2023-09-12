@@ -12,7 +12,7 @@ fn = unicycle
 
 # set up noise vec 
 noise_vec      = []
-noise_vec_iter = 0.05 : 0.05 : 0.25 
+noise_vec_iter = 0.05 : 0.05 : 0.1 
 for i in noise_vec_iter
     for j = 1:3 
         push!(noise_vec, i)
