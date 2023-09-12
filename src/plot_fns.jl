@@ -53,7 +53,7 @@ end
 # plot 
 
 export plot_validation_test 
-function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_stls, x_gpsindy_stls)  
+function plot_validation_test( t_test, x_test, x_sindy_stls, x_sindy_lasso, x_nn, x_gpsindy_stls)  
     
     xmin, dx, xmax = min_d_max(t_test)
     
@@ -76,23 +76,30 @@ function plot_validation_test( t_test, x_test, x_unicycle_test, x_sindy_stls, x_
             ylim    = (ymin, ymax), 
             title   = string(latexify("x_$(i)")),
         ) 
-        plot!( p, t_test, x_unicycle_test[:,i], 
+        plot!( p, t_test, x_sindy_stls[:,i], 
             c       = :green, 
-            label   = "unicycle", 
+            label   = "SINDy (STLS)", 
             xticks  = xmin:dx:xmax,
             yticks  = ymin:dy:ymax,
             ls      = :dash, 
         ) 
-        plot!( p, t_test, x_sindy_stls[:,i], 
+        plot!( p, t_test, x_sindy_lasso[:,i], 
             c       = :red, 
-            label   = "SINDy", 
+            label   = "SINDy (LASSO)", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ls      = :dashdot, 
+        ) 
+        plot!( p, t_test, x_nn[:,i], 
+            c       = :blue, 
+            label   = "NN (LASSO)", 
             xticks  = xmin:dx:xmax,
             yticks  = ymin:dy:ymax,
             ls      = :dashdot, 
         ) 
         plot!( p, t_test, x_gpsindy_stls[:,i], 
-            c       = :blue, 
-            label   = "GPSINDy", 
+            # c       = :blue, 
+            label   = "GPSINDy (LASSO)", 
             xticks  = xmin:dx:xmax,
             yticks = ymin:dy:ymax,
             ls      = :dot, 

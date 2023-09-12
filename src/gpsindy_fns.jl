@@ -166,6 +166,28 @@ function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train, λ_vec )
     return Ξ_gpsindy_vec, err_x_vec, err_dx_vec 
 end 
 
+## ============================================ ##
+
+export nn_Ξ_fn
+# function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train ) 
+function nn_Ξ_fn( dx_noise, x_noise, λ ) 
+
+    x_vars = size(x_noise, 2) 
+
+    # Train NN on the data
+    # Define the 2-layer MLP
+    dx_noise_nn = 0 * dx_noise 
+    for i = 1 : x_vars 
+        dx_noise_nn[:,i] = train_nn_predict(x_noise, dx_noise[:, i], 100, 2)
+    end 
+
+    # Concanate the two outputs to make a Matrix
+    Ξ_nn_lasso  = sindy_lasso( x_noise, dx_noise_nn, λ )
+
+    return Ξ_nn_lasso 
+end 
+
+
 
 ## ============================================ ##
 

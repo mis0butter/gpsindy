@@ -67,12 +67,12 @@ function ode_train_test( fn, noise = 0.01, stand_data = false )
     data_test  = data_struct( t_test, u_test, x_test_true, dx_test_true, x_test_noise, dx_test_noise) 
 
     # standardize data 
-    if stand_data == 1 
-        data_train = ode_stand_data( data_train, fn, p, noise ) 
+    # if stand_data == 1 
+        data_train_stand = ode_stand_data( data_train, fn, p, noise ) 
         # data_test  = ode_stand_data( data_test, fn, p, noise ) 
-    end 
+    # end 
 
-    return data_train, data_test 
+    return data_train, data_test, data_train_stand 
 end 
 
 
