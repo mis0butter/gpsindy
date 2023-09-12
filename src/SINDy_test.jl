@@ -2,12 +2,9 @@
 # putting it together (no control) 
 
 export sindy_stls 
-function sindy_stls( x, dx, λ, poly_order = false, u = false )
+function sindy_stls( x, dx, λ, u = false )
 
-    x_vars, u_vars, poly_order_x_vars, n_vars = size_x_n_vars( dx, u ) 
-    if poly_order == false 
-        poly_order = poly_order_x_vars 
-    end 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
     
     if isequal(u, false)      # if u_data = false 
         data   = x 
@@ -29,12 +26,9 @@ end
 # putting it together (no control) 
 
 export sindy_lasso 
-function sindy_lasso( x, dx, λ, poly_order = false, u = false )
+function sindy_lasso( x, dx, λ, u = false )
 
-    x_vars, u_vars, poly_order_x_vars, n_vars = size_x_n_vars( dx, u ) 
-    if poly_order == false 
-        poly_order = poly_order_x_vars 
-    end 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
     
     if isequal(u, false)      # if u_data = false 
         data = x 

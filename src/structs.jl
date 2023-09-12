@@ -28,9 +28,24 @@ struct Ξ_struct
 end
 
 struct Ξ_err_struct 
-    sindy 
+    sindy_stls 
+    sindy_lasso 
     gpsindy 
-    gpsindy_x2 
+    nn 
+end 
+
+struct x_struct 
+    truth 
+    sindy_stls 
+    sindy_lasso 
+    gpsindy 
+    nn 
+end
+
+struct x_err_struct 
+    sindy_stls 
+    sindy_lasso 
+    gpsindy 
     nn 
 end 
 
@@ -43,5 +58,5 @@ struct data_struct
     dx_noise 
 end 
 
-export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct 
+export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct, x_struct, x_err_struct
 

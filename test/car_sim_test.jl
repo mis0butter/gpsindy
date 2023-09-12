@@ -5,7 +5,7 @@ using GaussianSINDy
 
 # generate data 
 fn = unicycle 
-data_train, data_test = ode_train_test( fn ) 
+data_train, data_test, data_train_stand = ode_train_test( fn ) 
 
 
 ## ============================================ ##
