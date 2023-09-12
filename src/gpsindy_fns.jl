@@ -16,13 +16,12 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     if u == false 
         u_train = false ; u_test  = false 
     else 
-        u_train, u_test = split_train_test(u, test_fraction, portion) 
+        u_train, u_test = split_train_test(u, 0.2, 5) 
     end 
 
     # truth coeffs 
-    x_vars     = size(x_true, 2);
-    poly_order = x_vars 
-    Ξ_true     = sindy_stls(x_true, dx_true, λ)
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_true, u ) 
+    Ξ_true     = sindy_stls(x_true, dx_true, λ, u)
 
     # add noise 
     println("noise = ", noise)
@@ -50,7 +49,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     dx_train = dx_stand_noise
 
     ## ============================================ ##
-    # SINDy vs. GPSINDy 
+    # SINDy vs. NN vs. GPSINDy 
 
     # SINDy by itself 
     Ξ_sindy_stls  = sindy_stls(x_train, dx_train, λ, u_train)
@@ -61,39 +60,18 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     dx_train_GP = gp_post(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_train)
     Ξ_gpsindy   = sindy_lasso(x_train_GP, dx_train_GP, λ, u_train)
 
-    ## ============================================ ##
     # Train NN on the data
-
-    # ----------------------- #
-    # Define the 2-layer MLP
-    # dx_noise_nn_x1 = train_nn_predict(x_train_noise, dx_train_noise[:, 1], 100, 2)
-    # dx_noise_nn_x2 = train_nn_predict(x_train_noise, dx_train_noise[:, 2], 100, 2)
-
-    # # Concanate the two outputs to make a Matrix
-    # dx_noise_nn = hcat(dx_noise_nn_x1, dx_noise_nn_x2)
-
-    # Θx_nn = pool_data_test(x_train_noise, x_vars, poly_order)
-    # Ξ_nn  = sindy_lasso(x_train_noise, dx_noise_nn, λ)
-
     Ξ_nn = nn_Ξ_fn( dx_train_noise, x_train_noise, λ, u_train ) 
 
     # ----------------------- # 
     # validate data 
 
     x_vars = size(x_true, 2)
-    u_vars = 0
     dx_fn_sindy_stls  = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_stls)
     dx_fn_sindy_lasso = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_lasso)
     dx_fn_gpsindy     = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy)
     dx_fn_nn          = build_dx_fn(poly_order, x_vars, u_vars, Ξ_nn)
     
-    # t_sindy_val, x_sindy_stls_val = validate_data(t_test, x_test_noise, dx_sindy_stls_fn, dt)
-    # t_sindy_val, x_sindy_lasso_val = validate_data(t_test, x_test_noise, dx_sindy_lasso_fn, dt)
-    # # t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, fn, dt) 
-    # t_gpsindy_val, x_gpsindy_val       = validate_data(t_test, x_test_noise, dx_gpsindy_fn, dt)
-    # # t_gpsindy_x2_val, x_gpsindy_x2_val = validate_data(t_test, x_test_noise, dx_gpsindy_x2_fn, dt)
-    # t_nn_val, x_nn_val                 = validate_data(t_test, x_test_noise, dx_nn_fn, dt) 
-
     # integrate !! 
     x0 = x_test_true[1,:] 
     x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t_test, u_test ) 

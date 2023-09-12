@@ -3,7 +3,7 @@ using GaussianSINDy
 # using LineSearches 
 
 # choose ODE, plot states --> measurements 
-fn = predator_prey
+fn = unicycle 
 
 # constants 
 λ = 0.1
