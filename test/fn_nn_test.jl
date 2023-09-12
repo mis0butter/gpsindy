@@ -9,11 +9,14 @@ data_train, data_test, data_train_stand = ode_train_test( fn, 0.01, 1 )
 
 λ = 0.1 
 
-# run SINDy (STLS) 
+# truth 
 Ξ_true_stls       = sindy_stls( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
 Ξ_true_stls_terms = pretty_coeffs( Ξ_true_stls, data_train.x_true, data_train.u ) 
+
+# SINDy and GPSINDy 
 Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms = gpsindy_Ξ_fn( data_train_stand.t, data_train_stand.x_true, data_train_stand.dx_true, λ, data_train_stand.u ) 
 
+# NN 
 Ξ_nn_lasso = nn_Ξ_fn( data_train_stand.dx_noise, data_train_stand.x_noise, λ ) 
 
 

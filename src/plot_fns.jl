@@ -61,10 +61,7 @@ function plot_validation_test( t_test, x_test, x_sindy_stls, x_sindy_lasso, x_nn
     p_vec = [] 
     for i = 1 : x_vars 
     
-        # ymin, dy, ymax = min_d_max([ x_true_test[:, i]; x_gpsindy_stls[:,i] ])
-        ymin = -10 
-        ymax = 4 
-        dy   = 3 
+        ymin, dy, ymax = min_d_max( x_test[:, i] )
     
         p = plot( t_test, x_test[:,i], 
             c       = :gray, 
