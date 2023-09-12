@@ -2,10 +2,43 @@ using GaussianSINDy
 
 # generate data 
 fn = predator_prey 
-data_train, data_test, data_train_stand = ode_train_test( fn, 0.01, 1 ) 
+
+noise = 0.01 
+
+
 
 ## ============================================ ##
-# SINDy vs GPSINDy 
+
+
+function sindy_nn_gpsindy_Ξ_fn( data_train, data_train_stand ) 
+
+    # ----------------------- #
+    # SINDy vs NN vs GPSINDy 
+    
+    λ = 0.1 
+    
+    # truth 
+    Ξ_true_stls       = sindy_stls( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
+    Ξ_true_stls_terms = pretty_coeffs( Ξ_true_stls, data_train.x_true, data_train.u ) 
+    
+    # SINDy and GPSINDy 
+    Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms = gpsindy_Ξ_fn( data_train_stand.t, data_train_stand.x_true, data_train_stand.dx_true, λ, data_train_stand.u ) 
+    
+    # NN 
+    Ξ_nn_lasso = nn_Ξ_fn( data_train.dx_noise, data_train.x_noise, λ ) 
+
+    return Ξ_true_stls, Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_nn_lasso, Ξ_gpsindy
+end 
+
+
+## ============================================ ##
+
+
+
+data_train, data_test, data_train_stand = ode_train_test( fn, noise ) 
+
+# ----------------------- #
+# SINDy vs NN vs GPSINDy 
 
 λ = 0.1 
 
@@ -33,7 +66,7 @@ dx_fn_gpsindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy )
 x0 = data_test.x_true[1,:] 
 # x_unicycle_test    = integrate_euler_unicycle( fn, x0, data_test.t, data_test.u ) 
 # t, x_int_tsit5_true = validate_data( data_test.t, data_test.x_true, dx_fn_true, t[2] - t[1] ) 
-x_int_euler_true   = integrate_euler( dx_fn_true, x0, data_test.t, data_test.u ) 
+# x_int_euler_true   = integrate_euler( dx_fn_true, x0, data_test.t, data_test.u ) 
 x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, data_test.t, data_test.u ) 
 x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, data_test.t, data_test.u ) 
 x_nn_test          = integrate_euler( dx_fn_nn, x0, data_test.t, data_test.u ) 

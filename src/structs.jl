@@ -21,9 +21,9 @@ end
 
 struct Ξ_struct 
     truth 
-    sindy 
+    sindy_stls 
+    sindy_lasso 
     gpsindy 
-    gpsindy_x2 
     nn 
 end
 
