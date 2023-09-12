@@ -52,6 +52,111 @@ end
 
 
 ## ============================================ ##
+
+export x_Ξ_fn 
+function x_Ξ_fn( data_train, data_test, data_train_stand )
+
+    λ = 0.1 
+    
+    # truth 
+    Ξ_true_stls       = sindy_stls( data_train.x_true, data_train.dx_true, λ, data_train.u ) 
+    Ξ_true_stls_terms = pretty_coeffs( Ξ_true_stls, data_train.x_true, data_train.u ) 
+    
+    # SINDy and GPSINDy 
+    Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms = gpsindy_Ξ_fn( data_train_stand.t, data_train_stand.x_true, data_train_stand.dx_true, λ, data_train_stand.u ) 
+    
+    # NN 
+    Ξ_nn_lasso = nn_Ξ_fn( data_train.dx_noise, data_train.x_noise , λ, data_train.u ) 
+    
+    # ----------------------- # 
+    # validate 
+    
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    
+    dx_fn_nn          = build_dx_fn( poly_order, x_vars, u_vars, Ξ_nn_lasso ) 
+    dx_fn_true        = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true_stls ) 
+    dx_fn_sindy_stls  = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy_stls ) 
+    dx_fn_sindy_lasso = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy_lasso ) 
+    dx_fn_gpsindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+    
+    # integrate !! 
+    x0 = data_test.x_true[1,:] 
+    x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, data_test.t, data_test.u ) 
+    x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, data_test.t, data_test.u ) 
+    x_nn_test          = integrate_euler( dx_fn_nn, x0, data_test.t, data_test.u ) 
+    x_gpsindy_test     = integrate_euler( dx_fn_gpsindy, x0, data_test.t, data_test.u ) 
+    
+    
+    # ----------------------- #
+    # plot smoothed data and validation test data 
+    plot_validation_test( data_test.t, data_test.x_true, x_sindy_stls_test, x_sindy_lasso_test, x_nn_test, x_gpsindy_test ) 
+    
+    # save outputs 
+    Ξ = Ξ_struct( Ξ_true_stls, Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_nn_lasso, Ξ_gpsindy ) 
+    x = x_struct( data_test.x_true, x_sindy_stls_test, x_sindy_lasso_test, x_nn_test, x_gpsindy_test )  
+    
+    return x, Ξ 
+end 
+
+
+## ============================================ ##
+
+export err_Ξ_x 
+function err_Ξ_x( x, Ξ ) 
+
+    x_true          = x.truth 
+    x_sindy_stls    = x.sindy_stls 
+    x_sindy_lasso   = x.sindy_lasso 
+    x_nn            = x.nn 
+    x_gpsindy       = x.gpsindy 
+
+    Ξ_true          = Ξ.truth 
+    Ξ_sindy_stls    = Ξ.sindy_stls 
+    Ξ_sindy_lasso   = Ξ.sindy_lasso 
+    Ξ_nn_lasso      = Ξ.nn 
+    Ξ_gpsindy       = Ξ.gpsindy 
+
+    x_sindy_stls_err = [] 
+    for i = 1 : x_vars 
+        push!( x_sindy_stls_err, norm( x_true[:,i] - x_sindy_stls[:,i] )  ) 
+    end 
+    x_sindy_lasso_err = [] 
+    for i = 1 : x_vars 
+        push!( x_sindy_lasso_err, norm( x_true[:,i] - x_sindy_lasso[:,i] )  ) 
+    end
+    x_nn_err = [] 
+    for i = 1 : x_vars 
+        push!( x_nn_err, norm( x_true[:,i] - x_nn[:,i] )  ) 
+    end 
+    x_gpsindy_err = [] 
+    for i = 1 : x_vars 
+        push!( x_gpsindy_err, norm( x_true[:,i] - x_gpsindy[:,i] )  ) 
+    end 
+    x_err = x_err_struct( x_sindy_stls_err, x_sindy_lasso_err, x_nn_err, x_gpsindy_err ) 
+
+    Ξ_sindy_stls_err = [] 
+    for i = 1 : n_vars 
+        push!( Ξ_sindy_stls_err, norm( Ξ_true[:,i] - Ξ_sindy_stls[:,i] )  ) 
+    end 
+    Ξ_sindy_lasso_err = [] 
+    for i = 1 : n_vars 
+        push!( Ξ_sindy_lasso_err, norm( Ξ_true[:,i] - Ξ_sindy_lasso[:,i] )  ) 
+    end 
+    Ξ_nn_err = [] 
+    for i = 1 : n_vars 
+        push!( Ξ_nn_err, norm( Ξ_true[:,i] - Ξ_nn_lasso[:,i] )  ) 
+    end 
+    Ξ_gpsindy_err = [] 
+    for i = 1 : n_vars 
+        push!( Ξ_gpsindy_err, norm( Ξ_true[:,i] - Ξ_gpsindy[:,i] )  ) 
+    end 
+    Ξ_err = Ξ_err_struct( Ξ_sindy_stls_err, Ξ_sindy_lasso_err, Ξ_nn_err, Ξ_gpsindy_err ) 
+
+    return Ξ_err, x_err 
+end 
+
+
+## ============================================ ##
 # smooth training and test data with GPs 
 
 export gp_train_test 
@@ -170,7 +275,7 @@ end
 
 export nn_Ξ_fn
 # function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train ) 
-function nn_Ξ_fn( dx_noise, x_noise, λ ) 
+function nn_Ξ_fn( dx_noise, x_noise, λ, u_train ) 
 
     x_vars = size(x_noise, 2) 
 
@@ -178,11 +283,11 @@ function nn_Ξ_fn( dx_noise, x_noise, λ )
     # Define the 2-layer MLP
     dx_noise_nn = 0 * dx_noise 
     for i = 1 : x_vars 
-        dx_noise_nn[:,i] = train_nn_predict(x_noise, dx_noise[:, i], 100, 2)
+        dx_noise_nn[:, i] = train_nn_predict(x_noise, dx_noise[:, i], 100, x_vars)
     end 
 
     # Concanate the two outputs to make a Matrix
-    Ξ_nn_lasso  = sindy_lasso( x_noise, dx_noise_nn, λ )
+    Ξ_nn_lasso  = sindy_lasso( x_noise, dx_noise_nn, λ, u_train )
 
     return Ξ_nn_lasso 
 end 

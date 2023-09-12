@@ -23,30 +23,30 @@ struct Ξ_struct
     truth 
     sindy_stls 
     sindy_lasso 
-    gpsindy 
     nn 
+    gpsindy 
 end
 
 struct Ξ_err_struct 
     sindy_stls 
     sindy_lasso 
-    gpsindy 
     nn 
+    gpsindy 
 end 
 
 struct x_struct 
     truth 
     sindy_stls 
     sindy_lasso 
-    gpsindy 
     nn 
+    gpsindy 
 end
 
 struct x_err_struct 
     sindy_stls 
     sindy_lasso 
-    gpsindy 
     nn 
+    gpsindy 
 end 
 
 struct data_struct
