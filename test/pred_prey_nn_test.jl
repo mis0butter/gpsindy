@@ -8,13 +8,13 @@ fn = predator_prey
 # constants 
 λ = 0.1
 
-## ============================================ ##
+## ============================================ ## 
 
 # set up noise vec 
-noise_vec = []
-noise_vec_iter = 0.1:0.05:0.2 
+noise_vec      = []
+noise_vec_iter = 0.0 : 0.05 : 0.2 
 for i in noise_vec_iter
-    for j = 1:10 
+    for j = 1:5 
         push!(noise_vec, i)
     end
 end

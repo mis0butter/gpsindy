@@ -1,8 +1,12 @@
 using GaussianSINDy 
 
+
+## ============================================ ##
+
 # generate data 
 fn = unicycle 
 data_train, data_test = ode_train_test( fn ) 
+
 
 ## ============================================ ##
 # SINDy vs GPSINDy 
@@ -41,5 +45,8 @@ t_test = data_test.t
 # plot smoothed data and validation test data 
 
 plot_validation_test( t_test, data_test.x_true, x_unicycle_test, x_sindy_test, x_gpsindy_test ) 
+
+
+
 
 

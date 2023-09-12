@@ -2,6 +2,7 @@ using Statistics
 using CSV 
 using DataFrames 
 
+
 ## ============================================ ##
 # for cross-validation 
 
@@ -24,6 +25,30 @@ function λ_vec_fn(  )
     
     return λ_vec 
 end 
+
+
+## ============================================ ##
+
+export datastruct_to_train_test 
+function datastruct_to_train_test( data_train, data_test ) 
+
+    t_train        = data_train.t 
+    u_train        = data_train.u 
+    x_train_true   = data_train.x_true 
+    dx_train_true  = data_train.dx_true 
+    x_train_noise  = data_train.x_noise 
+    dx_train_noise = data_train.dx_noise 
+
+    t_test         = data_test.t 
+    u_test         = data_test.u 
+    x_test_true    = data_test.x_true 
+    dx_test_true   = data_test.dx_true 
+    x_test_noise   = data_test.x_noise 
+    dx_test_noise  = data_test.dx_noise 
+    
+    return t_train, u_train, x_train_true, dx_train_true, x_train_noise, dx_train_noise, t_test, u_test, x_test_true, dx_test_true, x_test_noise, dx_test_noise 
+end 
+
 
 ## ============================================ ##
 # extract Jake's car data, export as structs 

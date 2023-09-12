@@ -20,7 +20,8 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
     
     # SINDy (STLS) 
     λ = 0.1 
-    Ξ_sindy_stls  = sindy_stls( data_train.x_noise, data_train.dx_noise, λ, false, data_train.u ) 
+    # Ξ_sindy_stls  = sindy_stls( data_train.x_noise, data_train.dx_noise, λ, false, data_train.u ) 
+    Ξ_sindy_stls  = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, false, data_train.u ) 
     
     # build dx_fn from Ξ and integrate 
     x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_stls, x0_train_GP, x0_test_GP )
@@ -63,6 +64,26 @@ function gp_train_test( data_train, data_test )
     dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
     return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+end 
+
+
+
+## ============================================ ##
+# standardize data_train and data_test 
+
+export ode_stand_data 
+function ode_stand_data( data_train, fn, p, noise ) 
+
+    # ----------------------- # 
+    # standardize  
+    x_noise  = stand_data(data_train.t, data_train.x_noise)
+    x_true   = stand_data(data_train.t, data_train.x_true)
+    dx_true  = dx_true_fn(data_train.t, x_true, p, fn)
+    dx_noise = data_train.dx_true + noise * randn( size(dx_stand_true, 1), size(dx_stand_true, 2) )
+
+    data_train = data_struct( data_train.t, data_train.u, x_true, dx_true, x_noise, dx_noise ) 
+
+    return data_train 
 end 
 
 
@@ -202,30 +223,26 @@ function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train, plot_option = 0
     x_GP_train      = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
     dx_GP_train     = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
 
-    # run SINDy 
-    Ξ_sindy         = sindy_stls( x_train, dx_train, λ, u_train ) 
-    Ξ_sindy_terms   = pretty_coeffs( Ξ_sindy, x_train, u_train ) 
+    # run SINDy (STLS) 
+    Ξ_sindy_stls         = sindy_lasso( x_train, dx_train, λ, u_train ) 
+    Ξ_sindy_stls_terms   = pretty_coeffs( Ξ_sindy_stls, x_train, u_train ) 
+
+    # run SINDy (LASSO) 
+    Ξ_sindy_lasso       = sindy_lasso( x_train, dx_train, λ, u_train ) 
+    Ξ_sindy_lasso_terms = pretty_coeffs( Ξ_sindy_lasso, x_train, u_train ) 
 
     # run GPSINDy 
-    Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order ) 
+    # Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order ) 
     Ξ_gpsindy       = sindy_lasso( x_GP_train, dx_GP_train, λ, u_train ) 
     Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
-
-    # round 2 of GPSINDy  
-    dx_mean         = Θx_gpsindy * Ξ_gpsindy 
-    dx_post         = gp_post( x_GP_train, dx_mean, x_GP_train, dx_mean, dx_GP_train ) 
-    Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order )
-    Ξ_gpsindy_x2    = sindy_lasso( x_GP_train, dx_post, λ, u_train )
-    Ξ_gpsindy_x2_terms = pretty_coeffs( Ξ_gpsindy_x2, x_GP_train, u_train ) 
 
     # plot 
     if plot_option == 1 
         plot_fd_gp_train( t_train, dx_train, dx_GP_train )
-        plot_dx_mean( t_train, x_train, x_GP_train, u_train, dx_train, dx_GP_train, Ξ_sindy, Ξ_gpsindy, poly_order )     
+        plot_dx_mean( t_train, x_train, x_GP_train, u_train, dx_train, dx_GP_train, Ξ_sindy_stls, Ξ_gpsindy, poly_order )     
     end 
 
-    return Ξ_sindy, Ξ_gpsindy, Ξ_gpsindy_x2, Ξ_sindy_terms, Ξ_gpsindy_terms, Ξ_gpsindy_x2_terms 
-
+    return Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms  
 end 
 
 
@@ -447,9 +464,9 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
 
     # ----------------------- # 
     # standardize  
-    x_stand_noise = stand_data(t_train, x_train_noise)
-    x_stand_true = stand_data(t_train, x_train_true)
-    dx_stand_true = dx_true_fn(t_train, x_stand_true, p, fn)
+    x_stand_noise  = stand_data(t_train, x_train_noise)
+    x_stand_true   = stand_data(t_train, x_train_true)
+    dx_stand_true  = dx_true_fn(t_train, x_stand_true, p, fn)
     dx_stand_noise = dx_stand_true + noise * randn(size(dx_stand_true, 1), size(dx_stand_true, 2))
 
     # set training data for GPSINDy 

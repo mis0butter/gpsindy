@@ -20,21 +20,43 @@ end
 
 
 ## ============================================ ##
+# standardize data_train and data_test 
+
+export ode_stand_data 
+function ode_stand_data( data_train, fn, p, noise ) 
+
+    # ----------------------- # 
+    # standardize  
+    x_noise  = stand_data(data_train.t, data_train.x_noise)
+    x_true   = stand_data(data_train.t, data_train.x_true)
+    dx_true  = dx_true_fn(data_train.t, x_true, p, fn)
+    dx_noise = data_train.dx_true + noise * randn( size(dx_true, 1), size(dx_true, 2) )
+
+    data_train = data_struct( data_train.t, data_train.u, x_true, dx_true, x_noise, dx_noise ) 
+
+    return data_train 
+end 
+
+
+## ============================================ ##
 
 export ode_train_test 
-function ode_train_test( fn ) 
+function ode_train_test( fn, noise = 0.01, stand_data = false ) 
 
     x0, dt, t, x_true, dx_true, dx_fd, p, u = ode_states(fn, 0, 2) 
 
     # noise 
-    noise = 0.01 
     x_noise  = x_true + noise*randn( size(x_true, 1), size(x_true, 2) )
-    dx_noise = dx_true + noise*randn( size(dx_true, 1), size(dx_true, 2) )
-
+    dx_noise = dx_true + noise*randn( size(dx_true, 1), size(dx_true, 2) ) 
+    
     # split into training and test data 
     test_fraction = 0.2 
     portion       = 5 
-    u_train,        u_test        = split_train_test(u,        test_fraction, portion) 
+    if u == false 
+        u_train = false ; u_test  = false 
+    else 
+        u_train, u_test = split_train_test(u, test_fraction, portion) 
+    end 
     t_train,        t_test        = split_train_test(t,        test_fraction, portion) 
     x_train_true,   x_test_true   = split_train_test(x_true,   test_fraction, portion) 
     dx_train_true,  dx_test_true  = split_train_test(dx_true,  test_fraction, portion) 
@@ -43,6 +65,12 @@ function ode_train_test( fn )
 
     data_train = data_struct( t_train, u_train, x_train_true, dx_train_true, x_train_noise, dx_train_noise ) 
     data_test  = data_struct( t_test, u_test, x_test_true, dx_test_true, x_test_noise, dx_test_noise) 
+
+    # standardize data 
+    if stand_data == 1 
+        data_train = ode_stand_data( data_train, fn, p, noise ) 
+        data_test  = ode_stand_data( data_test, fn, p, noise ) 
+    end 
 
     return data_train, data_test 
 end 
