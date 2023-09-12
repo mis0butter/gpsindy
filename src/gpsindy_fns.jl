@@ -63,7 +63,7 @@ function x_Ξ_fn( data_train, data_test, data_train_stand )
     Ξ_true_stls_terms = pretty_coeffs( Ξ_true_stls, data_train.x_true, data_train.u ) 
     
     # SINDy and GPSINDy 
-    Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms = gpsindy_Ξ_fn( data_train_stand.t, data_train_stand.x_true, data_train_stand.dx_true, λ, data_train_stand.u ) 
+    Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms = gpsindy_Ξ_fn( data_train_stand.t, data_train_stand.x_noise, data_train_stand.dx_noise, λ, data_train_stand.u ) 
     
     # NN 
     Ξ_nn_lasso = nn_Ξ_fn( data_train.dx_noise, data_train.x_noise , λ, data_train.u ) 
@@ -102,13 +102,7 @@ end
 ## ============================================ ##
 
 export err_Ξ_x 
-function err_Ξ_x( x, Ξ ) 
-
-    x_true          = x.truth 
-    x_sindy_stls    = x.sindy_stls 
-    x_sindy_lasso   = x.sindy_lasso 
-    x_nn            = x.nn 
-    x_gpsindy       = x.gpsindy 
+function err_Ξ_x( Ξ, x, Ξ_err, x_err ) 
 
     Ξ_true          = Ξ.truth 
     Ξ_sindy_stls    = Ξ.sindy_stls 
@@ -116,6 +110,15 @@ function err_Ξ_x( x, Ξ )
     Ξ_nn_lasso      = Ξ.nn 
     Ξ_gpsindy       = Ξ.gpsindy 
 
+    x_true          = x.truth 
+    x_sindy_stls    = x.sindy_stls 
+    x_sindy_lasso   = x.sindy_lasso 
+    x_nn            = x.nn 
+    x_gpsindy       = x.gpsindy 
+
+    x_vars = size(x_true, 2) 
+
+    # x 
     x_sindy_stls_err = [] 
     for i = 1 : x_vars 
         push!( x_sindy_stls_err, norm( x_true[:,i] - x_sindy_stls[:,i] )  ) 
@@ -132,25 +135,32 @@ function err_Ξ_x( x, Ξ )
     for i = 1 : x_vars 
         push!( x_gpsindy_err, norm( x_true[:,i] - x_gpsindy[:,i] )  ) 
     end 
-    x_err = x_err_struct( x_sindy_stls_err, x_sindy_lasso_err, x_nn_err, x_gpsindy_err ) 
+    push!( x_err.sindy_stls, x_sindy_stls_err ) 
+    push!( x_err.sindy_lasso, x_sindy_lasso_err )
+    push!( x_err.nn, x_nn_err ) 
+    push!( x_err.gpsindy, x_gpsindy_err )
 
+    # Ξ 
     Ξ_sindy_stls_err = [] 
-    for i = 1 : n_vars 
+    for i = 1 : x_vars 
         push!( Ξ_sindy_stls_err, norm( Ξ_true[:,i] - Ξ_sindy_stls[:,i] )  ) 
     end 
     Ξ_sindy_lasso_err = [] 
-    for i = 1 : n_vars 
+    for i = 1 : x_vars 
         push!( Ξ_sindy_lasso_err, norm( Ξ_true[:,i] - Ξ_sindy_lasso[:,i] )  ) 
     end 
     Ξ_nn_err = [] 
-    for i = 1 : n_vars 
+    for i = 1 : x_vars 
         push!( Ξ_nn_err, norm( Ξ_true[:,i] - Ξ_nn_lasso[:,i] )  ) 
     end 
     Ξ_gpsindy_err = [] 
-    for i = 1 : n_vars 
+    for i = 1 : x_vars 
         push!( Ξ_gpsindy_err, norm( Ξ_true[:,i] - Ξ_gpsindy[:,i] )  ) 
     end 
-    Ξ_err = Ξ_err_struct( Ξ_sindy_stls_err, Ξ_sindy_lasso_err, Ξ_nn_err, Ξ_gpsindy_err ) 
+    push!( Ξ_err.sindy_stls, Ξ_sindy_stls_err ) 
+    push!( Ξ_err.sindy_lasso, Ξ_sindy_lasso_err ) 
+    push!( Ξ_err.nn, Ξ_nn_err ) 
+    push!( Ξ_err.gpsindy, Ξ_gpsindy_err ) 
 
     return Ξ_err, x_err 
 end 
@@ -545,15 +555,16 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
     dx_stand_noise = dx_stand_true + noise * randn(size(dx_stand_true, 1), size(dx_stand_true, 2))
 
     # set training data for GPSINDy 
-    x_train = x_stand_noise 
+    x_train  = x_stand_noise 
     dx_train = dx_stand_noise
 
     ## ============================================ ##
     # SINDy vs. GPSINDy vs. GPSINDy_x2 
 
     # SINDy by itself 
-    Θx_sindy = pool_data_test(x_train, n_vars, poly_order)
-    Ξ_sindy = sindy_stls(x_train, dx_train, λ)
+    # Θx_sindy = pool_data_test(x_train, n_vars, poly_order)
+    Ξ_sindy_stls  = sindy_stls(x_train, dx_train, λ)
+    Ξ_sindy_lasso = sindy_lasso(x_train, dx_train, λ)
 
     # ----------------------- #
     # GPSINDy (first) 
@@ -565,20 +576,20 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
     dx_train_GP = gp_post(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_train)
 
     # SINDy 
-    Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order)
-    Ξ_gpsindy = sindy_stls(x_train_GP, dx_train_GP, λ)
+    # Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order)
+    Ξ_gpsindy = sindy_lasso(x_train_GP, dx_train_GP, λ)
 
-    # ----------------------- #
-    # GPSINDy (second) 
+    # # ----------------------- #
+    # # GPSINDy (second) 
 
-    # step 2: GP 
-    dx_mean  = Θx_gpsindy * Ξ_gpsindy
-    dx_train = dx_stand_noise
-    dx_post  = gp_post(x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train)
+    # # step 2: GP 
+    # dx_mean  = Θx_gpsindy * Ξ_gpsindy
+    # dx_train = dx_stand_noise
+    # dx_post  = gp_post(x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train)
 
-    # step 3: SINDy 
-    Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order)
-    Ξ_gpsindy_x2 = sindy_stls(x_train_GP, dx_post, λ)
+    # # step 3: SINDy 
+    # Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order)
+    # Ξ_gpsindy_x2 = sindy_stls(x_train_GP, dx_post, λ)
 
 
     ## ============================================ ##
@@ -600,15 +611,17 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
 
     x_vars = size(x_true, 2)
     u_vars = 0
-    dx_sindy_fn      = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy)
+    dx_sindy_stls_fn  = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_stls)
+    dx_sindy_lasso_fn = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_lasso)
     dx_gpsindy_fn    = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy)
-    dx_gpsindy_x2_fn = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy_x2)
+    # dx_gpsindy_x2_fn = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy_x2)
     dx_nn_fn         = build_dx_fn(poly_order, x_vars, u_vars, Ξ_nn)
     
-    t_sindy_val, x_sindy_val           = validate_data(t_test, x_test_noise, dx_sindy_fn, dt)
+    t_sindy_val, x_sindy_stls_val = validate_data(t_test, x_test_noise, dx_sindy_stls_fn, dt)
+    t_sindy_val, x_sindy_lasso_val = validate_data(t_test, x_test_noise, dx_sindy_lasso_fn, dt)
     # t_sindy_val,      x_sindy_val      = validate_data(t_test, x_test, fn, dt) 
     t_gpsindy_val, x_gpsindy_val       = validate_data(t_test, x_test_noise, dx_gpsindy_fn, dt)
-    t_gpsindy_x2_val, x_gpsindy_x2_val = validate_data(t_test, x_test_noise, dx_gpsindy_x2_fn, dt)
+    # t_gpsindy_x2_val, x_gpsindy_x2_val = validate_data(t_test, x_test_noise, dx_gpsindy_x2_fn, dt)
     t_nn_val, x_nn_val                 = validate_data(t_test, x_test_noise, dx_nn_fn, dt) 
 
     # x_sindy_val       = integrate_euler( dx_sindy_fn, x_test_noise, t_test ) 
@@ -617,30 +630,32 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
     # x_nn_val          = integrate_euler( dx_nn_fn, x_test_noise, t_test ) 
 
     # plot!! 
-    if plot_option == 1 
+    # if plot_option == 1 
 
-        # plot_states(t_train, x_train_noise, t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
-        # plot_test_data(t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
+    #     # plot_states(t_train, x_train_noise, t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
+    #     # plot_test_data(t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
 
-        plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
-        plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
+    #     plot_states(t_train, x_train_noise, t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val)
+    #     plot_test_data(t_test, x_test_noise, t_test, x_sindy_val, t_test, x_gpsindy_val, t_test, x_gpsindy_x2_val, t_test, x_nn_val) 
 
-    end 
+    # end 
 
     # ----------------------- # 
     # save outputs  
 
     # save Ξ_hist 
     push!( Ξ_hist.truth,      Ξ_true ) 
-    push!( Ξ_hist.sindy,      Ξ_sindy ) 
+    push!( Ξ_hist.sindy_stls, Ξ_sindy_stls  ) 
+    push!( Ξ_hist.sindy_lasso, Ξ_sindy_lasso  ) 
     push!( Ξ_hist.gpsindy,    Ξ_gpsindy ) 
-    push!( Ξ_hist.gpsindy_x2, Ξ_gpsindy_x2 ) 
+    # push!( Ξ_hist.gpsindy_x2, Ξ_gpsindy_x2 ) 
     push!( Ξ_hist.nn,         Ξ_nn ) 
 
     # save Ξ_err_hist 
-    push!( Ξ_err_hist.sindy,      norm( Ξ_true - Ξ_sindy ) ) 
+    push!( Ξ_err_hist.sindy_stls, norm( Ξ_true - Ξ_sindy_stls ) ) 
+    push!( Ξ_err_hist.sindy_lasso, norm( Ξ_true - Ξ_sindy_lasso ) ) 
     push!( Ξ_err_hist.gpsindy,    norm( Ξ_true - Ξ_gpsindy ) ) 
-    push!( Ξ_err_hist.gpsindy_x2, norm( Ξ_true - Ξ_gpsindy_x2 ) ) 
+    # push!( Ξ_err_hist.gpsindy_x2, norm( Ξ_true - Ξ_gpsindy_x2 ) ) 
     push!( Ξ_err_hist.nn,         norm( Ξ_true - Ξ_nn ) ) 
 
     return Ξ_hist, Ξ_err_hist 

@@ -12,32 +12,33 @@ fn = predator_prey
 
 # set up noise vec 
 noise_vec      = []
-noise_vec_iter = 0.0 : 0.05 : 0.2 
+noise_vec_iter = 0.05 : 0.05 : 0.25 
 for i in noise_vec_iter
     for j = 1:5 
         push!(noise_vec, i)
     end
-end
+end 
 # noise_vec = [ 0.01 ] 
 
 # ----------------------- # 
 # start MC loop 
 
 Ξ_vec = []
-Ξ_hist = Ξ_struct([], [], [], [], [])
+Ξ_hist = Ξ_struct([], [], [], [], []) 
 Ξ_err_hist = Ξ_err_struct([], [], [], [])
 for noise = noise_vec 
     Ξ_hist, Ξ_err_hist = gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, 0 ) 
 end 
 
-# ----------------------- #
+## ============================================ ##
 # plot quartiles 
 
-Ξ_sindy_err      = Ξ_err_hist.sindy 
+Ξ_sindy_stls_err = Ξ_err_hist.sindy_stls
+Ξ_sindy_lasso_err = Ξ_err_hist.sindy_lasso 
+
 Ξ_gpsindy_err    = Ξ_err_hist.gpsindy 
-Ξ_gpsindy_x2_err = Ξ_err_hist.gpsindy_x2 
-Ξ_nn             = Ξ_err_hist.nn 
-plot_med_quarts_gpsindy_x2(Ξ_sindy_err, Ξ_gpsindy_err, Ξ_gpsindy_nn, noise_vec)
+Ξ_nn_err         = Ξ_err_hist.nn 
+plot_med_quarts_gpsindy_x2(Ξ_sindy_lasso_err, Ξ_gpsindy_err, Ξ_nn_err, noise_vec)
 
 
 ## ============================================ ##
@@ -46,7 +47,7 @@ plot_med_quarts_gpsindy_x2(Ξ_sindy_err, Ξ_gpsindy_err, Ξ_gpsindy_nn, noise_ve
 using JLD2
 
 timestamp = Dates.format(now(), "YYYYmmdd-HHMMSS")
-dir_name = joinpath(@__DIR__, "outputs", "runs_$timestamp")
+dir_name  = joinpath(@__DIR__, "outputs", "runs_$timestamp")
 @assert !ispath(dir_name) "Somebody else already created the directory"
 if !ispath(dir_name)
     mkdir(dir_name)
