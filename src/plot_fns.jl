@@ -598,10 +598,10 @@ function plot_med_quarts_sindy_nn_gpsindy(sindy_err_vec, nnsindy_err_vec, gpsind
         gpsq13 = []
         nnsq13 = []
         for j = 1:n_vars
-            push!(smed, median(sindy_err_vec[ji:jf, j]))
+            push!(smed,   median(sindy_err_vec[ji:jf, j]))
             push!(gpsmed, median(gpsindy_err_vec[ji:jf, j]))
             push!(nnsmed, median(nnsindy_err_vec[ji:jf, j]))
-            push!(sq13, [quantile(sindy_err_vec[ji:jf, j], 0.25), quantile(sindy_err_vec[ji:jf, j], 0.75)])
+            push!(sq13,   [quantile(sindy_err_vec[ji:jf, j], 0.25), quantile(sindy_err_vec[ji:jf, j], 0.75)])
             push!(gpsq13, [quantile(gpsindy_err_vec[ji:jf, j], 0.25), quantile(gpsindy_err_vec[ji:jf, j], 0.75)])
             push!(nnsq13, [quantile(nnsindy_err_vec[ji:jf, j], 0.25), quantile(nnsindy_err_vec[ji:jf, j], 0.75)])
         end

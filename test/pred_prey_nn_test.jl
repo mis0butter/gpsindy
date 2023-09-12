@@ -1,20 +1,16 @@
 using GaussianSINDy
-# using Flux
-# using LineSearches 
+using CSV, DataFrames 
 
 # choose ODE, plot states --> measurements 
-fn = unicycle 
-
-# constants 
-λ = 0.1
+fn = predator_prey
 
 ## ============================================ ## 
 
 # set up noise vec 
 noise_vec      = []
-noise_vec_iter = 0.05 : 0.05 : 0.1 
+noise_vec_iter = 0.05 : 0.05 : 0.25  
 for i in noise_vec_iter
-    for j = 1:3 
+    for j = 1:5 
         push!(noise_vec, i)
     end
 end 
@@ -48,10 +44,12 @@ x_nn_err          = x_err_hist.nn
 
 # plot_med_quarts_sindy_nn_gpsindy(x_sindy_lasso_err, x_gpsindy_err, x_nn_err, noise_vec)
 
-
-
-
-
+# ----------------------- #
+# save outputs as csv 
+data   = [ noise_vec Ξ_sindy_lasso_err Ξ_gpsindy_err Ξ_nn_err x_sindy_lasso_err x_gpsindy_err x_nn_err ]
+header = [ "noise_vec", "Ξ_sindy_err", "Ξ_gpsindy_err", "Ξ_nn_err", "x_sindy_err", "x_gpsindy_err", "x_nn_err" ] 
+df     = DataFrame( data,  :auto ) 
+CSV.write(string(string(fn), ".csv"), df, header=header)
 
 
 
