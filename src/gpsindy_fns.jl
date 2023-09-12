@@ -522,8 +522,8 @@ end
 ## ============================================ ##
 # compare sindy, gpsindy, and gpsindy_gpsindy 
 
-export gpsindy_x2
-function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option ) 
+export sindy_nn_gpsindy
+function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option ) 
     
     # generate true states 
     x0, dt, t, x_true, dx_true, dx_fd, p = ode_states(fn, 0, 2)
@@ -613,7 +613,7 @@ function gpsindy_x2( fn, noise, λ, Ξ_hist, Ξ_err_hist, plot_option )
     u_vars = 0
     dx_sindy_stls_fn  = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_stls)
     dx_sindy_lasso_fn = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_lasso)
-    dx_gpsindy_fn    = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy)
+    dx_gpsindy_fn     = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy)
     # dx_gpsindy_x2_fn = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy_x2)
     dx_nn_fn         = build_dx_fn(poly_order, x_vars, u_vars, Ξ_nn)
     
