@@ -188,7 +188,6 @@ function nn_Ξ_fn( dx_noise, x_noise, λ )
 end 
 
 
-
 ## ============================================ ##
 
 export gpsindy_Ξ_fn
