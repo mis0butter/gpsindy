@@ -90,6 +90,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     push!( Ξ_hist.nn,          Ξ_nn_lasso ) 
 
     # save x_hist 
+    push!( x_hist.t,            t_test ) 
     push!( x_hist.truth,        x_test_true ) 
     push!( x_hist.sindy_stls,   x_sindy_stls_test  ) 
     push!( x_hist.sindy_lasso,  x_sindy_lasso_test  ) 
@@ -131,10 +132,11 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
     # SINDy (STLS) 
     λ = 0.1 
     # Ξ_sindy_stls  = sindy_stls( data_train.x_noise, data_train.dx_noise, λ, false, data_train.u ) 
-    Ξ_sindy_stls  = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, false, data_train.u ) 
+    Ξ_sindy_lasso  = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
+    # Ξ_sindy_lasso = sindy_lasso(x_train, dx_train, λ, u_train)
     
     # build dx_fn from Ξ and integrate 
-    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_stls, x0_train_GP, x0_test_GP )
+    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test_GP )
     
     # cross-validate !!!  
     λ_vec = λ_vec_fn() 
@@ -157,7 +159,7 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
 
     end 
 
-    return Ξ_sindy_stls, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy
+    return Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy
 end 
 
 
@@ -203,7 +205,7 @@ function x_Ξ_fn( data_train, data_test, data_train_stand )
     
     # save outputs 
     Ξ = Ξ_struct( Ξ_true_stls, Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_nn_lasso, Ξ_gpsindy ) 
-    x = x_struct( data_test.x_true, x_sindy_stls_test, x_sindy_lasso_test, x_nn_test, x_gpsindy_test )  
+    x = x_struct( data_test.t, data_test.x_true, x_sindy_stls_test, x_sindy_lasso_test, x_nn_test, x_gpsindy_test )  
     
     return x, Ξ 
 end 
@@ -359,7 +361,7 @@ function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train, λ_vec )
             println( "x", j, ": λ = ", λ ) 
     
             # GPSINDy-lasso ! 
-            Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, poly_order, u_train ) 
+            Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
             dx_gpsindy = Θx_gp * Ξ_gpsindy 
     
             if sum(Ξ_gpsindy[:,j]) == 0 

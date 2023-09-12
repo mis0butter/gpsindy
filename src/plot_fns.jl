@@ -2,6 +2,74 @@ using Plots
 using StatsPlots
 using Statistics 
 using Latexify 
+## ============================================ ##
+# plot 
+
+export plot_x_sindy_nn_gpsindy 
+function plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy_lasso, x_nn, x_gpsindy_stls)  
+    
+    xmin, dx, xmax = min_d_max(t_test)
+    
+    x_vars = size(x_test, 2) 
+    p_vec = [] 
+    for i = 1 : x_vars 
+    
+        ymin, dy, ymax = min_d_max( x_test[:, i] )
+    
+        p = plot( t_test, x_test[:,i], 
+            c       = :gray, 
+            label   = "test", 
+            legend  = :outerright, 
+            xlabel  = "Time (s)", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ylim    = (ymin, ymax), 
+            title   = string(latexify("x_$(i)")),
+        ) 
+        plot!( p, t_test, x_sindy_lasso[:,i], 
+            c       = :red, 
+            label   = "SINDy (LASSO)", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ls      = :dashdot, 
+        ) 
+        plot!( p, t_test, x_nn[:,i], 
+            c       = :blue, 
+            label   = "NN (LASSO)", 
+            xticks  = xmin:dx:xmax,
+            yticks  = ymin:dy:ymax,
+            ls      = :dashdot, 
+        ) 
+        plot!( p, t_test, x_gpsindy_stls[:,i], 
+            # c       = :blue, 
+            label   = "GPSINDy (LASSO)", 
+            xticks  = xmin:dx:xmax,
+            yticks = ymin:dy:ymax,
+            ls      = :dot, 
+        )
+        push!( p_vec, p ) 
+    
+    end 
+    
+    # p = deepcopy( p_vec[end] ) 
+    # plot!( p, 
+    #     legend = ( -0.1, 0.6 ), 
+    #     framestyle = :none, 
+    #     title = "",      
+    # )  
+    # push!( p_vec, p ) 
+    
+    pfig = plot(  p_vec ... , 
+        layout = grid( x_vars, 1 ), 
+        size   = [ 600 x_vars * 400 ],         
+        margin = 5Plots.mm,
+        bottom_margin = 14Plots.mm,
+    )
+    
+    display(pfig)     
+
+end 
+
 
 ## ============================================ ##
 # plot noise, GP, SINDy, GPSINDy 

@@ -35,6 +35,7 @@ struct Ξ_err_struct
 end 
 
 struct x_struct 
+    t 
     truth 
     sindy_stls 
     sindy_lasso 
