@@ -1,5 +1,5 @@
 using GaussianSINDy
-using Flux
+# using Flux
 # using LineSearches 
 
 # choose ODE, plot states --> measurements 
@@ -14,7 +14,7 @@ fn = predator_prey
 noise_vec      = []
 noise_vec_iter = 0.05 : 0.05 : 0.25 
 for i in noise_vec_iter
-    for j = 1:2 
+    for j = 1:3 
         push!(noise_vec, i)
     end
 end 
@@ -23,22 +23,41 @@ end
 # ----------------------- # 
 # start MC loop 
 
-Ξ_vec = []
-Ξ_hist = Ξ_struct([], [], [], [], []) 
+x_hist     = x_struct( [], [], [], [], [] ) 
+x_err_hist = x_err_struct([], [], [], [])
+Ξ_hist     = Ξ_struct([], [], [], [], []) 
 Ξ_err_hist = Ξ_err_struct([], [], [], [])
 for noise = noise_vec 
-    Ξ_hist, Ξ_err_hist = sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, 0 ) 
+    Ξ_hist, Ξ_err_hist, x_hist, x_err_hist = sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hist ) 
 end 
 
-## ============================================ ##
+# ----------------------- #
 # plot quartiles 
 
-Ξ_sindy_stls_err = Ξ_err_hist.sindy_stls
+Ξ_sindy_stls_err  = Ξ_err_hist.sindy_stls
 Ξ_sindy_lasso_err = Ξ_err_hist.sindy_lasso 
+Ξ_gpsindy_err     = Ξ_err_hist.gpsindy 
+Ξ_nn_err          = Ξ_err_hist.nn 
 
-Ξ_gpsindy_err    = Ξ_err_hist.gpsindy 
-Ξ_nn_err         = Ξ_err_hist.nn 
 plot_med_quarts_gpsindy_x2(Ξ_sindy_lasso_err, Ξ_gpsindy_err, Ξ_nn_err, noise_vec)
+
+x_sindy_stls_err  = x_err_hist.sindy_stls
+x_sindy_lasso_err = x_err_hist.sindy_lasso 
+x_gpsindy_err     = x_err_hist.gpsindy 
+x_nn_err          = x_err_hist.nn 
+
+# plot_med_quarts_gpsindy_x2(x_sindy_lasso_err, x_gpsindy_err, x_nn_err, noise_vec)
+
+
+
+
+
+
+
+
+
+
+
 
 
 # ## ============================================ ##
