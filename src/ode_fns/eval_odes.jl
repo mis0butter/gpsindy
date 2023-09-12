@@ -69,7 +69,7 @@ function ode_train_test( fn, noise = 0.01, stand_data = false )
     # standardize data 
     if stand_data == 1 
         data_train = ode_stand_data( data_train, fn, p, noise ) 
-        data_test  = ode_stand_data( data_test, fn, p, noise ) 
+        # data_test  = ode_stand_data( data_test, fn, p, noise ) 
     end 
 
     return data_train, data_test 

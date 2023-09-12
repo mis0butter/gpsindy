@@ -67,26 +67,6 @@ function gp_train_test( data_train, data_test )
 end 
 
 
-
-## ============================================ ##
-# standardize data_train and data_test 
-
-export ode_stand_data 
-function ode_stand_data( data_train, fn, p, noise ) 
-
-    # ----------------------- # 
-    # standardize  
-    x_noise  = stand_data(data_train.t, data_train.x_noise)
-    x_true   = stand_data(data_train.t, data_train.x_true)
-    dx_true  = dx_true_fn(data_train.t, x_true, p, fn)
-    dx_noise = data_train.dx_true + noise * randn( size(dx_stand_true, 1), size(dx_stand_true, 2) )
-
-    data_train = data_struct( data_train.t, data_train.u, x_true, dx_true, x_noise, dx_noise ) 
-
-    return data_train 
-end 
-
-
 ## ============================================ ##
 # return Ξ with minimum x error 
 
@@ -118,30 +98,6 @@ function Ξ_minerr( Ξ_gpsindy_vec, err_x_vec )
     end     
 
     return Ξ_gpsindy_minerr 
-end 
-
-
-## ============================================ ##
-# for cross-validation 
-
-export λ_vec_fn 
-function λ_vec_fn(  ) 
-
-    λ_vec = [ 1e-6 ] 
-    while λ_vec[end] < 1e-1 
-        push!( λ_vec, 10 * λ_vec[end] ) 
-    end 
-    while λ_vec[end] < 1.0  
-        push!( λ_vec, 0.1 + λ_vec[end] ) 
-    end 
-    while λ_vec[end] < 10 
-        push!( λ_vec, 1.0 + λ_vec[end] ) 
-    end 
-    while λ_vec[end] < 100 
-        push!( λ_vec, 10.0 + λ_vec[end] ) 
-    end
-    
-    return λ_vec 
 end 
 
 
@@ -214,33 +170,26 @@ end
 ## ============================================ ##
 
 export gpsindy_Ξ_fn
-function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train, plot_option = 0 ) 
+function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train ) 
 
     # get sizes 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train, u_train ) 
 
     # GP smooth data 
-    x_GP_train      = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
-    dx_GP_train     = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
+    x_GP_train  = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+    dx_GP_train = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
 
     # run SINDy (STLS) 
-    Ξ_sindy_stls         = sindy_lasso( x_train, dx_train, λ, u_train ) 
-    Ξ_sindy_stls_terms   = pretty_coeffs( Ξ_sindy_stls, x_train, u_train ) 
+    Ξ_sindy_stls       = sindy_lasso( x_train, dx_train, λ, u_train ) 
+    Ξ_sindy_stls_terms = pretty_coeffs( Ξ_sindy_stls, x_train, u_train ) 
 
     # run SINDy (LASSO) 
     Ξ_sindy_lasso       = sindy_lasso( x_train, dx_train, λ, u_train ) 
     Ξ_sindy_lasso_terms = pretty_coeffs( Ξ_sindy_lasso, x_train, u_train ) 
 
     # run GPSINDy 
-    # Θx_gpsindy      = pool_data_test( [ x_GP_train u_train ], n_vars, poly_order ) 
     Ξ_gpsindy       = sindy_lasso( x_GP_train, dx_GP_train, λ, u_train ) 
     Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_GP_train, u_train ) 
-
-    # plot 
-    if plot_option == 1 
-        plot_fd_gp_train( t_train, dx_train, dx_GP_train )
-        plot_dx_mean( t_train, x_train, x_GP_train, u_train, dx_train, dx_GP_train, Ξ_sindy_stls, Ξ_gpsindy, poly_order )     
-    end 
 
     return Ξ_sindy_stls, Ξ_sindy_lasso, Ξ_gpsindy, Ξ_sindy_stls_terms, Ξ_sindy_lasso_terms, Ξ_gpsindy_terms  
 end 
