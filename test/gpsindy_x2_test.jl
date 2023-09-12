@@ -136,7 +136,7 @@ plot_test_data( t_test, x_test_noise, t_sindy_val, x_sindy_val, t_gpsindy_val, x
 Ξ_sindy_err = Ξ_err_hist.sindy ; 
 Ξ_gpsindy_err = Ξ_err_hist.gpsindy ; 
 Ξ_gpsindy_x2_err = Ξ_err_hist.gpsindy_x2 ; 
-plot_med_quarts_gpsindy_x2( Ξ_sindy_err, Ξ_gpsindy_err, Ξ_gpsindy_x2_err, noise_vec ) 
+plot_med_quarts_sindy_nn_gpsindy( Ξ_sindy_err, Ξ_gpsindy_err, Ξ_gpsindy_x2_err, noise_vec ) 
 
 
 ## ============================================ ##

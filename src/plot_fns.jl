@@ -573,8 +573,8 @@ end
 ## ============================================ ##
 
 
-export plot_med_quarts_gpsindy_x2
-function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, nnsindy_err_vec, noise_vec)
+export plot_med_quarts_sindy_nn_gpsindy
+function plot_med_quarts_sindy_nn_gpsindy(sindy_err_vec, nnsindy_err_vec, gpsindy_err_vec, noise_vec)
 
     n_vars = size(sindy_err_vec, 2)
     unique_i = unique(i -> noise_vec[i], 1:length(noise_vec))
@@ -632,17 +632,17 @@ function plot_med_quarts_gpsindy_x2(sindy_err_vec, gpsindy_err_vec, nnsindy_err_
         plot!(plt, noise_vec_iter, ymed, c=:green, ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.35)
         scatter!(plt, noise_vec, sindy_err_vec[:, i], c=:green, markerstrokewidth=0, ms=3, markeralpha=0.35, label="SINDy")
 
-        # gpsindy 
-        ymed = gpsindy_med[:, i]
-        yq13 = vv2m(gpsindy_q13[:, i])
-        plot!(plt, noise_vec_iter, ymed, c=:orange, ls=:dash, ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.3)
-        scatter!(plt, noise_vec, gpsindy_err_vec[:, i], c=:orange, markerstrokewidth=0, ms=3, markeralpha=0.35, label="GPSINDy")
-
         # gpsindy_gpsindy
         ymed = nnsindy_med[:, i]
         yq13 = vv2m(nnsindy_q13[:, i])
         plot!(plt, noise_vec_iter, ymed, c=:cyan, ls=:dashdot, ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.25)
         scatter!(plt, noise_vec, nnsindy_err_vec[:, i], c=:cyan, markerstrokewidth=0, ms=3, markeralpha=0.35, label="NNSINDy")
+
+        # gpsindy 
+        ymed = gpsindy_med[:, i]
+        yq13 = vv2m(gpsindy_q13[:, i])
+        plot!(plt, noise_vec_iter, ymed, c=:orange, ls=:dash, ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.3)
+        scatter!(plt, noise_vec, gpsindy_err_vec[:, i], c=:orange, markerstrokewidth=0, ms=3, markeralpha=0.35, label="GPSINDy")
 
         push!(p_nvars, plt)
     end

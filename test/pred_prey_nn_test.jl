@@ -39,14 +39,14 @@ end
 Ξ_gpsindy_err     = Ξ_err_hist.gpsindy 
 Ξ_nn_err          = Ξ_err_hist.nn 
 
-plot_med_quarts_gpsindy_x2(Ξ_sindy_lasso_err, Ξ_gpsindy_err, Ξ_nn_err, noise_vec)
+plot_med_quarts_sindy_nn_gpsindy(Ξ_sindy_lasso_err, Ξ_nn_err, Ξ_gpsindy_err, noise_vec)
 
 x_sindy_stls_err  = x_err_hist.sindy_stls
 x_sindy_lasso_err = x_err_hist.sindy_lasso 
 x_gpsindy_err     = x_err_hist.gpsindy 
 x_nn_err          = x_err_hist.nn 
 
-# plot_med_quarts_gpsindy_x2(x_sindy_lasso_err, x_gpsindy_err, x_nn_err, noise_vec)
+# plot_med_quarts_sindy_nn_gpsindy(x_sindy_lasso_err, x_gpsindy_err, x_nn_err, noise_vec)
 
 
 
