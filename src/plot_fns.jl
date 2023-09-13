@@ -15,7 +15,6 @@ function plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy_lasso, x_nn, x_gpsindy
     for i = 1 : x_vars 
     
         ymin, dy, ymax = min_d_max( x_test[:, i] )
-    
         p = plot( t_test, x_test[:,i], 
             c       = :gray, 
             label   = "test", 

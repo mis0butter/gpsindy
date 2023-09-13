@@ -2,11 +2,11 @@ using GaussianSINDy
 using CSV, DataFrames 
 
 # choose ODE, plot states --> measurements 
-fn = predator_prey 
+fn = unicycle 
 
 # set up noise vec 
 noise_vec      = []
-noise_vec_iter = 0.05 : 0.05 : 0.25  
+noise_vec_iter = 0.01 : 0.01 : 0.05  
 for i in noise_vec_iter
     for j = 1:5 
         push!(noise_vec, i)
@@ -14,9 +14,10 @@ for i in noise_vec_iter
 end 
 # noise_vec = [ 0.01 ] 
 
-# ----------------------- # 
+## ============================================ ##
 # start MC loop 
 
+λ = 0.1 
 x_test_hist = x_struct( [], [], [], [], [], [] ) 
 x_err_hist  = x_err_struct([], [], [], [])
 Ξ_hist      = Ξ_struct([], [], [], [], []) 
@@ -55,7 +56,7 @@ CSV.write(string(string(fn), "_batch.csv"), df, header=header)
 
 fn = unicycle 
 
-noise = 0.01 
+noise = 0.0 
 λ = 0.1 
 x_test_hist = x_struct( [], [], [], [], [], [] ) 
 x_err_hist  = x_err_struct([], [], [], [])

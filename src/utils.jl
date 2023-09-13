@@ -225,6 +225,10 @@ function min_d_max( x )
     # dx   = round( ( xmax - xmin ) / 2, digits = 1 ) 
     dx = ( xmax - xmin ) / 2 
 
+    if dx == 0 
+        dx = 1 
+    end 
+
     return xmin, dx, xmax  
 
 end 
