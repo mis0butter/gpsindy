@@ -7,7 +7,11 @@ fn = predator_prey
 
 # set up noise vec 
 noise_vec      = []
-noise_vec_iter = 0.01 : 0.01 : 0.05  
+if fn == unicycle 
+    noise_vec_iter = 0.01 : 0.01 : 0.05  
+elseif fn == predator_prey  
+    noise_vec_iter = 0.05 : 0.05 : 0.25  
+end 
 for i in noise_vec_iter
     for j = 1:5 
         push!(noise_vec, i)
@@ -20,9 +24,9 @@ end
 
 λ = 0.1 
 x_test_hist = x_struct( [], [], [], [], [], [] ) 
-x_err_hist  = x_err_struct([], [], [], [])
-Ξ_hist      = Ξ_struct([], [], [], [], []) 
-Ξ_err_hist  = Ξ_err_struct([], [], [], [])
+x_err_hist  = x_err_struct( [], [], [], [] )
+Ξ_hist      = Ξ_struct( [], [], [], [], [] ) 
+Ξ_err_hist  = Ξ_err_struct( [], [], [], [] )
 for noise = noise_vec 
     Ξ_hist, Ξ_err_hist, x_hist, x_err_hist = sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_test_hist, x_err_hist ) 
 end 

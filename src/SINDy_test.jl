@@ -579,7 +579,7 @@ function pretty_coeffs(Ξ_true, x_true, u = false)
     n_vars = size(x_true, 2) 
     inds = [] 
     for i = 1 : n_vars 
-        ind  = findall( x -> x > 0, Ξ_true[:,i] ) 
+        ind  = findall( x -> abs(x) > 0, Ξ_true[:,i] ) 
         inds = [ inds ; ind ]
     end 
     inds = sort(unique(inds)) 

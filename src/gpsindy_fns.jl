@@ -21,6 +21,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
 
     # truth coeffs 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_true, u ) 
+    Ξ_true = sindy_stls(x_true, dx_true, λ, u)
 
     # add noise 
     println("noise = ", noise)
@@ -50,8 +51,6 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     ## ============================================ ##
     # SINDy vs. NN vs. GPSINDy 
 
-    Ξ_true = sindy_stls(x_stand_true, dx_stand_true, λ )
-
     # SINDy by itself 
     Ξ_sindy_stls  = sindy_stls(x_train, dx_train, λ, u_train)
     Ξ_sindy_lasso = sindy_lasso(x_train, dx_train, λ, u_train)
@@ -75,45 +74,46 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     dx_fn_nn          = build_dx_fn(poly_order, x_vars, u_vars, Ξ_nn_lasso)
     
     # # integrate !! 
-    # x0 = x_test_true[1,:] 
-    # x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t_test, u_test ) 
-    # x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t_test, u_test ) 
-    # x_nn_test          = integrate_euler( dx_fn_nn, x0, t_test, u_test ) 
-    # x_gpsindy_test     = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
+    x0 = x_test_true[1,:] 
+    x_true             = integrate_euler( dx_fn_true, x0, t_test, u_test )
+    x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t_test, u_test ) 
+    x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t_test, u_test ) 
+    x_nn_test          = integrate_euler( dx_fn_nn, x0, t_test, u_test ) 
+    x_gpsindy_test     = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
     
-    # COMMENT OUT / DELETE THIS 
-    x0 = x_train_true[1,:] 
-    x_true             = integrate_euler( dx_fn_true, x0, t, u )
-    x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t, u ) 
-    x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t, u ) 
-    x_nn_test          = integrate_euler( dx_fn_nn, x0, t, u ) 
-    x_gpsindy_test     = integrate_euler( dx_fn_gpsindy, x0, t, u ) 
+    # # COMMENT OUT / DELETE THIS 
+    # x0 = x_train_true[1,:] 
+    # x_true             = integrate_euler( dx_fn_true, x0, t, u )
+    # x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t, u ) 
+    # x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t, u ) 
+    # x_nn_test          = integrate_euler( dx_fn_nn, x0, t, u ) 
+    # x_gpsindy_test     = integrate_euler( dx_fn_gpsindy, x0, t, u ) 
 
     # ----------------------- # 
     # save outputs  
 
     # save Ξ_hist 
     push!( Ξ_hist.truth,       Ξ_true ) 
-    push!( Ξ_hist.sindy_stls,  Ξ_sindy_stls  ) 
-    push!( Ξ_hist.sindy_lasso, Ξ_sindy_lasso  ) 
+    push!( Ξ_hist.sindy_stls,  Ξ_sindy_stls ) 
+    push!( Ξ_hist.sindy_lasso, Ξ_sindy_lasso ) 
     push!( Ξ_hist.gpsindy,     Ξ_gpsindy ) 
     push!( Ξ_hist.nn,          Ξ_nn_lasso ) 
 
-    # # save x_hist 
-    # push!( x_hist.t,            t_test ) 
-    # push!( x_hist.truth,        x_test_true ) 
-    # push!( x_hist.sindy_stls,   x_sindy_stls_test  ) 
-    # push!( x_hist.sindy_lasso,  x_sindy_lasso_test  ) 
-    # push!( x_hist.gpsindy,      x_gpsindy_test ) 
-    # push!( x_hist.nn,           x_nn_test ) 
-
-    # COMMENT OUT / DELETE 
-    push!( x_hist.t,            t ) 
-    push!( x_hist.truth,        x_true) 
+    # save x_hist 
+    push!( x_hist.t,            t_test ) 
+    push!( x_hist.truth,        x_test_true ) 
     push!( x_hist.sindy_stls,   x_sindy_stls_test  ) 
     push!( x_hist.sindy_lasso,  x_sindy_lasso_test  ) 
     push!( x_hist.gpsindy,      x_gpsindy_test ) 
     push!( x_hist.nn,           x_nn_test ) 
+
+    # # COMMENT OUT / DELETE 
+    # push!( x_hist.t,            t ) 
+    # push!( x_hist.truth,        x_true) 
+    # push!( x_hist.sindy_stls,   x_sindy_stls_test  ) 
+    # push!( x_hist.sindy_lasso,  x_sindy_lasso_test  ) 
+    # push!( x_hist.gpsindy,      x_gpsindy_test ) 
+    # push!( x_hist.nn,           x_nn_test ) 
 
     # save Ξ_err_hist 
     push!( Ξ_err_hist.sindy_stls,  norm( Ξ_true - Ξ_sindy_stls ) ) 
@@ -121,17 +121,17 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     push!( Ξ_err_hist.gpsindy,     norm( Ξ_true - Ξ_gpsindy ) ) 
     push!( Ξ_err_hist.nn,          norm( Ξ_true - Ξ_nn_lasso ) ) 
 
-    # # save Ξ_err_hist 
-    # push!( x_err_hist.sindy_stls,  norm( x_test_true - x_sindy_stls_test ) ) 
-    # push!( x_err_hist.sindy_lasso, norm( x_test_true - x_sindy_lasso_test ) ) 
-    # push!( x_err_hist.gpsindy,     norm( x_test_true - x_gpsindy_test ) ) 
-    # push!( x_err_hist.nn,          norm( x_test_true - x_nn_test ) ) 
+    # save Ξ_err_hist 
+    push!( x_err_hist.sindy_stls,  norm( x_test_true - x_sindy_stls_test ) ) 
+    push!( x_err_hist.sindy_lasso, norm( x_test_true - x_sindy_lasso_test ) ) 
+    push!( x_err_hist.gpsindy,     norm( x_test_true - x_gpsindy_test ) ) 
+    push!( x_err_hist.nn,          norm( x_test_true - x_nn_test ) ) 
 
-        # COMMENT OUT / DELETE 
-        push!( x_err_hist.sindy_stls,  norm( x_true - x_sindy_stls_test ) ) 
-        push!( x_err_hist.sindy_lasso, norm( x_true - x_sindy_lasso_test ) ) 
-        push!( x_err_hist.gpsindy,     norm( x_true - x_gpsindy_test ) ) 
-        push!( x_err_hist.nn,          norm( x_true - x_nn_test ) ) 
+    # # COMMENT OUT / DELETE 
+    # push!( x_err_hist.sindy_stls,  norm( x_true - x_sindy_stls_test ) ) 
+    # push!( x_err_hist.sindy_lasso, norm( x_true - x_sindy_lasso_test ) ) 
+    # push!( x_err_hist.gpsindy,     norm( x_true - x_gpsindy_test ) ) 
+    # push!( x_err_hist.nn,          norm( x_true - x_nn_test ) ) 
     
     return Ξ_hist, Ξ_err_hist, x_hist, x_err_hist
 
