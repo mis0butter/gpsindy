@@ -2,8 +2,8 @@ using GaussianSINDy
 using CSV, DataFrames 
 
 # single run 
-# fn = unicycle 
-fn = predator_prey 
+fn = unicycle 
+# fn = predator_prey 
 
 noise = 0.01 
 λ = 0.1 
@@ -13,13 +13,12 @@ x_err_hist  = x_err_struct( [], [], [], [] )
 Ξ_err_hist  = Ξ_err_struct( [], [], [], [] )
 Ξ_hist, Ξ_err_hist, x_hist, x_err_hist = sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_test_hist, x_err_hist ) 
 
-x_true = x_hist.truth[1] 
-x_sindy = x_hist.sindy_lasso[1] 
-x_nn = x_hist.nn[1] 
-x_gpsindy = x_hist.gpsindy[1] 
-
-t_test = x_hist.t[1] 
-x_test = x_hist.truth[1] 
+x_true      = x_hist.truth[1] 
+x_sindy     = x_hist.sindy_lasso[1] 
+x_nn        = x_hist.nn[1] 
+x_gpsindy   = x_hist.gpsindy[1] 
+t_test      = x_hist.t[1] 
+x_test      = x_hist.truth[1] 
 plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy, x_nn, x_gpsindy)  
 
 # check coeffs 
@@ -31,7 +30,9 @@ if fn == unicycle
 elseif fn == predator_prey 
     u_temp = false 
 end 
-Ξ_true_terms = pretty_coeffs( Ξ_true, x_true, u_temp )
+Ξ_true_terms    = pretty_coeffs( Ξ_true, x_true, u_temp )
+Ξ_sindy_terms   = pretty_coeffs( Ξ_sindy, x_true, u_temp )
+Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_true, u_temp )
 
 
 # ## ============================================ ##
