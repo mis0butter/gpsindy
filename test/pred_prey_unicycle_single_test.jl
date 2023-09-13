@@ -5,7 +5,7 @@ using CSV, DataFrames
 fn = unicycle 
 # fn = predator_prey 
 
-noise = 0.01 
+noise = 0.005
 λ = 0.1 
 x_test_hist = x_struct( [], [], [], [], [], [] ) 
 x_err_hist  = x_err_struct( [], [], [], [] )
@@ -21,7 +21,9 @@ t_test      = x_hist.t[1]
 x_test      = x_hist.truth[1] 
 plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy, x_nn, x_gpsindy)  
 
+# ----------------------- #
 # check coeffs 
+
 Ξ_true    = Ξ_hist.truth[1] 
 Ξ_sindy   = Ξ_hist.sindy_lasso[1] 
 Ξ_gpsindy = Ξ_hist.gpsindy[1] 

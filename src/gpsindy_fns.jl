@@ -75,7 +75,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     
     # # integrate !! 
     x0 = x_test_true[1,:] 
-    x_true             = integrate_euler( dx_fn_true, x0, t_test, u_test )
+    x_test_true        = integrate_euler( dx_fn_true, x0, t_test, u_test )
     x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t_test, u_test ) 
     x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t_test, u_test ) 
     x_nn_test          = integrate_euler( dx_fn_nn, x0, t_test, u_test ) 
