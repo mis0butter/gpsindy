@@ -13,7 +13,7 @@ elseif fn == predator_prey
     noise_vec_iter = 0.05 : 0.05 : 0.25  
 end 
 for i in noise_vec_iter
-    for j = 1:5 
+    for j = 1 : 5 
         push!(noise_vec, i)
     end
 end 
