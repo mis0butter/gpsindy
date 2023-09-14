@@ -50,5 +50,10 @@ df     = DataFrame( data,  :auto )
 CSV.write(string("car_hw_single", ".csv"), df, header=header)
 
 
-
+## ============================================ ##
+data_noise = [ t_test x_test_noise ] 
+header     = [ "t", "x1_test", "x2_test", "x3_test", "x4_test" ]
+data       = [ t_test x_test_noise ]  
+df         = DataFrame( data,  :auto ) 
+CSV.write(string("car_hw_single_test_data", ".csv"), df, header=header)
 

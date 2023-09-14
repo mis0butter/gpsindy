@@ -27,6 +27,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     println("noise = ", noise)
     x_noise  = x_true + noise * randn(size(x_true, 1), size(x_true, 2))
     dx_noise = dx_true + noise * randn(size(dx_true, 1), size(dx_true, 2))
+    # dx_noise = dx_fd 
 
     # split into training and test data 
     test_fraction = 0.2
@@ -153,24 +154,30 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
     x0_train_GP = x_train_GP[1,:] 
     x0_test_GP  = x_test_GP[1,:] 
     
-    # SINDy (STLS) 
-    λ = 0.1 
+    # SINDy 
+    # λ = 0.1 
     # Ξ_sindy_stls  = sindy_stls( data_train.x_noise, data_train.dx_noise, λ, false, data_train.u ) 
-    Ξ_sindy_lasso  = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
-    # Ξ_sindy_lasso = sindy_lasso(x_train, dx_train, λ, u_train)
+    # Ξ_sindy_lasso  = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
+
+    # cross-validate SINDy!!! 
+    λ_vec = λ_vec_fn() 
+    Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
+    
+    # save ξ with smallest x error  
+    Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
     
     # build dx_fn from Ξ and integrate 
     x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test_GP )
     
-    # cross-validate !!!  
+    # cross-validate GPSINDy!!!  
     λ_vec = λ_vec_fn() 
-    Ξ_gpsindy_vec, err_x_vec, err_dx_vec = cross_validate_λ( data_train.t, x_train_GP, dx_train_GP, data_train.u, λ_vec ) 
+    Ξ_gpsindy_vec, err_x_gpsindy, err_dx_gpsindy = cross_validate_λ( data_train.t, x_train_GP, dx_train_GP, data_train.u, λ_vec ) 
     
     # save ξ with smallest x error  
-    Ξ_gpsindy_minerr = Ξ_minerr( Ξ_gpsindy_vec, err_x_vec ) 
+    Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
     
     # build dx_fn from Ξ and integrate 
-    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy_minerr, x0_train_GP, x0_test_GP ) 
+    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train_GP, x0_test_GP ) 
 
     # plot 
     if plot_option == 1 
@@ -183,7 +190,7 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
 
     end 
 
-    return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy 
+    return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy, x_train_gpsindy, x_test_gpsindy 
 end 
 
 

@@ -5,7 +5,7 @@ using CSV, DataFrames
 fn = unicycle 
 # fn = predator_prey 
 
-noise = 0.005
+noise = 0.01
 λ = 0.1 
 x_test_hist = x_struct( [], [], [], [], [], [] ) 
 x_err_hist  = x_err_struct( [], [], [], [] )
@@ -36,16 +36,18 @@ end
 Ξ_sindy_terms   = pretty_coeffs( Ξ_sindy, x_true, u_temp )
 Ξ_gpsindy_terms = pretty_coeffs( Ξ_gpsindy, x_true, u_temp )
 
+display( Ξ_sindy_terms ) 
+display( Ξ_gpsindy_terms ) 
 
-# ## ============================================ ##
-# # save data 
+## ============================================ ##
+# save data 
 
 if fn == unicycle 
-    header = [ "t", "x1_sindy", "x2_sindy", "x3_sindy", "x4_sindy", "x1_gpsindy", "x2_gpsindy", "x3_gpsindy", "x4_gpsindy", "x1_nn", "x2_nn", "x3_nn", "x4_nn" ] 
+    header = [ "t", "x1_true", "x2_true", "x3_true", "x4_true", "x1_sindy", "x2_sindy", "x3_sindy", "x4_sindy", "x1_gpsindy", "x2_gpsindy", "x3_gpsindy", "x4_gpsindy", "x1_nn", "x2_nn", "x3_nn", "x4_nn" ] 
 elseif fn == predator_prey
-    header = [ "t", "x1_sindy", "x2_sindy", "x1_gpsindy", "x2_gpsindy", "x1_nn", "x2_nn" ] 
+    header = [ "t", "x1_true", "x2_true", "x1_sindy", "x2_sindy", "x1_gpsindy", "x2_gpsindy", "x1_nn", "x2_nn" ] 
 end 
-data   = [ t_test x_sindy x_gpsindy x_nn ]
+data   = [ t_test x_test x_sindy x_gpsindy x_nn ]
 df     = DataFrame( data,  :auto ) 
 CSV.write(string(string(fn), "_single", ".csv"), df, header=header)
 
