@@ -43,9 +43,9 @@ i = 4
 
 ## ============================================ ##
 # save outputs as csv 
-header = [ "t", "x1_sindy", "x2_sindy", "x3_sindy", "x4_sindy", "x1_gpsindy", "x2_gpsindy", "x3_gpsindy", "x4_gpsindy" ] 
+header = [ "t", "x1_test", "x2_test", "x3_test", "x4_test", "x1_sindy", "x2_sindy", "x3_sindy", "x4_sindy", "x1_gpsindy", "x2_gpsindy", "x3_gpsindy", "x4_gpsindy" ] 
 
-data   = [ t_test x_test_sindy x_test_gpsindy ]
+data   = [ t_test x_test_noise x_test_sindy x_test_gpsindy ]
 df     = DataFrame( data,  :auto ) 
 CSV.write(string("car_hw_single", ".csv"), df, header=header)
 
