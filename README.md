@@ -4,6 +4,69 @@ Discovering Equations of Motion from Data
 
 # Research Notes 
 
+Junette (TODAY): 
+1. work on intro (1 hr) 
+2. send to David (0 hr)
+3. tell Somi to improve plots (1/2 hr)
+4. investigate car robot delayed control input (2 hrs)
+5. go through Adam's comments and address feedback (2 hrs)
+6. double-check template (1/2 hr)
+7. clean up refs (1 hr)
+8. ping Adam, send updated draft to him, get feedback (1 hr)
+9. send updated draft to everyone 
+
+right now: at 8 hours 
+
+TOMORROW: 
+- Adam is available until 5pm tmrw 
+
+## 
+
+Sept 14, 2023  
+
+Adam: 
+- work on plots, big one 
+  - 3.25 in is standardize size for figure width in IEEE 
+- update paper title (noise-tolerant?) 
+- funding blurb - typically, IEEE puts it on bottom or in the acknowledgements 
+- check the template 
+- references ( will take some time ): 
+  - clean up references 
+  - IEEE guidelines give format, use template as closely as possible 
+  - if can't find ICRA style template, default to IEEE tran template, style for bibliography 
+  - remove things like URLs, links, DOIs 
+  - things needed are: name, (only) year, titles, journal/publisher  
+- focus on flow and a nice logical argument 
+  - all the content is basically there 
+- register for submission website (Adam shared site)
+  - include PINs for co-authors 
+  - make sure you know process - David is supposed to help me out  
+  - Adam will give me more info on registration process stuff 
+- after ICRA submission, put paper on ArXiV  
+
+Junette: 
+- explore delayed control input with robot car 
+
+for Somi: 
+- predator-prey x1 and x2 plots should have time at horizontal axis time (t)
+- background should be white  
+
+
+- 
+
+## 
+
+Adam: 
+- Finish experiments section 
+- Finish intro 
+- Related work section needs more work 
+- Read papers by Adam and put into related work 
+  - identify one key statement that summarizes paper 
+  - identify downfall of method 
+  - "this is a problem that has been identified, see this papers. They propose to handle via this technique," do that over and over again 
+- get to a point where we can say "our proposed approach is different and better" 
+- send paper to Adam first, (ALSO FIX ABSTRACT) then send to DFK/Somi 
+
 ## Sept 9, 2023 
 
 Somi: 
