@@ -2,8 +2,8 @@ using GaussianSINDy
 using CSV, DataFrames 
 
 # choose ODE, plot states --> measurements 
-# fn = unicycle 
-fn = predator_prey 
+fn = unicycle 
+# fn = predator_prey 
 
 # set up noise vec 
 noise_vec      = []

@@ -5,7 +5,7 @@ using CSV, DataFrames
 fn = unicycle 
 # fn = predator_prey 
 
-noise = 0.01
+noise = 0.01 
 λ = 0.1 
 x_test_hist = x_struct( [], [], [], [], [], [] ) 
 x_err_hist  = x_err_struct( [], [], [], [] )

@@ -68,7 +68,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     # validate data 
 
     x_vars = size(x_true, 2)
-    dx_fn_true        = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
+    # dx_fn_true        = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true ) 
     dx_fn_sindy_stls  = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_stls)
     dx_fn_sindy_lasso = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_lasso)
     dx_fn_gpsindy     = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy)
@@ -76,7 +76,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     
     # # integrate !! 
     x0 = x_test_true[1,:] 
-    x_test_true        = integrate_euler( dx_fn_true, x0, t_test, u_test )
+    # x_test_true        = integrate_euler( dx_fn_true, x0, t_test, u_test )
     x_sindy_stls_test  = integrate_euler( dx_fn_sindy_stls, x0, t_test, u_test ) 
     x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t_test, u_test ) 
     x_nn_test          = integrate_euler( dx_fn_nn, x0, t_test, u_test ) 
