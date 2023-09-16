@@ -37,7 +37,7 @@ function init_params(fn)
         
     elseif fn == unicycle || fn == unicycle_realistic 
         x0  = [ 0, 0, 0.5, 0.5 ] 
-        p   = zeros(4) 
+        p   = [ 1.1, 0.4, 1, 0.4 ] 
         str = "double_pendulum" 
 
     elseif fn == dyn_car 
@@ -53,7 +53,7 @@ function init_params(fn)
     end 
     
     n_vars = size(x0, 1) 
-    tf     = 10.0  
+    tf     = 30.0  
     ts     = (0.0, tf) 
     dt     = 0.1 
 

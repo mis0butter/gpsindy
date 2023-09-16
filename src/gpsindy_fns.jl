@@ -21,6 +21,8 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
 
     # truth coeffs 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_true, u ) 
+    
+    poly_order = 1 
     Ξ_true = sindy_stls(x_true, dx_true, λ, u)
 
     # add noise 

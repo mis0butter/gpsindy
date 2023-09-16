@@ -5,6 +5,8 @@ export sindy_stls
 function sindy_stls( x, dx, λ, u = false )
 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
+    poly_order = 1 
+
     
     if isequal(u, false)      # if u_data = false 
         data   = x 
@@ -37,6 +39,7 @@ function sindy_lasso( x, dx, λ, u = false )
     end 
 
     # construct data library 
+    poly_order = 1 
     Θx = pool_data_test(data, n_vars, poly_order) 
 
     # SINDy 
