@@ -21,7 +21,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
 
     # truth coeffs 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_true, u ) 
-    
+
     poly_order = 1 
     Ξ_true = sindy_stls(x_true, dx_true, λ, u)
 
@@ -48,8 +48,11 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     dx_stand_noise = dx_stand_true + noise * randn(size(dx_stand_true, 1), size(dx_stand_true, 2))
 
     # set training data for GPSINDy 
-    x_train  = x_stand_noise 
-    dx_train = dx_stand_noise
+    # x_train  = x_stand_noise 
+    # dx_train = dx_stand_noise
+
+    x_train  = x_train_noise 
+    dx_train = dx_train_noise 
 
     ## ============================================ ##
     # SINDy vs. NN vs. GPSINDy 
@@ -64,7 +67,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     Ξ_gpsindy   = sindy_lasso(x_train_GP, dx_train_GP, λ, u_train)
 
     # Train NN on the data
-    Ξ_nn_lasso = nn_lasso_Ξ_fn( dx_train_noise, x_train_noise, λ, u_train ) 
+    Ξ_nn_lasso = nn_lasso_Ξ_fn( dx_train, x_train, λ, u_train ) 
 
     # ----------------------- # 
     # validate data 
