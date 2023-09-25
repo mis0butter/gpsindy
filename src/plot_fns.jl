@@ -2,6 +2,131 @@ using Plots
 using StatsPlots
 using Statistics 
 using Latexify 
+
+
+## ============================================ ##
+
+export plot_med_quarts_sindy_nn_gpsindy
+function plot_med_quarts_sindy_nn_gpsindy(x_sindy_lasso_err, x_nn_err, x_gpsindy_err, noise_vec, plot_title)
+
+    n_vars = size(x_sindy_lasso_err, 2)
+    unique_i = unique(i -> noise_vec[i], 1:length(noise_vec))
+    push!(unique_i, length(noise_vec) + 1)
+
+    sindy_med   = []
+    sindy_q13   = []
+    nn_med      = []
+    nn_q13      = []
+    gpsindy_med = []
+    gpsindy_q13 = []
+    for i = 1:length(unique_i)-1
+
+        ji = unique_i[i]
+        jf = unique_i[i+1] - 1
+
+        sindy_med_i   = []
+        sindy_q13_i   = []
+        nn_med_i   = []
+        nn_q13_i   = []
+        gpsindy_med_i = []
+        gpsindy_q13_i = []
+        for j = 1:n_vars
+            push!(sindy_med_i, median(x_sindy_lasso_err[ji:jf, j]))
+            push!(sindy_q13_i, [quantile(x_sindy_lasso_err[ji:jf, j], 0.25), quantile(x_sindy_lasso_err[ji:jf, j], 0.75)])
+            push!(nn_med_i, median(x_nn_err[ji:jf, j]))
+            push!(nn_q13_i, [quantile(x_nn_err[ji:jf, j], 0.25), quantile(x_nn_err[ji:jf, j], 0.75)])
+            push!(gpsindy_med_i, median(x_gpsindy_err[ji:jf, j]))
+            push!(gpsindy_q13_i, [quantile(x_gpsindy_err[ji:jf, j], 0.25), quantile(x_gpsindy_err[ji:jf, j], 0.75)])
+        end
+
+        push!(sindy_med, sindy_med_i)
+        push!(sindy_q13, sindy_q13_i)
+        push!(nn_med, nn_med_i)
+        push!(nn_q13, nn_q13_i)
+        push!(gpsindy_med, gpsindy_med_i)
+        push!(gpsindy_q13, gpsindy_q13_i)
+
+    end
+    sindy_med = vv2m(sindy_med)
+    sindy_q13 = vv2m(sindy_q13)
+    nn_med = vv2m(nn_med)
+    nn_q13 = vv2m(nn_q13)
+    gpsindy_med = vv2m(gpsindy_med)
+    gpsindy_q13 = vv2m(gpsindy_q13)
+
+    noise_vec_iter = unique(noise_vec)
+    p_nvars = []
+    for i = 1:n_vars
+
+        plt = plot(legend=:outerright, size=[800 300], title=string("|| true - discovered ||_2"), xlabel="noise")
+
+        ymed = sindy_med[:, i]
+        yq13 = vv2m(sindy_q13[:, i])
+        plot!(plt, noise_vec_iter, ymed, c=:orange, label="SINDy", ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.35)
+        scatter!(plt, noise_vec, x_sindy_lasso_err[:, i], c=:orange, markerstrokewidth=0, ms=3, markeralpha=0.35)
+
+        ymed = nn_med[:, i]
+        yq13 = vv2m(nn_q13[:, i])
+        plot!(plt, noise_vec_iter, ymed, c=:magenta, label="NNSINDy", ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.35)
+        scatter!(plt, noise_vec, x_nn_err[:, i], c=:magenta, markerstrokewidth=0, ms=3, markeralpha=0.35)
+
+        ymed = gpsindy_med[:, i]
+        yq13 = vv2m(gpsindy_q13[:, i])
+        plot!(plt, noise_vec_iter, ymed, c=:cyan, label="GPSINDy", ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.35)
+        scatter!(plt, noise_vec, x_gpsindy_err[:, i], c=:cyan, markerstrokewidth=0, ms=3, markeralpha=0.35)
+
+        push!(p_nvars, plt)
+
+    end
+    p_nvars = plot(p_nvars...,
+        layout=(2, 1),
+        size=[800 600],
+        plot_title = plot_title 
+    )
+    display(p_nvars)
+
+end
+
+
+
+## ============================================ ##
+# plot 
+
+export plot_x_sindy_nn_gpsindy_err
+function plot_x_sindy_nn_gpsindy_err( noise_vec, x_sindy_err, x_nn_err, x_gpsindy_err)  
+    
+    # xmin, dx, xmax = min_d_max(noise_vec)
+    
+        # ymin, dy, ymax = min_d_max( [ x_sindy_err ; x_nn_err ; x_gpsindy_err ] )
+        p = scatter( noise_vec, x_sindy_err, 
+            c       = :red, 
+            ls      = :dashdot, 
+            legend  = :outerright, 
+            xlabel  = "Time (s)", 
+            label   = "SINDy (LASSO)", 
+            # yticks  = ymin:dy:ymax,
+            # ylim    = (ymin, ymax), 
+            title   = "x error",
+        ) 
+        scatter!( p, noise_vec, x_nn_err, 
+            c       = :blue, 
+            label   = "NN (LASSO)", 
+            # yticks  = ymin:dy:ymax,
+            ls      = :dashdot, 
+        ) 
+        scatter!( p, noise_vec, x_gpsindy_err, 
+            # c       = :blue, 
+            label   = "GPSINDy (LASSO)", 
+            # yticks = ymin:dy:ymax,
+            ls      = :dot, 
+        )
+        
+    
+    display(p)     
+
+end 
+
+
 ## ============================================ ##
 # plot 
 
@@ -592,13 +717,13 @@ function plot_med_quarts(sindy_err_vec, gpsindy_err_vec, noise_vec)
         jf = unique_i[i+1] - 1
 
         smed = []
-        gpsmed = []
         sq13 = []
+        gpsmed = []
         gpsq13 = []
         for j = 1:n_vars
             push!(smed, median(sindy_err_vec[ji:jf, j]))
-            push!(gpsmed, median(gpsindy_err_vec[ji:jf, j]))
             push!(sq13, [quantile(sindy_err_vec[ji:jf, j], 0.25), quantile(sindy_err_vec[ji:jf, j], 0.75)])
+            push!(gpsmed, median(gpsindy_err_vec[ji:jf, j]))
             push!(gpsq13, [quantile(gpsindy_err_vec[ji:jf, j], 0.25), quantile(gpsindy_err_vec[ji:jf, j], 0.75)])
         end
 
@@ -616,15 +741,19 @@ function plot_med_quarts(sindy_err_vec, gpsindy_err_vec, noise_vec)
     noise_vec_iter = unique(noise_vec)
     p_nvars = []
     for i = 1:n_vars
+
         plt = plot(legend=:outerright, size=[800 300], title=string("|| ξ", i, "_true - ξ", i, "_discovered ||"), xlabel="noise")
+
         ymed = sindy_med[:, i]
         yq13 = vv2m(sindy_q13[:, i])
         plot!(plt, noise_vec_iter, ymed, c=:orange, label="SINDy", ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.35)
         scatter!(plt, noise_vec, sindy_err_vec[:, i], c=:orange, markerstrokewidth=0, ms=3, markeralpha=0.35)
+
         ymed = gpsindy_med[:, i]
         yq13 = vv2m(gpsindy_q13[:, i])
         plot!(plt, noise_vec_iter, ymed, c=:cyan, label="GPSINDy", ribbon=(ymed - yq13[:, 1], yq13[:, 2] - ymed), fillalpha=0.35)
         scatter!(plt, noise_vec, gpsindy_err_vec[:, i], c=:cyan, markerstrokewidth=0, ms=3, markeralpha=0.35)
+        
         push!(p_nvars, plt)
     end
     p_nvars = plot(p_nvars...,
