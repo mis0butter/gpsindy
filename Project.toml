@@ -3,6 +3,18 @@ uuid = "a9898bbb-5022-4261-9cce-b6d8b803bf86"
 authors = ["mis0butter <junetter@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+GaussianProcesses = "891a1506-143c-57d2-908e-e1f8e92e6de9"
+Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+LineSearches = "d3d80556-e9d4-5f37-9878-2ab0fcc64255"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
 [compat]
 julia = "1"
 
