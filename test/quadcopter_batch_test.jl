@@ -2,6 +2,41 @@ using GaussianSINDy
 using LinearAlgebra 
 
 ## ============================================ ##
+
+path = "test/data/cyrus_quadcopter_csvs/" 
+csv_files_vec = readdir( path ) 
+
+# for i_csv in eachindex(csv_files_vec) 
+i_csv = 1 
+
+    csv_file = string( path, csv_files_vec[i_csv] ) 
+    println( csv_file ) 
+
+    df   = CSV.read(csv_file, DataFrame) 
+    x    = Matrix(df) 
+
+i_csv = 2 
+
+    csv_file = string( path, csv_files_vec[i_csv] ) 
+    println( csv_file ) 
+
+    df   = CSV.read(csv_file, DataFrame) 
+    u    = Matrix(df) 
+
+# end 
+
+    # wrap in data frame --> Matrix 
+    
+
+
+
+
+## ============================================ ##
+## ============================================ ##
+# below is all jake's car data stuff 
+
+
+## ============================================ ##
 # single run (good) 
 
 path          = "test/data/jake_car_csvs/" 
