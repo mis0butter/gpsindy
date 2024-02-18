@@ -58,7 +58,7 @@ end
 ## ============================================ ##
 
 export unicycle 
-function unicycle( dx, x, p, t, u = [ sin(t)      1/2*cos(t) ] ) 
+function unicycle( dx, x, p, t, u = [ sin(t)      cos(t) ] ) 
     # x[1] x position 
     # x[2] y position 
     # x[3] forward velocity    

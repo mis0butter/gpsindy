@@ -1,5 +1,27 @@
 module GaussianSINDy
 
+## ============================================ ##
+# packages 
+
+using LinearAlgebra 
+using Optim 
+
+using Plots 
+using StatsPlots
+using Latexify
+
+using GaussianProcesses
+using LineSearches 
+
+using Statistics 
+using CSV 
+using DataFrames 
+
+using Flux 
+
+## ============================================ ##
+# includes 
+
 include("structs.jl")
 include("SINDy.jl")
 include("GP_tools.jl")

@@ -1,6 +1,3 @@
-using LinearAlgebra 
-using Optim 
-
 ## ============================================ ##
 # sample from given mean and covariance 
 
@@ -237,10 +234,6 @@ end
 
 ## ============================================ ##
 # posterior mean with GP toolbox 
-
-using GaussianProcesses
-using Optim 
-using LineSearches 
 
 export post_dist_SE 
 function post_dist_SE( x_train, y_train, x_test ) 

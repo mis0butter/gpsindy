@@ -1,7 +1,3 @@
-using Plots
-using StatsPlots
-using Statistics 
-using Latexify 
 
 
 ## ============================================ ##
@@ -412,9 +408,6 @@ end
 ## ============================================ ##
 # plot prey vs. predator 
 
-using Plots
-using Latexify
-
 export plot_test_data
 function plot_test_data(t_test, x_test, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
 
@@ -494,9 +487,6 @@ end
 
 ## ============================================ ##
 # plot prey vs. predator 
-
-using Plots
-using Latexify
 
 export plot_states
 function plot_states(t_train, x_train, t_test, x_test, t_sindy_val, x_sindy_val, t_gpsindy_val, x_gpsindy_val, t_gpsindy_x2_val, x_gpsindy_x2_val, t_nn_val, x_nn_val)
@@ -610,8 +600,6 @@ end
 ## ============================================ ##
 # plot derivatives 
 
-using Plots
-
 export plot_deriv
 function plot_deriv(t, dx_true, dx_fd, dx_tv, str)
 
@@ -647,8 +635,6 @@ end
 
 ## ============================================ ##
 # plot state 
-
-using Plots
 
 export plot_dyn
 function plot_dyn(t, x, str)
@@ -768,7 +754,6 @@ end
 
 ## ============================================ ##
 
-
 export plot_med_quarts_sindy_nn_gpsindy
 function plot_med_quarts_sindy_nn_gpsindy(sindy_err_vec, nnsindy_err_vec, gpsindy_err_vec, noise_vec)
 
@@ -850,3 +835,4 @@ function plot_med_quarts_sindy_nn_gpsindy(sindy_err_vec, nnsindy_err_vec, gpsind
     display(p_nvars)
 
 end
+

@@ -55,9 +55,6 @@ end
 ## ============================================ ##
 # plot everything! 
 
-using Plots 
-using Latexify
-
 export plot_admm 
 function plot_admm( hist, var ) 
 
@@ -139,9 +136,6 @@ end
 
 ## ============================================ ##
 # LASSO ADMM! 
-
-using Optim 
-using GaussianProcesses
 
 export lasso_admm_hp_opt 
 function lasso_admm_hp_opt( t, f, g, n, λ, ρ, α, hist ) 
@@ -451,7 +445,6 @@ end
 ## ============================================ ##
 # LASSO ADMM! 
 
-using  Optim 
 export lasso_admm_opt
 
 function lasso_admm_opt( f, g, n, λ, ρ, α, hist ) 
@@ -523,7 +516,6 @@ end
 ## ============================================ ##
 # LASSO ADMM! 
 
-using  Optim 
 export lasso_admm_test
 
 function lasso_admm_test( f, g, n, λ, ρ, α, hist ) 

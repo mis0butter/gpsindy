@@ -157,8 +157,6 @@ end
 ## ============================================ ##
 # define min function 
 
-using Optim 
-
 export min_Ax_b 
 function min_Ax_b( A, b, bound = 10 ) 
 
@@ -181,8 +179,6 @@ end
 
 ## ============================================ ##
 # solve sparse regression 
-
-using Optim 
 
 export sparsify_dynamics_cstrnd 
 function sparsify_dynamics_cstrnd( Θx, dx, λ, x_vars ) 

@@ -1,4 +1,4 @@
-using DifferentialEquations
+# using DifferentialEquations
 
 
 ## ============================================ ##
@@ -36,8 +36,6 @@ end
 
 ## ============================================ ##
 # derivatives: gaussian process (smoothing) 
-
-using Optim 
 
 export dx_gp_fn 
 function dx_gp_fn(t, dx) 

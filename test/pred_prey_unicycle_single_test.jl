@@ -1,6 +1,8 @@
 using GaussianSINDy
 using CSV, DataFrames 
 
+## ============================================ ##
+
 # single run 
 fn = unicycle 
 # fn = predator_prey 
@@ -12,6 +14,9 @@ x_err_hist  = x_err_struct( [], [], [], [] )
 Ξ_hist      = Ξ_struct( [], [], [], [], [] ) 
 Ξ_err_hist  = Ξ_err_struct( [], [], [], [] )
 Ξ_hist, Ξ_err_hist, x_hist, x_err_hist = sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_test_hist, x_err_hist ) 
+
+
+## ============================================ ##
 
 x_true      = x_hist.truth[1] 
 x_sindy     = x_hist.sindy_lasso[1] 
@@ -28,7 +33,7 @@ plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy, x_nn, x_gpsindy)
 Ξ_sindy   = Ξ_hist.sindy_lasso[1] 
 Ξ_gpsindy = Ξ_hist.gpsindy[1] 
 if fn == unicycle 
-    u_temp = zeros( length(t_test), 2 )
+    u_temp = zeros( length(t_test), 2 ) 
 elseif fn == predator_prey 
     u_temp = false 
 end 

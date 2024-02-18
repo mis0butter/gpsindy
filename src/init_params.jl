@@ -1,4 +1,3 @@
-using Plots 
 
 export init_params 
 function init_params(fn) 

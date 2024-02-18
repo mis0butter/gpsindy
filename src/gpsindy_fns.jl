@@ -1,8 +1,3 @@
-using Optim 
-using GaussianProcesses
-using LinearAlgebra 
-using Statistics 
-using Plots 
 
 
 ## ============================================ ##

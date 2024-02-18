@@ -1,6 +1,4 @@
-using Optim 
-using GaussianProcesses
-using LinearAlgebra 
+
 
 ## ============================================ ##
 
