@@ -1,6 +1,68 @@
 using GLMakie 
 
 ## ============================================ ##
+
+"""
+Plot training and predicted training data using GLMakie 
+""" 
+function plot_train_test( 
+    x_train,                # [N,3] matrix of training data 
+    x_test,                 # [N,3] matrix of testing data 
+    N_train        = 0      # number of training points to plot 
+) 
+
+    # create figure 
+    fig_train_test = Figure() ; ax = Axis3( fig_train_test[1,1] ) 
+    if N_train == 0 
+        ax.title = "Trajectory of Training and Testing Data" 
+    else 
+        ax.title = string( "Trajectory of Training and Testing Data, N train points = ", N_train ) 
+    end 
+
+    # plot training data 
+    lines_train = lines!( ax, x_train[:,1], x_train[:,2], x_train[:,3], linewidth = 2, label = "Training Data" )
+    lines_test = lines!( ax, x_test[:,1], x_test[:,2], x_test[:,3], linewidth = 2, label = "Testing Data" ) 
+
+    axislegend( ax, position = :rt ) 
+
+    return fig_train_test
+end 
+
+export plot_train_test
+
+
+## ============================================ ##
+
+"""
+Plot training and predicted training data using GLMakie 
+""" 
+function plot_train_pred( 
+    x_train,                # [N,3] matrix of training data 
+    x_train_pred,           # [N,3] matrix of predicted training data 
+    N_points        = 0     # number of points to plot 
+) 
+
+    # create figure 
+    fig_train_pred = Figure() ; ax = Axis3( fig_train_pred[1,1] ) 
+    if N_points == 0 
+        ax.title = "Trajectory of Predicted Training Data" 
+    else 
+        ax.title = string( "Trajectory of Predicted Training Data, N points = ", N_points ) 
+    end 
+
+    # plot training data 
+    lines_train = lines!( ax, x_train[:,1], x_train[:,2], x_train[:,3], linewidth = 2, label = "Training Data" )
+    lines_train_pred = lines!( ax, x_train_pred[:,1], x_train_pred[:,2], x_train_pred[:,3], color = :red, linewidth = 2, label = "Predicted Training Data" ) 
+
+    axislegend( ax, position = :rt ) 
+
+    return fig_train_pred 
+end 
+
+export plot_train_pred 
+
+
+## ============================================ ##
 # add title to Axis3 of GLMakie figures 
 
 """ 
@@ -16,7 +78,7 @@ function add_title3d(
     return fig 
 end 
 
-export add_title 
+export add_title3d 
 
 ## ============================================ ##
 # plot Cartesian axes 

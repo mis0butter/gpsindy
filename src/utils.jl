@@ -172,6 +172,27 @@ end
 
 
 ## ============================================ ##
+# split into training and testing data based on N points 
+
+function split_train_test_Npoints( t, x, dx, u, N_train ) 
+
+    t_train  = t[ 1:N_train ] 
+    x_train  = x[ 1:N_train, : ] 
+    dx_train = dx[ 1:N_train, : ] 
+    u_train  = u[ 1:N_train, : ] 
+    
+    t_test   = t[ N_train+1:end ] 
+    x_test   = x[ N_train+1:end, : ] 
+    dx_test  = dx[ N_train+1:end, : ] 
+    u_test   = u[ N_train+1:end, : ] 
+
+    return t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test  
+end 
+
+export split_train_test_Npoints 
+
+
+## ============================================ ##
 # split into training and validation data 
 
 export split_train_test 

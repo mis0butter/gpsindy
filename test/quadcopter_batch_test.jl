@@ -13,21 +13,16 @@ csv_files_vec = readdir( path )
 
 # for i_csv in eachindex(csv_files_vec) 
 i_csv = 1 
-
     csv_file = string( path, csv_files_vec[i_csv] ) 
     df   = CSV.read(csv_file, DataFrame) 
     x    = Matrix(df) 
-
 i_csv = 2 
-
     csv_file = string( path, csv_files_vec[i_csv] ) 
-    println( csv_file ) 
-
     df   = CSV.read(csv_file, DataFrame) 
     u    = Matrix(df) 
-
 # end 
 
+# all points 
 N  = size(x, 1) 
 
 # time vector ( probably dt = 0.01 s? )
@@ -37,7 +32,6 @@ t  = collect( range(0, step = dt, length = N) )
 # get derivatives 
 x, dx_fd = unroll( t, x ) 
 
-
 # ----------------------- #
 # plot entire trajectory 
 
@@ -45,26 +39,20 @@ fig_entire_traj = plot_line3d( x[:,1], x[:,2], x[:,3] )
 fig_entire_traj = add_title3d( fig_entire_traj, "Entire Trajectory" ) 
 
 
-
 ## ============================================ ##
 # split into training and testing 
 
 N_train = Int( round( N * 0.8 ) ) 
-N_train = 100  
+N_train = 200 
 
-t_train  = t[ 1:N_train ] 
-x_train  = x[ 1:N_train, : ] 
-dx_train = dx_fd[ 1:N_train, : ] 
-u_train  = @btime u[ 1:N_train, : ] 
+# split into training and test data 
+t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test = split_train_test_Npoints( t, x, dx_fd, u, N_train ) 
 
-t_test   = t[ N_train+1:end ] 
-x_test   = x[ N_train+1:end, : ] 
-dx_test  = dx_fd[ N_train+1:end, : ] 
-u_test   = u[ N_train+1:end, : ] 
-
+# get sizes 
 x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
 
-fig_train = plot_line3d( x_train[:,1], x_train[:,2], x_train[:,3] ) 
+# plot training and testing data 
+fig_train_test = plot_train_test( x_train, x_test, N_train ) 
 
 
 ## ============================================ ##
@@ -84,8 +72,7 @@ dx_GP_elapsed = time() - start
 
 Ξ_GP_lasso = sindy_lasso( x_GP, dx_GP, λ, u_train ) 
 
-
-## ============================================ ##
+# ----------------------- #
 # now test on training data 
 
 x0_train_GP = x_GP[1,:] 
@@ -94,8 +81,8 @@ x0_train_GP = x_GP[1,:]
 dx_fn_gpsindy = build_dx_fn( poly_order, x_vars, u_vars, Ξ_GP_lasso ) 
 x_train_pred  = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
 
-fig_train_pred = plot_line3d( x_train_pred[:,1], x_train_pred[:,2], x_train_pred[:,3] ) 
-
+# create figure 
+fig_train_pred = plot_train_pred( x_train, x_train_pred, N_train ) 
 
 
 
