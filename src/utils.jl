@@ -293,7 +293,7 @@ function check_vars_poly_deg(
     p       # polynomial degree 
 )  
 
-    num = factorial( p + n - 1 ) 
+    num = factorial( big(p + n - 1) ) 
     den = factorial( n - 1 ) * factorial( p )
     out = num / den 
 
