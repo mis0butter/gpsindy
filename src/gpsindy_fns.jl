@@ -286,19 +286,19 @@ function err_Ξ_x( Ξ, x, Ξ_err, x_err )
     # Ξ 
     Ξ_sindy_stls_err = [] 
     for i = 1 : x_vars 
-        push!( Ξ_sindy_stls_err, norm( Ξ_true[:,i] - Ξ_sindy_stls[:,i] )  ) 
+        push!( Ξ_sindy_stls_err, norm( Ξ_true[:,i] - Ξ_sindy_stls[:,i] ) ) 
     end 
     Ξ_sindy_lasso_err = [] 
     for i = 1 : x_vars 
-        push!( Ξ_sindy_lasso_err, norm( Ξ_true[:,i] - Ξ_sindy_lasso[:,i] )  ) 
+        push!( Ξ_sindy_lasso_err, norm( Ξ_true[:,i] - Ξ_sindy_lasso[:,i] ) ) 
     end 
     Ξ_nn_err = [] 
     for i = 1 : x_vars 
-        push!( Ξ_nn_err, norm( Ξ_true[:,i] - Ξ_nn_lasso[:,i] )  ) 
+        push!( Ξ_nn_err, norm( Ξ_true[:,i] - Ξ_nn_lasso[:,i] ) ) 
     end 
     Ξ_gpsindy_err = [] 
     for i = 1 : x_vars 
-        push!( Ξ_gpsindy_err, norm( Ξ_true[:,i] - Ξ_gpsindy[:,i] )  ) 
+        push!( Ξ_gpsindy_err, norm( Ξ_true[:,i] - Ξ_gpsindy[:,i] ) ) 
     end 
     push!( Ξ_err.sindy_stls, Ξ_sindy_stls_err ) 
     push!( Ξ_err.sindy_lasso, Ξ_sindy_lasso_err ) 

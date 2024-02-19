@@ -280,3 +280,26 @@ function fdiff(t, x, fd_method)
 
 end 
 
+
+## ============================================ ##
+# check polynomial combinatorics 
+# thank you https://math.stackexchange.com/questions/2928712/number-of-elements-in-polynomial-of-degree-n-and-m-variables !!! 
+
+""" 
+Check possible combinations of polynomial degree with number of variables  
+""" 
+function check_vars_poly_deg( 
+    n,      # number of variables  
+    p       # polynomial degree 
+)  
+
+    num = factorial( p + n - 1 ) 
+    den = factorial( n - 1 ) * factorial( p )
+    out = num / den 
+
+    return out 
+end
+
+export check_vars_poly_deg 
+
+

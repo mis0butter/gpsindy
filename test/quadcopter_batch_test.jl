@@ -114,9 +114,51 @@ dx_fn_gpsindy = build_dx_fn( poly_order, x_vars, u_vars, Ξ_GP_lasso )
 x_train_pred  = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
 
 
+## ============================================ ## 
+# debug build_dx_fn 
+
+z_fd = Ξ_GP_lasso 
+
+n_vars = x_vars + u_vars 
+
+# define pool_data functions 
+fn_vector = pool_data_vecfn_test(n_vars, poly_order) 
+
+# numerically evaluate each function at x and return a vector of numbers
+𝚽( xu, fn_vector ) = [ f(xu) for f in fn_vector ]
+
+# create vector of functions, each element --> each state 
+dx_fn_vec = Vector{Function}(undef,0) 
+for i = 1 : x_vars 
+    # define the differential equation 
+    push!( dx_fn_vec, (xu,p,t) -> dot( 𝚽( xu, fn_vector ), z_fd[:,i] ) ) 
+end 
+
+dx_fn(xu,p,t) = [ f(xu,p,t) for f in dx_fn_vec ] 
 
 
+## ============================================ ##
+# poly order n_vars test 
 
+ind = 0 
+n_vars = 5 
+poly_order = 4 
+
+    # poly order 3 
+    if poly_order >= 4 
+        for i = 1 : n_vars 
+            for j = i : n_vars 
+                for k = j : n_vars 
+                    for l = k  : n_vars 
+                        ind += 1 ;                     
+                    end 
+                    # push!( Θx, x -> x[i] .* x[j] .* x[k] )
+                end 
+            end 
+        end 
+    end 
+
+ind 
 
 
 
