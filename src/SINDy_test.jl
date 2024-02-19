@@ -39,7 +39,7 @@ function sindy_lasso( x, dx, λ, u = false )
     end 
 
     # construct data library 
-    poly_order = 1 
+    # poly_order = 1 
     Θx = pool_data_test(data, n_vars, poly_order) 
 
     # SINDy 
