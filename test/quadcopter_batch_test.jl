@@ -1,7 +1,11 @@
 using GaussianSINDy 
 using LinearAlgebra 
+using CSV, DataFrames 
+using BenchmarkTools 
+using GLMakie 
 
 ## ============================================ ##
+# get states and inputs 
 
 path = "test/data/cyrus_quadcopter_csvs/" 
 csv_files_vec = readdir( path ) 
@@ -10,8 +14,6 @@ csv_files_vec = readdir( path )
 i_csv = 1 
 
     csv_file = string( path, csv_files_vec[i_csv] ) 
-    println( csv_file ) 
-
     df   = CSV.read(csv_file, DataFrame) 
     x    = Matrix(df) 
 
@@ -25,8 +27,106 @@ i_csv = 2
 
 # end 
 
-    # wrap in data frame --> Matrix 
-    
+N  = size(x, 1) 
+
+# time vector ( probably dt = 0.01 s? )
+dt = 0.01 
+t  = collect( range(0, step = dt, length = N) ) 
+
+# get derivatives 
+x, dx_fd = unroll( t, x ) 
+
+
+## ============================================ ##
+# plot entire trajectory 
+
+# state vars: px, py, pz, vx, vy, vz, qw, qx, qy, qz, wx, wy, wz 
+
+fig = plot_line3d( x[:,1], x[:,2], x[:,3] ) 
+
+
+## ============================================ ##
+# split into training and testing 
+
+N_train = Int( round( N * 0.8 ) ) 
+N_train = 200 
+
+t_train  = t[ 1:N_train ] 
+x_train  = x[ 1:N_train, : ] 
+dx_train = dx_fd[ 1:N_train, : ] 
+u_train  = @btime u[ 1:N_train, : ] 
+
+t_test   = t[ N_train+1:end ] 
+x_test   = x[ N_train+1:end, : ] 
+dx_test  = dx_fd[ N_train+1:end, : ] 
+u_test   = u[ N_train+1:end, : ] 
+
+
+x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
+
+## ============================================ ##
+# try sindy stls and lasso 
+
+# try sindy 
+λ = 0.1 
+
+# println( "Ξ_stls time " ) 
+# @btime Ξ_stls  = sindy_stls( x_train, dx_train, λ, u_train ) 
+
+println( "Ξ_lasso time " ) 
+
+start   = time() 
+Ξ_lasso = @btime sindy_lasso( x_train, dx_train, λ, u_train ) 
+elapsed = time() - start 
+println( "btime elapsed = ", elapsed ) 
+
+start   = time() 
+Ξ_lasso = @time sindy_lasso( x_train, dx_train, λ, u_train ) 
+elapsed = time() - start 
+println( "time elapsed = ", elapsed ) 
+
+
+## ============================================ ##
+# try gp stuff 
+
+# first - smooth measurements with Gaussian processes 
+
+println( "x_GP time" )
+start        = time() 
+x_GP         = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+x_GP_elapsed = time() - start 
+
+println( "dx_GP time" ) 
+start         = time() 
+dx_GP         = gp_post( x_GP, 0*dx_train, x_GP, 0*dx_train, dx_train ) 
+dx_GP_elapsed = time() - start 
+
+Ξ_GP_lasso = sindy_lasso( x_GP, dx_GP, λ, u_train ) 
+
+
+## ============================================ ##
+# now test on training data 
+
+x0_train_GP = x_GP[1,:] 
+
+# build dx fn 
+dx_fn_gpsindy = build_dx_fn( poly_order, x_vars, u_vars, Ξ_GP_lasso ) 
+x_train_pred  = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
