@@ -4,10 +4,11 @@ using CSV, DataFrames
 using BenchmarkTools 
 using GLMakie 
 
+
 ## ============================================ ##
 # get states and inputs 
 
-path = "test/data/cyrus_quadcopter_csvs/" 
+path = "test/data/cyrus_quadcopter_csvs_sparse/" 
 # state vars: px, py, pz, vx, vy, vz, qw, qx, qy, qz, wx, wy, wz 
 csv_files_vec = readdir( path ) 
 
