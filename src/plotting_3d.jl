@@ -6,13 +6,20 @@ using GLMakie
 Plot training and predicted training data using GLMakie 
 """ 
 function plot_train_test( 
-    x_train,                # [N,3] matrix of training data 
-    x_test,                 # [N,3] matrix of testing data 
-    N_train        = 0      # number of training points to plot 
+    x_train,            # [N,3] matrix of training data 
+    x_test,             # [N,3] matrix of testing data 
+    N_train = 0,        # number of training points to plot 
+    fig     = nothing   # figure handle 
 ) 
 
     # create figure 
-    fig_train_test = Figure() ; ax = Axis3( fig_train_test[1,1] ) 
+    if isnothing(fig) 
+        fig = Figure() 
+        ax = Axis3( fig[1,1] ) 
+    else 
+        ax = fig.content[1] 
+    end 
+    
     if N_train == 0 
         ax.title = "Trajectory of Training and Testing Data" 
     else 
@@ -21,11 +28,11 @@ function plot_train_test(
 
     # plot training data 
     lines_train = lines!( ax, x_train[:,1], x_train[:,2], x_train[:,3], linewidth = 2, label = "Training Data" )
-    lines_test = lines!( ax, x_test[:,1], x_test[:,2], x_test[:,3], linewidth = 2, label = "Testing Data" ) 
+    lines_test  = lines!( ax, x_test[:,1], x_test[:,2], x_test[:,3], linewidth = 2, label = "Testing Data" ) 
 
     axislegend( ax, position = :rt ) 
 
-    return fig_train_test
+    return fig 
 end 
 
 export plot_train_test
@@ -85,7 +92,7 @@ export add_title3d
 
 "Plot x, y, and z Cartesian axes using GLMakie "
 function plot_axes3d( 
-    r   = 6378.0 / 3,   # radius of axes 
+    r   = 0.5,            # radius of axes 
     fig = nothing,      # figure handle 
 ) 
 
@@ -97,7 +104,7 @@ function plot_axes3d(
     xyz = [ zeros(3) for i in 1:3 ] 
     uvw = r .* [ [1,0,0] , [0,1,0] , [0,0,1] ] 
 
-    width = r/50 
+    width = r/20
     fig = plot_vector3d( [ xyz[1] ] , [ uvw[1] ], nothing, width, :red ) 
     fig = plot_vector3d( [ xyz[2] ] , [ uvw[2] ], fig, width, :blue ) 
     fig = plot_vector3d( [ xyz[3] ] , [ uvw[3] ], fig, width, :green  )  

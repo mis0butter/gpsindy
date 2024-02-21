@@ -13,7 +13,7 @@ path = "test/data/cyrus_quadcopter_csvs_sparse/"
 csv_files_vec = readdir( path ) 
 
 # for i_csv in eachindex(csv_files_vec) 
-i_csv = 1  
+i_csv = 2 
 
     csv_file = string( path, csv_files_vec[i_csv] ) 
     println( "csv_file = ", csv_files_vec[i_csv] ) 
@@ -38,7 +38,8 @@ x, dx_fd = unroll( t, x )
 # ----------------------- #
 # plot entire trajectory 
 
-fig_entire_traj = plot_line3d( x[:,1], x[:,2], x[:,3] ) 
+fig_entire_traj = plot_axes3d( ) 
+fig_entire_traj = plot_line3d( x[:,1], x[:,2], x[:,3], fig_entire_traj ) 
 fig_entire_traj = add_title3d( fig_entire_traj, "Entire Trajectory" ) 
 
 
@@ -46,7 +47,7 @@ fig_entire_traj = add_title3d( fig_entire_traj, "Entire Trajectory" )
 # split into training and testing 
 
 N_train = Int( round( N * 0.8 ) ) 
-N_train = 300 
+N_train = 100 
 
 # split into training and test data 
 t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test = split_train_test_Npoints( t, x, dx_fd, u, N_train ) 
@@ -55,7 +56,8 @@ t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test = split_tra
 x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
 
 # plot training and testing data 
-fig_train_test = plot_train_test( x_train, x_test, N_train ) 
+fig_train_test = plot_axes3d( ) 
+fig_train_test = plot_train_test( x_train, x_test, N_train, fig_train_test ) 
 
 
 ## ============================================ ##
@@ -84,7 +86,7 @@ x_train_sindy   = integrate_euler( dx_fn_sindy, x0_train_GP, t_train, u_train )
 x_train_gpsindy = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
 
 # create figure 
-fig_train_pred  = plot_train_pred( x_train, x_train_sindy, N_train ) 
+fig_train_pred  = plot_train_pred( x_train, x_train_gpsindy, N_train ) 
 
 
 ## ============================================ ## 
@@ -92,7 +94,7 @@ fig_train_pred  = plot_train_pred( x_train, x_train_sindy, N_train )
 
 λ_vec = λ_vec_fn() 
 Ξ_gpsindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( t_train, x_GP, dx_GP, u_train, λ_vec ) 
-
+Ξ_gpsindy_minerr = Ξ_minerr( Ξ_gpsindy_vec, err_x_sindy ) 
 
 
 
