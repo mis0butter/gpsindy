@@ -258,29 +258,29 @@ function pool_data_test(xmat, n_vars, poly_order)
         Θx   = [ Θx xmat[:,i] ]
     end 
 
-    # poly order 2 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                ind += 1 ; 
-                vec  = xmat[:,i] .* xmat[:,j] 
-                Θx   = [Θx vec] 
-            end 
-        end 
-    end 
+    # # poly order 2 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             ind += 1 ; 
+    #             vec  = xmat[:,i] .* xmat[:,j] 
+    #             Θx   = [Θx vec] 
+    #         end 
+    #     end 
+    # end 
 
-    # poly order 3 
-    if poly_order >= 3 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                for k = j : n_vars 
-                    ind += 1 ;                     
-                    vec  = xmat[:,i] .* xmat[:,j] .* xmat[:,k] 
-                    Θx   = [Θx vec] 
-                end 
-            end 
-        end 
-    end 
+    # # poly order 3 
+    # if poly_order >= 3 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             for k = j : n_vars 
+    #                 ind += 1 ;                     
+    #                 vec  = xmat[:,i] .* xmat[:,j] .* xmat[:,k] 
+    #                 Θx   = [Θx vec] 
+    #             end 
+    #         end 
+    #     end 
+    # end 
 
     # sine functions 
     for i = 1 : n_vars 
@@ -314,31 +314,31 @@ function pool_data_test(xmat, n_vars, poly_order)
         end 
     end 
 
-    # poly order 2 nonlinear combination with sine functions 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                for k = 1 : n_vars 
-                    ind  += 1 
-                    vec   = xmat[:,i] .* xmat[:,j] .* sin.(xmat[:,k]) 
-                    Θx    = [Θx vec]     
-                end
-            end 
-        end 
-    end 
+    # # poly order 2 nonlinear combination with sine functions 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             for k = 1 : n_vars 
+    #                 ind  += 1 
+    #                 vec   = xmat[:,i] .* xmat[:,j] .* sin.(xmat[:,k]) 
+    #                 Θx    = [Θx vec]     
+    #             end
+    #         end 
+    #     end 
+    # end 
 
-    # poly order 2 nonlinear combination with cosine functions 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                for k = 1 : n_vars 
-                    ind  += 1 
-                    vec   = xmat[:,i] .* xmat[:,j] .* cos.(xmat[:,k]) 
-                    Θx    = [Θx vec]     
-                end
-            end 
-        end 
-    end 
+    # # poly order 2 nonlinear combination with cosine functions 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             for k = 1 : n_vars 
+    #                 ind  += 1 
+    #                 vec   = xmat[:,i] .* xmat[:,j] .* cos.(xmat[:,k]) 
+    #                 Θx    = [Θx vec]     
+    #             end
+    #         end 
+    #     end 
+    # end 
 
     return Θx  
 
@@ -377,27 +377,27 @@ function pool_data_vecfn_test(n_vars, poly_order)
     # ind += 1 
     # push!( Θ, x[1] .* x[2] )
 
-    # poly order 2 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i:n_vars 
-                ind += 1 ; 
-                push!( Θx, x -> x[i] .* x[j] ) 
-            end 
-        end 
-    end 
+    # # poly order 2 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i:n_vars 
+    #             ind += 1 ; 
+    #             push!( Θx, x -> x[i] .* x[j] ) 
+    #         end 
+    #     end 
+    # end 
 
-    # poly order 3 
-    if poly_order >= 3 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                for k = j : n_vars 
-                    ind += 1 ;                     
-                    push!( Θx, x -> x[i] .* x[j] .* x[k] )
-                end 
-            end 
-        end 
-    end 
+    # # poly order 3 
+    # if poly_order >= 3 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             for k = j : n_vars 
+    #                 ind += 1 ;                     
+    #                 push!( Θx, x -> x[i] .* x[j] .* x[k] )
+    #             end 
+    #         end 
+    #     end 
+    # end 
 
     # sine functions 
     for i = 1 : n_vars 
@@ -427,29 +427,29 @@ function pool_data_vecfn_test(n_vars, poly_order)
         end 
     end 
 
-    # poly order 2 nonlinear combination with sine functions 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                for k = 1 : n_vars 
-                    ind += 1 
-                    push!( Θx, x -> x[i] .* x[j] .* sin.( x[k] ) ) 
-                end
-            end 
-        end 
-    end 
+    # # poly order 2 nonlinear combination with sine functions 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             for k = 1 : n_vars 
+    #                 ind += 1 
+    #                 push!( Θx, x -> x[i] .* x[j] .* sin.( x[k] ) ) 
+    #             end
+    #         end 
+    #     end 
+    # end 
 
-    # poly order 2 nonlinear combination with cosine functions 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                for k = 1 : n_vars 
-                    ind += 1 
-                    push!( Θx, x -> x[i] .* x[j] .* cos.( x[k] ) ) 
-                end
-            end 
-        end 
-    end
+    # # poly order 2 nonlinear combination with cosine functions 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             for k = 1 : n_vars 
+    #                 ind += 1 
+    #                 push!( Θx, x -> x[i] .* x[j] .* cos.( x[k] ) ) 
+    #             end
+    #         end 
+    #     end 
+    # end
     
     return Θx 
 

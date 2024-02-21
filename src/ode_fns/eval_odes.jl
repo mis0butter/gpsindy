@@ -285,7 +285,7 @@ end
 ## ============================================ ##
 
 export build_dx_fn 
-function build_dx_fn(poly_order, x_vars, u_vars, z_fd) 
+function build_dx_fn( poly_order, x_vars, u_vars, z_fd ) 
 
     n_vars = x_vars + u_vars 
 

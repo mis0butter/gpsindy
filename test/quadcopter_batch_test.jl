@@ -13,6 +13,98 @@ path = "test/data/cyrus_quadcopter_csvs_sparse/"
 csv_files_vec = readdir( path ) 
 
 # for i_csv in eachindex(csv_files_vec) 
+i_csv = 1  
+
+    csv_file = string( path, csv_files_vec[i_csv] ) 
+    println( "csv_file = ", csv_files_vec[i_csv] ) 
+    df   = CSV.read( csv_file, DataFrame ) 
+    # header = [ 
+    #     "t", 
+    #     "px", "py", "pz", "vx", "vy", "vz", "qw", "qx", "qy", "qz", "wx", "wy", "wz",   # states 
+    #     "c1", "c2", "c3", "c4", "c5", "c6"                                              # commands  
+    #     ] 
+    data = Matrix(df) 
+    t    = data[:,1] 
+    x    = data[:,2:14] 
+    u    = data[:,15:end] 
+# end 
+
+# all points 
+N  = size(x, 1) 
+
+# get derivatives 
+x, dx_fd = unroll( t, x ) 
+
+# ----------------------- #
+# plot entire trajectory 
+
+fig_entire_traj = plot_line3d( x[:,1], x[:,2], x[:,3] ) 
+fig_entire_traj = add_title3d( fig_entire_traj, "Entire Trajectory" ) 
+
+
+## ============================================ ##
+# split into training and testing 
+
+N_train = Int( round( N * 0.8 ) ) 
+N_train = 300 
+
+# split into training and test data 
+t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test = split_train_test_Npoints( t, x, dx_fd, u, N_train ) 
+
+# get sizes 
+x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
+
+# plot training and testing data 
+fig_train_test = plot_train_test( x_train, x_test, N_train ) 
+
+
+## ============================================ ##
+# try gp stuff 
+
+# first - smooth measurements with Gaussian processes 
+
+# normal SINDy 
+λ = 0.1 
+Ξ_lasso    = sindy_lasso( x_train, dx_train, λ, u_train ) 
+
+# GPSINDy 
+x_GP       = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+dx_GP      = gp_post( x_GP, 0*dx_train, x_GP, 0*dx_train, dx_train ) 
+Ξ_GP_lasso = sindy_lasso( x_GP, dx_GP, λ, u_train ) 
+
+# ----------------------- # 
+# now test on training data 
+
+x0_train_GP = x_GP[1,:] 
+
+# build dx fn 
+dx_fn_sindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_lasso ) 
+dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_GP_lasso ) 
+x_train_sindy   = integrate_euler( dx_fn_sindy, x0_train_GP, t_train, u_train )  
+x_train_gpsindy = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
+
+# create figure 
+fig_train_pred  = plot_train_pred( x_train, x_train_sindy, N_train ) 
+
+
+## ============================================ ## 
+# cross-validation 
+
+λ_vec = λ_vec_fn() 
+Ξ_gpsindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( t_train, x_GP, dx_GP, u_train, λ_vec ) 
+
+
+
+
+
+## ============================================ ##
+# get states and inputs (OLD WAY) 
+
+path = "test/data/cyrus_quadcopter_csvs/" 
+# state vars: px, py, pz, vx, vy, vz, qw, qx, qy, qz, wx, wy, wz 
+csv_files_vec = readdir( path ) 
+
+# for i_csv in eachindex(csv_files_vec) 
 i_csv = 1 
     csv_file = string( path, csv_files_vec[i_csv] ) 
     df   = CSV.read(csv_file, DataFrame) 
@@ -38,64 +130,6 @@ x, dx_fd = unroll( t, x )
 
 fig_entire_traj = plot_line3d( x[:,1], x[:,2], x[:,3] ) 
 fig_entire_traj = add_title3d( fig_entire_traj, "Entire Trajectory" ) 
-
-
-## ============================================ ##
-# split into training and testing 
-
-N_train = Int( round( N * 0.8 ) ) 
-N_train = 100 
-
-# split into training and test data 
-t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test = split_train_test_Npoints( t, x, dx_fd, u, N_train ) 
-
-# get sizes 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
-
-# plot training and testing data 
-fig_train_test = plot_train_test( x_train, x_test, N_train ) 
-
-
-## ============================================ ##
-# try gp stuff 
-
-# first - smooth measurements with Gaussian processes 
-
-# normal SINDy 
-Ξ_lasso    = sindy_lasso( x_train, dx_train, λ, u_train ) 
-
-# GPSINDy 
-x_GP       = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
-dx_GP      = gp_post( x_GP, 0*dx_train, x_GP, 0*dx_train, dx_train ) 
-Ξ_GP_lasso = sindy_lasso( x_GP, dx_GP, λ, u_train ) 
-
-# ----------------------- #
-# now test on training data 
-
-x0_train_GP = x_GP[1,:] 
-
-# build dx fn 
-dx_fn_sindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_lasso ) 
-dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_GP_lasso ) 
-x_train_sindy   = integrate_euler( dx_fn_sindy, x0_train_GP, t_train, u_train )  
-x_train_gpsindy = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
-
-# create figure 
-fig_train_pred = plot_train_pred( x_train, x_train_gpsindy, N_train ) 
-
-
-## ============================================ ##
-
-λ_vec = λ_vec_fn() 
-Ξ_gpsindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( t_train, x_GP, dx_GP, u_train, λ_vec ) 
-
-
-
-
-
-
-
-
 
 
 
