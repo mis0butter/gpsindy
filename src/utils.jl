@@ -128,15 +128,24 @@ function unroll( t, x )
     # @infiltrate 
 
     for i in eachindex(rollover_up_ind) 
-
-        i0   = rollover_up_ind[i] + 1 
-        ifin = rollover_dn_ind[i] 
-        rollover_rng = x[ i0 : ifin , 4 ]
-        dθ = π .- rollover_rng 
-        θ  = -π .- dθ 
-        x[ i0 : ifin , 4 ] = θ
-
-    end 
+        # i = 1 
+    
+            if rollover_up_ind[i] < rollover_dn_ind[i] 
+                i0   = rollover_up_ind[i] + 1 
+                ifin = rollover_dn_ind[i]     
+                rollover_rng = x[ i0 : ifin , 4 ]
+                dθ = π .- rollover_rng 
+                θ  = -π .- dθ 
+            else 
+                i0   = rollover_dn_ind[i] + 1 
+                ifin = rollover_up_ind[i]     
+                rollover_rng = x[ i0 : ifin , 4 ]
+                dθ = π .+ rollover_rng 
+                θ  = π .+ dθ     
+            end 
+            x[ i0 : ifin , 4 ] = θ
+    
+        end 
 
     # @infiltrate 
     

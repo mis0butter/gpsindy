@@ -47,7 +47,7 @@ t_train  = data_train.t[:,1]
 x_train  = data_train.x_noise 
 dx_train = data_train.dx_noise 
 
-t, x, u = extract_car_data( csv_file ) 
+# t, x, u = extract_car_data( csv_file ) 
 
 ## ============================================ ##
 # debug unroll 
@@ -86,26 +86,6 @@ t, x, u = extract_car_data( csv_file )
     rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
 
     # @infiltrate 
-
-    # for i in eachindex(rollover_up_ind) 
-    i = 1 
-
-        if rollover_up_ind[i] < rollover_dn_ind[i] 
-            i0   = rollover_up_ind[i] + 1 
-            ifin = rollover_dn_ind[i]     
-            rollover_rng = x[ i0 : ifin , 4 ]
-            dθ = π .- rollover_rng 
-            θ  = -π .- dθ 
-        else 
-            i0   = rollover_dn_ind[i] + 1 
-            ifin = rollover_up_ind[i]     
-            rollover_rng = x[ i0 : ifin , 4 ]
-            dθ = π .+ rollover_rng 
-            θ  = π .+ dθ     
-        end 
-        x[ i0 : ifin , 4 ] = θ
-
-    # end 
 
 plot( t, x[:,4] )
 
