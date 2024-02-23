@@ -4,6 +4,8 @@ using CSV, DataFrames
 using BenchmarkTools 
 using GLMakie 
 
+Infiltrator.clear_disabled!() 
+Infiltrator.toggle_async_check(false) 
 
 ## ============================================ ##
 # get states and inputs 
@@ -70,14 +72,14 @@ fig_train_test = plot_train_test( x_train, x_test, N_train, fig_train_test )
 Ξ_lasso    = sindy_lasso( x_train, dx_train, λ, u_train ) 
 
 # GPSINDy 
-x_GP       = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
-dx_GP      = gp_post( x_GP, 0*dx_train, x_GP, 0*dx_train, dx_train ) 
-Ξ_GP_lasso = sindy_lasso( x_GP, dx_GP, λ, u_train ) 
+x_train_GP  = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+dx_train_GP = gp_post( x_train_GP, 0*dx_train, x_train_GP, 0*dx_train, dx_train ) 
+Ξ_GP_lasso  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
 
 # ----------------------- # 
 # now test on training data 
 
-x0_train_GP = x_GP[1,:] 
+x0_train_GP = x_train_GP[1,:] 
 
 # build dx fn 
 dx_fn_sindy     = build_dx_fn( poly_order, x_vars, u_vars, Ξ_lasso ) 
@@ -86,15 +88,69 @@ x_train_sindy   = integrate_euler( dx_fn_sindy, x0_train_GP, t_train, u_train )
 x_train_gpsindy = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train )  
 
 # create figure 
-fig_train_pred  = plot_train_pred( x_train, x_train_gpsindy, N_train ) 
+fig_train_pred  = plot_axes3d( ) 
+fig_train_pred  = plot_train_pred( x_train, x_train_gpsindy, N_train, fig_train_pred ) 
+
+## ============================================ ## 
+# okay ... debug why the GP stuff is not working for q1, w1, w2, w3, and wdot3 
+
+q1_train = x_train[:,7] 
+q1_train_GP  = gp_post( t_train, 0*q1_train, t_train, 0*q1_train, q1_train ) 
+
+
+## ============================================ ##
+
+
+
+fig_x  = plot_quad_x_train_GP( t_train, x_train, x_train_GP ) 
+fig_dx = plot_quad_dx_train_GP( t_train, dx_train, dx_train_GP ) 
+
+fig_train_GP 
+    # lines!(ax2, t_train, x_train_GP[:,1], x_train_GP[:,2], x_train_GP[:,3], linewidth = 1, linestyle = :solid, label = "GP") 
 
 
 ## ============================================ ## 
 # cross-validation 
 
 λ_vec = λ_vec_fn() 
-Ξ_gpsindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( t_train, x_GP, dx_GP, u_train, λ_vec ) 
+Ξ_gpsindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train, λ_vec ) 
 Ξ_gpsindy_minerr = Ξ_minerr( Ξ_gpsindy_vec, err_x_sindy ) 
+
+
+## ============================================ ##
+# debug cross-validation 
+   
+# build function library from smoothed data 
+Θx_gp  = pool_data_test( [ x_train_GP u_train ], n_vars, poly_order ) 
+
+j = size(x_train_GP, 2) 
+    
+# CROSS-VALIDATION 
+for i = eachindex(λ_vec) 
+
+    λ = λ_vec[i] 
+    println( "x", j, ": λ = ", λ ) 
+
+    # GPSINDy-lasso ! 
+    Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
+    dx_gpsindy = Θx_gp * Ξ_gpsindy 
+
+    # integrate discovered dynamics 
+    dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+    x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train ) 
+
+    # save ξ coefficients 
+    ξ = Ξ_gpsindy[:,j] 
+    println( "ξ norm = ", norm( ξ ) ) 
+    
+    # push error stuff 
+    err_xj_norm  = norm( x_gpsindy_train[:,j] - x_train_GP[:,j] )   ; println( "x err = ", err_xj_norm ) 
+    # err_dxj_norm = norm( dx_gpsindy[:,j] - dx_train_GP[:,j] )       
+
+end 
+
+
+
 
 
 

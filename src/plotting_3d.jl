@@ -1,6 +1,189 @@
 using GLMakie 
 
 ## ============================================ ##
+ function plot_quad_dx_train_GP( t_train, dx_train, dx_train_GP ) 
+
+    fig_train_GP = Figure( size = ( 800,400 ) )
+
+    ax_1x = Axis(
+        fig_train_GP[1:4,1],
+        ylabel  = "xdot1"
+    ) 
+        lines!(ax_1x, t_train, dx_train[:,1], label = "Raw") 
+        lines!(ax_1x, t_train, dx_train_GP[:,1], label = "GP") 
+        axislegend() 
+    ax_1y = Axis(
+        fig_train_GP[5:8,1],
+        ylabel  = "xdot2"
+    ) 
+        lines!(ax_1y, t_train, dx_train[:,2], label = "xdot2 Raw") 
+        lines!(ax_1y, t_train, dx_train_GP[:,2], label = "xdot2 GP") 
+    ax_1z = Axis(
+        fig_train_GP[9:12,1],
+        ylabel  = "xdot3"
+    ) 
+        lines!(ax_1z, t_train, dx_train[:,3], label = "xdot3 Raw") 
+        lines!(ax_1z, t_train, dx_train_GP[:,3], label = "xdot3 GP") 
+    
+    ax_2 = Axis(
+        fig_train_GP[1:4,2],
+        ylabel  = "vdot1"
+    ) 
+        lines!(ax_2, t_train, dx_train[:,4], label = "v1 Raw") 
+        lines!(ax_2, t_train, dx_train_GP[:,4], label = "v1 GP") 
+        # axislegend()
+    ax_3 = Axis( 
+        fig_train_GP[5:8,2], 
+        ylabel = "vdot2" 
+    ) 
+        lines!(ax_3, t_train, dx_train[:,5], label = "v2 Raw") 
+        lines!(ax_3, t_train, dx_train_GP[:,5], label = "v2 GP") 
+        # axislegend()
+    ax_4 = Axis( 
+        fig_train_GP[9:12,2], 
+        xlabel = "t (s)", 
+        ylabel = "vdot3", 
+        )
+        lines!(ax_4, t_train, dx_train[:,6], label = "v3 Raw") 
+        lines!(ax_4, t_train, dx_train_GP[:,6], label = "v3 GP") 
+    ax_5 = Axis(
+        fig_train_GP[1:3,3],
+        ylabel = "qdot1",
+    ) 
+        lines!(ax_5, t_train, dx_train[:,7], label = "Raw") 
+        lines!(ax_5, t_train, dx_train_GP[:,7], label = "GP") 
+    ax_6 = Axis(
+        fig_train_GP[4:6,3],
+        ylabel = "qdot2",
+    ) 
+        lines!(ax_6, t_train, dx_train[:,8], label = "Raw") 
+        lines!(ax_6, t_train, dx_train_GP[:,8], label = "GP") 
+    ax_7 = Axis(
+        fig_train_GP[7:9,3],
+        ylabel = "qdot3",
+    ) 
+        lines!(ax_7, t_train, dx_train[:,9], label = "Raw") 
+        lines!(ax_7, t_train, dx_train_GP[:,9], label = "GP") 
+    ax_8 = Axis( 
+        fig_train_GP[10:12,3], 
+        xlabel = "t (s)", 
+        ylabel = "qdot4", 
+    ) 
+        lines!(ax_8, t_train, dx_train[:,10], label = "Raw") 
+        lines!(ax_8, t_train, dx_train_GP[:,10], label = "GP") 
+    ax_9 = Axis( 
+        fig_train_GP[1:4,4], 
+        ylabel = "wdot1", 
+    ) 
+        lines!(ax_9, t_train, dx_train[:,11], label = "Raw") 
+        lines!(ax_9, t_train, dx_train_GP[:,11], label = "GP") 
+    ax_10 = Axis( 
+        fig_train_GP[5:8,4], 
+        ylabel = "wdot2", 
+    ) 
+        lines!(ax_10, t_train, dx_train[:,12], label = "Raw") 
+        lines!(ax_10, t_train, dx_train_GP[:,12], label = "GP") 
+    ax_11 = Axis( 
+        fig_train_GP[9:12,4], 
+        xlabel = "t (s)", 
+        ylabel = "wdot3", 
+    ) 
+        lines!(ax_11, t_train, dx_train[:,13], label = "Raw") 
+        lines!(ax_11, t_train, dx_train_GP[:,13], label = "GP") 
+
+    return fig_train_GP 
+ end 
+
+ export plot_quad_dx_train_GP 
+
+## ============================================ ##
+ function plot_quad_x_train_GP( t_train, x_train, x_train_GP ) 
+
+    fig_train_GP = Figure( size = ( 800,400 ) )
+    ax_1 = Axis3(
+        fig_train_GP[1:12,1],
+        aspect = :data,
+        xlabel = "x",
+        ylabel = "y",
+        zlabel = "z",
+        title  = "Raw vs. GP Data Position"
+    ) 
+        lines!(ax_1, x_train[:,1], x_train[:,2], x_train[:,3], linewidth = 1, linestyle = :solid, label = "Raw") 
+        lines!(ax_1, x_train_GP[:,1], x_train_GP[:,2], x_train_GP[:,3], linewidth = 1, linestyle = :solid, label = "GP") 
+        axislegend()
+    
+    ax_2 = Axis(
+        fig_train_GP[1:4,2],
+        ylabel  = "v1"
+    ) 
+        lines!(ax_2, t_train, x_train[:,4], label = "v1 Raw") 
+        lines!(ax_2, t_train, x_train_GP[:,4], label = "v1 GP") 
+        # axislegend()
+    ax_3 = Axis( 
+        fig_train_GP[5:8,2], 
+        ylabel = "v2" 
+    ) 
+        lines!(ax_3, t_train, x_train[:,5], label = "v2 Raw") 
+        lines!(ax_3, t_train, x_train_GP[:,5], label = "v2 GP") 
+        # axislegend()
+    ax_4 = Axis( 
+        fig_train_GP[9:12,2], 
+        xlabel = "t (s)", 
+        ylabel = "v3", 
+        )
+        lines!(ax_4, t_train, x_train[:,6], label = "v3 Raw") 
+        lines!(ax_4, t_train, x_train_GP[:,6], label = "v3 GP") 
+    ax_5 = Axis(
+        fig_train_GP[1:3,3],
+        ylabel = "q1",
+    ) 
+        lines!(ax_5, t_train, x_train[:,7], label = "Raw") 
+        lines!(ax_5, t_train, x_train_GP[:,7], label = "GP") 
+    ax_6 = Axis(
+        fig_train_GP[4:6,3],
+        ylabel = "q2",
+    ) 
+        lines!(ax_6, t_train, x_train[:,8], label = "Raw") 
+        lines!(ax_6, t_train, x_train_GP[:,8], label = "GP") 
+    ax_7 = Axis(
+        fig_train_GP[7:9,3],
+        ylabel = "q3",
+    ) 
+        lines!(ax_7, t_train, x_train[:,9], label = "Raw") 
+        lines!(ax_7, t_train, x_train_GP[:,9], label = "GP") 
+    ax_8 = Axis( 
+        fig_train_GP[10:12,3], 
+        xlabel = "t (s)", 
+        ylabel = "q4", 
+    ) 
+        lines!(ax_8, t_train, x_train[:,10], label = "Raw") 
+        lines!(ax_8, t_train, x_train_GP[:,10], label = "GP") 
+    ax_9 = Axis( 
+        fig_train_GP[1:4,4], 
+        ylabel = "w1", 
+    ) 
+        lines!(ax_9, t_train, x_train[:,11], label = "Raw") 
+        lines!(ax_9, t_train, x_train_GP[:,11], label = "GP") 
+    ax_10 = Axis( 
+        fig_train_GP[5:8,4], 
+        ylabel = "w2", 
+    ) 
+        lines!(ax_10, t_train, x_train[:,12], label = "Raw") 
+        lines!(ax_10, t_train, x_train_GP[:,12], label = "GP") 
+    ax_11 = Axis( 
+        fig_train_GP[9:12,4], 
+        xlabel = "t (s)", 
+        ylabel = "w3", 
+    ) 
+        lines!(ax_11, t_train, x_train[:,13], label = "Raw") 
+        lines!(ax_11, t_train, x_train_GP[:,13], label = "GP") 
+
+    return fig_train_GP 
+ end 
+
+ export plot_quad_x_train_GP 
+
+## ============================================ ##
 
 """
 Plot training and predicted training data using GLMakie 
@@ -44,13 +227,20 @@ export plot_train_test
 Plot training and predicted training data using GLMakie 
 """ 
 function plot_train_pred( 
-    x_train,                # [N,3] matrix of training data 
-    x_train_pred,           # [N,3] matrix of predicted training data 
-    N_points        = 0     # number of points to plot 
+    x_train,                    # [N,3] matrix of training data 
+    x_train_pred,               # [N,3] matrix of predicted training data 
+    N_points      = 0,          # number of points to plot 
+    fig           = nothing     # figure handle 
 ) 
 
     # create figure 
-    fig_train_pred = Figure() ; ax = Axis3( fig_train_pred[1,1] ) 
+    if isnothing(fig) 
+        fig = Figure() 
+        ax  = Axis3( fig[1,1] ) 
+    else 
+        ax  = fig.content[1] 
+    end 
+
     if N_points == 0 
         ax.title = "Trajectory of Predicted Training Data" 
     else 
@@ -63,7 +253,7 @@ function plot_train_pred(
 
     axislegend( ax, position = :rt ) 
 
-    return fig_train_pred 
+    return fig 
 end 
 
 export plot_train_pred 

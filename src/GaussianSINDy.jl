@@ -5,6 +5,7 @@ module GaussianSINDy
 
 using LinearAlgebra 
 using Optim 
+using DifferentialEquations
 
 using Plots 
 using StatsPlots
@@ -16,6 +17,8 @@ using LineSearches
 using Statistics 
 using CSV 
 using DataFrames 
+
+# using Infiltrator 
 
 using Flux 
 

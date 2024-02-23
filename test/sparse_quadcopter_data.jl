@@ -84,7 +84,7 @@ end
 # ----------------------- #
 # save data 
 
-F_hz = 10   # 10 Hz 
+F_hz = 100   # 10 Hz 
 save_Fhz_data( F_hz )
 
 

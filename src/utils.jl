@@ -1,4 +1,5 @@
 
+
 ## ============================================ ##
 # for cross-validation 
 
@@ -123,7 +124,10 @@ function unroll( t, x )
     # massage data, generate rollovers  
     rollover_up_ind = findall( x -> x > 100, dx_fd[:,4] ) 
     rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
-    for i = 1 : length(rollover_up_ind) 
+
+    # @infiltrate 
+
+    for i in eachindex(rollover_up_ind) 
 
         i0   = rollover_up_ind[i] + 1 
         ifin = rollover_dn_ind[i] 
@@ -133,6 +137,8 @@ function unroll( t, x )
         x[ i0 : ifin , 4 ] = θ
 
     end 
+
+    # @infiltrate 
     
     # use central finite differencing now  
     dx_fd = fdiff(t, x, 2) 
