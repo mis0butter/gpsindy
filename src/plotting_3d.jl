@@ -1,6 +1,46 @@
 using GLMakie 
 
+
 ## ============================================ ##
+
+function plot_car_raw_GP( t_train, x_train, dx_train, x_train_GP, dx_train_GP) 
+
+    fig = Figure() 
+
+    Axis( fig[1:2, 1], xlabel = "x", ylabel = "y" ) 
+        lines!( fig[1:2,1] , x_train[:,1], x_train[:,2], label = "raw" ) 
+        lines!( fig[1:2,1] , x_train_GP[:,1], x_train_GP[:,2], linestyle = :dash, label = "GP" ) 
+        axislegend() 
+    
+    Axis( fig[3, 1], xlabel = "t", ylabel = "v" ) 
+        lines!( fig[3,1] , t_train, x_train[:,3], label = "v" ) 
+        lines!( fig[3,1] , t_train, x_train_GP[:,3], linestyle = :dash, label = "v" ) 
+    Axis( fig[4, 1], xlabel = "t", ylabel = "θ" ) 
+        lines!( fig[4,1] , t_train, x_train[:,4], label = "θ" ) 
+        lines!( fig[4,1] , t_train, x_train_GP[:,4], linestyle = :dash, label = "θ" ) 
+    
+    Axis( fig[1, 2], ylabel = "xdot" ) 
+        lines!( fig[1,2] , t_train, dx_train[:,1], label = "raw" ) 
+        lines!( fig[1,2] , t_train, dx_train_GP[:,1], label = "raw" ) 
+    Axis( fig[2, 2], ylabel = "ydot" ) 
+        lines!( fig[2,2] , t_train, dx_train[:,2], label = "raw" ) 
+        lines!( fig[2,2] , t_train, dx_train_GP[:,2], label = "raw" ) 
+    Axis( fig[3, 2], ylabel = "vdot" ) 
+        lines!( fig[3,2] , t_train, dx_train[:,3], label = "v" ) 
+        lines!( fig[3,2] , t_train, dx_train_GP[:,3], label = "v" ) 
+    Axis( fig[4, 2], xlabel = "t", ylabel = "θdot" ) 
+        lines!( fig[4,2] , t_train, dx_train[:,4], label = "θ" ) 
+        lines!( fig[4,2] , t_train, dx_train_GP[:,4], label = "θ" ) 
+
+    return fig 
+end 
+
+export plot_car_raw_GP 
+
+
+## ============================================ ##
+# plot quadcopter data 
+
  function plot_quad_dx_train_GP( t_train, dx_train, dx_train_GP ) 
 
     fig_train_GP = Figure( size = ( 800,400 ) )
@@ -97,7 +137,7 @@ using GLMakie
  export plot_quad_dx_train_GP 
 
 ## ============================================ ##
- function plot_quad_x_train_GP( t_train, x_train, x_train_GP ) 
+function plot_quad_x_train_GP( t_train, x_train, x_train_GP ) 
 
     fig_train_GP = Figure( size = ( 800,400 ) )
     ax_1 = Axis3(
