@@ -10,12 +10,11 @@ csv_files_vec = readdir( path )
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( path, csv_files_vec[i] ) 
 end
-
-x_err_hist  = x_err_struct([], [], [], []) 
+N = length(csv_files_vec) 
 
 norm_err_vec = [  ] 
 
-for i = eachindex(csv_files_vec) 
+for i = 25 : N 
 # i = 1 
 
     csv_file = csv_files_vec[i] 
@@ -36,9 +35,9 @@ end
 
 
 ## ============================================ ##
-# i = 17 error 
+# i = 36 error 
 
-i = 17 
+i = 36 
 csv_file = csv_files_vec[i] 
 
 # get x and dx training data 
@@ -47,53 +46,11 @@ t_train  = data_train.t[:,1]
 x_train  = data_train.x_noise 
 dx_train = data_train.dx_noise 
 
-# t, x, u = extract_car_data( csv_file ) 
 
-## ============================================ ##
-# debug unroll 
-
-    # use forward finite differencing 
-    dx_fd = fdiff(t, x, 1) 
-
-    # massage data, generate rollovers  
-    rollover_up_ind = findall( x -> x > 100, dx_fd[:,4] ) 
-    rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
-
-    # @infiltrate 
-
-    for i in eachindex(rollover_up_ind) 
-
-        i0   = rollover_up_ind[i] + 1 
-        ifin = rollover_dn_ind[i] 
-        rollover_rng = x[ i0 : ifin , 4 ]
-        dθ = π .- rollover_rng 
-        θ  = -π .- dθ 
-        x[ i0 : ifin , 4 ] = θ
-
-    end 
-
-## ============================================ ##
-
-t, x, u = extract_car_data( csv_file ) 
-
-# debug car_data_struct 
-
-    # use forward finite differencing 
-    dx_fd = fdiff(t, x, 1) 
-
-    # massage data, generate rollovers  
-    rollover_up_ind = findall( x -> x > 100, dx_fd[:,4] ) 
-    rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
-
-    # @infiltrate 
-
-plot( t, x[:,4] )
-
-
-## ============================================ ## 
-
+# ----------------------- #
 # smooth with GPs 
-x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+
+# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
 
 
 ## ============================================ ## 
@@ -120,10 +77,6 @@ fig = Figure()
 fig  
 
 ## ============================================ ##
-
-
-
-
 
 
 

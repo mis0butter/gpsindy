@@ -125,8 +125,6 @@ function unroll( t, x )
     rollover_up_ind = findall( x -> x > 100, dx_fd[:,4] ) 
     rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
 
-    # @infiltrate 
-
     for i in eachindex(rollover_up_ind) 
         # i = 1 
     
