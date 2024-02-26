@@ -100,20 +100,6 @@ x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data
 # plot train and train_GP data 
 
 fig = Figure() 
-for i = 1:4 
-    Axis( fig[i, 1], xlabel = "t", ylabel = string( "x",i ) ) 
-        lines!( fig[i,1] , t_train, x_train[:,i], label = "raw" ) 
-        # lines!( fig[i,1] , t_train, x_train_GP[:,i], linestyle = :dash, label = "GP" ) 
-    Axis( fig[i, 2], xlabel = "t", ylabel = string( "dx",i ) ) 
-        lines!( fig[i,2] , t_train, dx_train[:,i], label = "raw" ) 
-        # lines!( fig[i,2] , t_train, dx_train_GP[:,i], linestyle = :dash, label = "GP" ) 
-end       
-fig  
-
-
-## ============================================ ##
-
-fig = Figure() 
 
     Axis( fig[1:2, 1], xlabel = "x", ylabel = "y" ) 
         lines!( fig[1:2,1] , x_train[:,1], x_train[:,2], label = "raw" ) 
