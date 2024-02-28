@@ -16,22 +16,22 @@ include("eval_odes.jl")
 ## ============================================ ##
 # derivatives: variational 
 
-using NoiseRobustDifferentiation
+# using NoiseRobustDifferentiation
 
-export dx_tv_fn 
-function dx_tv_fn(x) 
+# export dx_tv_fn 
+# function dx_tv_fn(x) 
 
-    dx_tv  = 0*x 
-    n_vars = size(x, 2)
+#     dx_tv  = 0*x 
+#     n_vars = size(x, 2)
 
-    for i = 1:n_vars 
-        dx = x[2,i] - x[1,i] 
-        dx_tv[:,i] = tvdiff(x[:,i], 100, 0.2, dx=dx)
-    end 
+#     for i = 1:n_vars 
+#         dx = x[2,i] - x[1,i] 
+#         dx_tv[:,i] = tvdiff(x[:,i], 100, 0.2, dx=dx)
+#     end 
 
-    return dx_tv 
+#     return dx_tv 
 
-end 
+# end 
 
 
 ## ============================================ ##

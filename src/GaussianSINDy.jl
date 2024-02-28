@@ -8,7 +8,6 @@ using Optim
 using DifferentialEquations
 
 using Plots 
-using StatsPlots
 using Latexify
 
 using GaussianProcesses
