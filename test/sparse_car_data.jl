@@ -7,7 +7,7 @@ using GLMakie
 ## ============================================ ##
 # control input delay  
 
-path          = "test/data/jake_car_csvs_sparse/" 
+path          = "test/data/jake_car_csvs_control_adjust/" 
 csv_files_vec = readdir( path ) 
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( path, csv_files_vec[i] ) 
@@ -35,6 +35,9 @@ end
     
     x_GP  = gp_post( t, 0*x, t, 0*x, x ) 
     dx_GP = gp_post( x, 0*dx, x, 0*dx, dx ) 
+
+    # get header from dataframe 
+    header = names(df) 
 
 
 ## ============================================ ##
@@ -130,4 +133,60 @@ fig
 
 # looks like there is control input delay of 9.54 , 9.66 maybe 
 # delay of 0.12 seconds? 
+
+
+## ============================================ ##
+# so ... what I want to do is shift the first column down by 0.12 * 50 = 6 indices 
+
+u_shift = circshift(u, 6)   
+u_shift[1:6,2] .= 0 
+
+du_shift  = fdiff(t, u_shift, 1) 
+ddu_shift = fdiff(t, du_shift, 1) 
+
+# now plot again 
+i0 = 470     
+i1 = 500       
+
+t1 = 9.54
+t2 = 9.54 + 0.12 
+
+fig = Figure() 
+    Axis( fig[1,1], xlabel = "t" )
+        # lines!( fig[1,1], t, du[:,1], label = "du1" )  
+        lines!( fig[1,1], t[i0:i1], u_shift[i0:i1,2], label = "u2" ) 
+        lines!( fig[1,1], t[i0:i1], x[i0:i1,4], label = "x4" )  
+        lines!( fig[1,1], t[i0:i1], x_GP[i0:i1,4], label = "x4_GP" )  
+        vlines!( fig[1,1], [t1, t2], color = :red)
+        axislegend() 
+    Axis( fig[2,1], xlabel = "t" )
+        # lines!( fig[1,1], t, du[:,1], label = "du1" )  
+        lines!( fig[2,1], t[i0:i1], du_shift[i0:i1,2], label = "du2" ) 
+        lines!( fig[2,1], t[i0:i1], dx[i0:i1,4], label = "dx4" )  
+        vlines!( fig[2,1], [t1, t2], color = :red)
+        axislegend() 
+    Axis( fig[1,2], xlabel = "t" )
+        lines!( fig[1,2], t[i0:i1], ddu_shift[i0:i1,2], label = "ddu2" ) 
+        vlines!( fig[1,2], [t1, t2], color = :red)
+        axislegend() 
+    Axis( fig[2,2], xlabel = "t" ) 
+        lines!( fig[2,2], t[i0:i1], ddx[i0:i1,4], label = "ddx4" )  
+        vlines!( fig[2,2], [t1, t2], color = :red)
+        axislegend() 
+
+fig 
+
+
+## ============================================ ##
+# okay, I like that control input delay adjustment. But that's what I found for rollout_1.csv 
+
+# Let's save over the u data for the csv file 
+data_shift = copy(data) 
+data_shift[:,6:7] = u_shift 
+
+# save data_shift as csv file 
+csv_file_shift = replace( csv_file, "rollout_" => "rollout_shift_") 
+CSV.write( csv_file_shift, DataFrame(data_shift, header) ) 
+
+
 
