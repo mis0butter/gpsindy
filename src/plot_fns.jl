@@ -136,7 +136,7 @@ function plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy_lasso, x_nn, x_gpsindy
     for i = 1 : x_vars 
     
         ymin, dy, ymax = min_d_max( x_test[:, i] )
-        p = plot( t_test, x_test[:,i], 
+        p = Plots.plot( t_test, x_test[:,i], 
             c       = :gray, 
             label   = "test", 
             legend  = :outerright, 
@@ -146,21 +146,21 @@ function plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy_lasso, x_nn, x_gpsindy
             ylim    = (ymin, ymax), 
             title   = string(latexify("x_$(i)")),
         ) 
-        plot!( p, t_test, x_sindy_lasso[:,i], 
+        Plots.plot!( p, t_test, x_sindy_lasso[:,i], 
             c       = :red, 
             label   = "SINDy (LASSO)", 
             xticks  = xmin:dx:xmax,
             yticks  = ymin:dy:ymax,
             ls      = :dashdot, 
         ) 
-        plot!( p, t_test, x_nn[:,i], 
+        Plots.plot!( p, t_test, x_nn[:,i], 
             c       = :blue, 
             label   = "NN (LASSO)", 
             xticks  = xmin:dx:xmax,
             yticks  = ymin:dy:ymax,
             ls      = :dashdot, 
         ) 
-        plot!( p, t_test, x_gpsindy_stls[:,i], 
+        Plots.plot!( p, t_test, x_gpsindy_stls[:,i], 
             # c       = :blue, 
             label   = "GPSINDy (LASSO)", 
             xticks  = xmin:dx:xmax,
@@ -179,7 +179,7 @@ function plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy_lasso, x_nn, x_gpsindy
     # )  
     # push!( p_vec, p ) 
     
-    pfig = plot(  p_vec ... , 
+    pfig = Plots.plot(  p_vec ... , 
         layout = grid( x_vars, 1 ), 
         size   = [ 600 x_vars * 400 ],         
         margin = 5Plots.mm,
@@ -203,7 +203,7 @@ function plot_noise_sindy_gpsindy( t_train, x_train_noise, x_train_GP, x_train_s
     plt_x_vec = [] 
     for j = 1 : x_vars 
         ymin, dy, ymax = min_d_max( x_train_noise[:,j] ) 
-        plt_x = plot( t_train, x_train_noise[:,j], 
+        plt_x = Plots.plot( t_train, x_train_noise[:,j], 
             xlabel = "t (s)", 
             ylabel = "x", 
             ylim   = ( ymin, ymax ), 
@@ -212,21 +212,21 @@ function plot_noise_sindy_gpsindy( t_train, x_train_noise, x_train_GP, x_train_s
             size   = (1000, 400), 
             label  = "noise", 
         ) 
-        plot!( plt_x, t_train, x_train_GP[:,j], 
+        Plots.plot!( plt_x, t_train, x_train_GP[:,j], 
             label = "GP", 
             ls    = :dash,   
         ) 
-        plot!( plt_x, t_train, x_train_sindy[:,j], 
+        Plots.plot!( plt_x, t_train, x_train_sindy[:,j], 
             label = "SINDy", 
             ls    = :dashdot,   
         ) 
-        plot!( plt_x, t_train, x_train_gpsindy[:,j], 
+        Plots.plot!( plt_x, t_train, x_train_gpsindy[:,j], 
         label = string("GPSINDy"),
         ls    = :dot,   
         ) 
         push!( plt_x_vec, plt_x ) 
     end 
-    pfig = plot( plt_x_vec ... , 
+    pfig = Plots.plot( plt_x_vec ... , 
         layout = ( x_vars, 1 ), 
         size = (1000, 400*x_vars), 
         plot_title = plot_suptitle, 
