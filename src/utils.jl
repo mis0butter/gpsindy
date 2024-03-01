@@ -119,11 +119,11 @@ export unroll
 function unroll( t, x ) 
 
     # use forward finite differencing 
-    dx_fd = fdiff(t, x, 1) 
+    dx = fdiff(t, x, 1) 
 
     # massage data, generate rollovers  
-    rollover_up_ind = findall( x -> x > 100, dx_fd[:,4] ) 
-    rollover_dn_ind = findall( x -> x < -100, dx_fd[:,4] ) 
+    rollover_up_ind = findall( x -> x > 10, dx[:,4] ) 
+    rollover_dn_ind = findall( x -> x < -10, dx[:,4] ) 
 
     for i in eachindex(rollover_up_ind) 
         # i = 1 
@@ -148,9 +148,9 @@ function unroll( t, x )
     # @infiltrate 
     
     # use central finite differencing now  
-    dx_fd = fdiff(t, x, 2) 
+    dx = fdiff(t, x, 2) 
 
-    return x, dx_fd 
+    return x, dx
 end 
 
 

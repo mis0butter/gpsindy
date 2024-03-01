@@ -157,21 +157,21 @@ fig = Figure()
         lines!( fig[1,1], t[i0:i1], u_shift[i0:i1,2], label = "u2" ) 
         lines!( fig[1,1], t[i0:i1], x[i0:i1,4], label = "x4" )  
         lines!( fig[1,1], t[i0:i1], x_GP[i0:i1,4], label = "x4_GP" )  
-        vlines!( fig[1,1], [t1, t2], color = :red)
+        vlines!( fig[1,1], [t1, t2], color = :red ) 
         axislegend() 
     Axis( fig[2,1], xlabel = "t" )
         # lines!( fig[1,1], t, du[:,1], label = "du1" )  
         lines!( fig[2,1], t[i0:i1], du_shift[i0:i1,2], label = "du2" ) 
         lines!( fig[2,1], t[i0:i1], dx[i0:i1,4], label = "dx4" )  
-        vlines!( fig[2,1], [t1, t2], color = :red)
+        vlines!( fig[2,1], [t1, t2], color = :red ) 
         axislegend() 
     Axis( fig[1,2], xlabel = "t" )
         lines!( fig[1,2], t[i0:i1], ddu_shift[i0:i1,2], label = "ddu2" ) 
-        vlines!( fig[1,2], [t1, t2], color = :red)
+        vlines!( fig[1,2], [t1, t2], color = :red ) 
         axislegend() 
     Axis( fig[2,2], xlabel = "t" ) 
         lines!( fig[2,2], t[i0:i1], ddx[i0:i1,4], label = "ddx4" )  
-        vlines!( fig[2,2], [t1, t2], color = :red)
+        vlines!( fig[2,2], [t1, t2], color = :red ) 
         axislegend() 
 
 fig 
@@ -187,6 +187,36 @@ data_shift[:,6:7] = u_shift
 # save data_shift as csv file 
 csv_file_shift = replace( csv_file, "rollout_" => "rollout_shift_") 
 CSV.write( csv_file_shift, DataFrame(data_shift, header) ) 
+
+
+## ============================================ ##
+# save data at 10 Hz (assuming that previous data is 50 Hz) 
+
+function Fhz_data( x, u, F_hz_des, F_hz_OG = 50 ) 
+
+    N = size(x, 1) 
+
+    x_Fhz_mat = zeros(1,13) 
+    u_Fhz_mat = zeros(1,4) 
+    for i = 1 : Int(F_hz_OG / F_hz_des) : N      # assuming the quadcopter data is already at 100 Hz - so we can just take every 100 / F_hz-th point 
+        x_Fhz = x[i,:] 
+        u_Fhz = u[i,:] 
+        if i == 1 
+            x_Fhz_mat = x_Fhz' 
+            u_Fhz_mat = u_Fhz' 
+        else 
+            x_Fhz_mat = vcat( x_Fhz_mat, x_Fhz' ) 
+            u_Fhz_mat = vcat( u_Fhz_mat, u_Fhz' ) 
+        end 
+    end
+    
+    N_Fhz = size(x_Fhz_mat, 1) 
+    t_Fhz = collect( range(0, step = 1 / F_hz_des, length = N_Fhz) ) 
+
+    return t_Fhz, x_Fhz_mat, u_Fhz_mat 
+end 
+
+t_Fhz, x_Fhz_mat, u_Fhz_mat = Fhz_data( x, u, 10 ) 
 
 
 

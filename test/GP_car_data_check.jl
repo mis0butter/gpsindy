@@ -5,7 +5,7 @@ using GLMakie
 ## ============================================ ##
 # single run (good) 
 
-path          = "test/data/jake_car_csvs/" 
+path          = "test/data/jake_car_csvs_control_adjust_10hz/" 
 csv_files_vec = readdir( path ) 
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( path, csv_files_vec[i] ) 
@@ -14,7 +14,7 @@ N = length(csv_files_vec)
 
 norm_err_vec = [  ] 
 
-for i = 1 : N 
+# for i = 1 : N 
 # i = 1 
 
     csv_file = csv_files_vec[i] 
@@ -40,7 +40,7 @@ for i = 1 : N
     x_err = norm( x_train_GP - x_train ) 
     push!( norm_err_vec, x_err ) 
 
-end 
+# end 
 
 
 ## ============================================ ##
@@ -85,8 +85,70 @@ fig = Figure()
 
 fig  
 
+
 ## ============================================ ##
-# plot x_train, dx_train, GP and raw data  
+# unroll errors? 
+
+t, x, u = extract_car_data( csv_file ) 
+
+# x, dx = unroll( t, x ) 
+
+# use forward finite differencing 
+dx = fdiff(t, x, 1) 
+
+# massage data, generate rollovers  
+rollover_up_ind = findall( x -> x > 100, dx[:,4] ) 
+rollover_dn_ind = findall( x -> x < -100, dx[:,4] ) 
+
+for i in eachindex(rollover_up_ind) 
+    # i = 1 
+
+        if rollover_up_ind[i] < rollover_dn_ind[i] 
+            i0   = rollover_up_ind[i] + 1 
+            ifin = rollover_dn_ind[i]     
+            rollover_rng = x[ i0 : ifin , 4 ]
+            dθ = π .- rollover_rng 
+            θ  = -π .- dθ 
+        else 
+            i0   = rollover_dn_ind[i] + 1 
+            ifin = rollover_up_ind[i]     
+            rollover_rng = x[ i0 : ifin , 4 ]
+            dθ = π .+ rollover_rng 
+            θ  = π .+ dθ     
+        end 
+        x[ i0 : ifin , 4 ] = θ
+
+    end 
+
+# @infiltrate 
+
+# use central finite differencing now  
+dx = fdiff(t, x, 2) 
+
+
+## ============================================ ##
+
+
+f = Figure() 
+
+    Axis( f[1:2, 1], xlabel = "x", ylabel = "y" ) 
+        lines!( f[1:2,1] , x[:,1], x[:,2], label = "raw" ) 
+    Axis( f[3, 1], xlabel = "x", ylabel = "y" ) 
+        lines!( f[3,1] , t, x[:,3], label = "raw" ) 
+    Axis( f[4, 1], xlabel = "x", ylabel = "y" ) 
+        lines!( f[4,1] , t, x[:,4], label = "raw" ) 
+
+    Axis( f[1, 2], ylabel = "xdot" ) 
+        lines!( f[1,2] , t, dx[:,1], label = "raw" ) 
+    Axis( f[2, 2], ylabel = "ydot" ) 
+        lines!( f[2,2] , t, dx[:,2], label = "raw" ) 
+    Axis( f[3, 2], ylabel = "vdot" ) 
+        lines!( f[3,2] , t, dx[:,3], label = "v" ) 
+    Axis( f[4, 2], xlabel = "t", ylabel = "θdot" ) 
+        lines!( f[4,2] , t, dx[:,4], label = "θ" ) 
+
+f 
+
 
 
 

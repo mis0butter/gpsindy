@@ -3,7 +3,7 @@ using GLMakie
 
 ## ============================================ ##
 
-function plot_car_raw_GP( t_train, x_train, dx_train, x_train_GP, dx_train_GP) 
+function plot_car_raw_GP( t_train, x_train, dx_train, x_train_GP, dx_train_GP ) 
 
     fig = Figure() 
 
