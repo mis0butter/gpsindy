@@ -64,6 +64,15 @@ for i = eachindex(csv_files_vec)
     push!( x_err_hist_control_adjust_10hz.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
 end 
 
+# find index that is equal to maximum 
+findall( x_err_hist_control_adjust_10hz.sindy_lasso .== maximum( x_err_hist_control_adjust_10hz.sindy_lasso ) ) 
+
+
+# reject 3-sigma outliers 
+sindy_lasso_3sigma = reject_outliers( x_err_hist_control_adjust_10hz.sindy_lasso ) 
+
+gpsindy_3sigma = reject_outliers( x_err_hist_control_adjust_10hz.gpsindy ) 
+x_err_hist_control_adjust_10hz.gpsindy[ x_err_hist_control_adjust_10hz.gpsindy .< ( mean( x_err_hist_control_adjust_10hz.gpsindy ) + 3*std( x_err_hist_control_adjust_10hz.gpsindy ) ) ] 
 
 
 

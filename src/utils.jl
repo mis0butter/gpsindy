@@ -1,5 +1,16 @@
 
 
+function reject_outliers( data ) 
+
+    # reject 3-sigma outliers 
+    sigma3 = data[ data .< ( mean( data ) + 3*std( data ) ) ] 
+
+    return sigma3 
+end 
+
+export reject_outliers 
+
+
 ## ============================================ ##
 # for cross-validation 
 
