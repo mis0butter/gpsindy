@@ -87,7 +87,7 @@ x_err_hist_5hz  = x_err_struct([], [], [], [])
 # for i = [ 4 ]
     i = 4 
     csv_file = csv_files_vec[i] 
-    t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_stls, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy = cross_validate_gpsindy( csv_file, 1 ) 
+    t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_stls, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
 
     push!( x_err_hist_5hz.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
     push!( x_err_hist_5hz.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
@@ -105,24 +105,6 @@ gpsindy_5hz_3sigma = reject_outliers( x_err_hist_5hz.gpsindy )
 
 
 
-
-
-## ============================================ ##
-# make better plot 
-
-# sindy coefficients 
-Ξ_sindy = sindy_lasso(x_train, dx_train, λ, u_train)
-
-x_train_GP  = gp_post(t_train, 0 * x_train, t_train, 0 * x_train, x_train)
-
-Ξ_gpsindy   = sindy_lasso(x_train_GP, dx_train_GP, λ, u_train)
-
-dx_fn_sindy_lasso = build_dx_fn(poly_order, x_vars, u_vars, Ξ_sindy_lasso)
-dx_fn_gpsindy     = build_dx_fn(poly_order, x_vars, u_vars, Ξ_gpsindy)
-
-x_sindy_lasso_test = integrate_euler( dx_fn_sindy_lasso, x0, t_test, u_test ) 
-
-x_gpsindy_test     = integrate_euler( dx_fn_gpsindy, x0, t_test, u_test ) 
 
 
 

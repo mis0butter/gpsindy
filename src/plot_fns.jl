@@ -192,6 +192,78 @@ end
 
 
 ## ============================================ ##
+
+function plot_noise_GP_sindy_gpsindy( t, x_noise, x_GP, x_sindy, x_gpsindy, csv_string ) 
+
+    # csv_string = replace( csv_file, path => "" ) 
+
+    fig = Figure( size = (1000, 800) ) 
+    
+        # trajectory subplots 
+        noise = 0 ; GP = 0 ; sindy = 0 ; gpsindy = 0 
+        for i = 1 : 4 
+    
+            if i == 1 
+                Axis( fig[i, 1], ylabel = string( "x", i ), title = string("Trajectory: ", csv_string) ) 
+            elseif i == 4 
+                Axis( fig[i,1], xlabel = "t", ylabel = string( "x", i ) ) 
+            else 
+                Axis( fig[i,1], ylabel = string( "x", i ) ) 
+            end 
+
+            noise   = lines!( fig[i, 1], t, x_noise[:,i], linewidth = 4, label = "noise" ) 
+            GP      = lines!( fig[i, 1], t, x_GP[:,i], linewidth = 2, label = "GP" ) 
+            sindy   = lines!( fig[i, 1], t, x_sindy[:,i], linestyle = :dash, label = "sindy" ) 
+            gpsindy = lines!( fig[i, 1], t, x_gpsindy[:,i], linestyle = :dash, label = "gpsindy" ) 
+    
+        end 
+        
+        # trajectory plots legend 
+        Legend( fig[5, 1],
+        [ noise, GP, sindy, gpsindy ],
+        ["GT", "GP", "sindy", "gpsindy"], 
+        orientation = :horizontal ) 
+    
+        # error subplots 
+        for i = 1 : 4  
+            
+            err_GP          = x_noise[:,i] - x_GP[:,i] 
+            err_GP_str      = @sprintf "%.3g" mean(err_GP) 
+            err_sindy       = x_noise[:,i] - x_sindy[:,i] 
+            err_sindy_str   = @sprintf "%.3g" mean(err_sindy) 
+            err_gpsindy     = x_noise[:,i] - x_gpsindy[:,i] 
+            err_gpsindy_str = @sprintf "%.3g" mean(err_gpsindy) 
+
+            err_title = string( "GP = ", err_GP_str, " | sindy = ", err_sindy_str, " | gpsindy = ", err_gpsindy_str ) 
+    
+            if i == 1 
+                Axis( fig[i, 2], ylabel = string( "x", i ), title = string("Error: ", err_title) ) 
+            elseif i == 4 
+                Axis( fig[i, 2], xlabel = "t", ylabel = string( "x", i ), title = err_title ) 
+            else 
+                Axis( fig[i, 2], ylabel = string( "x", i ), title = err_title ) 
+            end 
+
+                noise   = lines!( fig[i, 2], NaN, NaN ) 
+                GP      = lines!( fig[i, 2], t, err_GP, linewidth = 2, label   = string( "x", i, "_GP" ) ) 
+                sindy   = lines!( fig[i, 2], t, err_sindy, linestyle = :dash, label = string( "x", i, "_sindy" ) ) 
+                gpsindy = lines!( fig[i, 2], t, err_gpsindy, linestyle = :dash, label = string( "x", i, "_gpsindy" ) ) 
+    
+        end 
+        
+        # error subplots legend 
+        Legend( fig[5, 2], 
+        [ GP, sindy, gpsindy ], 
+        [ "GP", "sindy", "gpsindy" ], 
+        orientation = :horizontal ) 
+
+    return fig 
+end 
+
+export plot_noise_GP_sindy_gpsindy 
+
+
+## ============================================ ##
 # plot noise, GP, SINDy, GPSINDy 
 
 export plot_noise_sindy_gpsindy 

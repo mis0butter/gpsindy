@@ -1,5 +1,55 @@
 
 
+
+
+## ============================================ ##
+
+export cross_validate_sindy_gpsindy
+function cross_validate_sindy_gpsindy( csv_file, plot_option = false ) 
+
+    data_train, data_test = car_data_struct( csv_file ) 
+
+    # smooth with GPs 
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+    
+    # get x0 from smoothed data 
+    x0_train_GP = x_train_GP[1,:] 
+    x0_test_GP  = x_test_GP[1,:] 
+
+    # cross-validate SINDy!!! 
+    λ_vec = λ_vec_fn() 
+    Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
+    
+    # save ξ with smallest x error  
+    Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
+    
+    # build dx_fn from Ξ and integrate 
+    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test_GP )
+    
+    # cross-validate GPSINDy!!!  
+    λ_vec = λ_vec_fn() 
+    Ξ_gpsindy_vec, err_x_gpsindy, err_dx_gpsindy = cross_validate_λ( data_train.t, x_train_GP, dx_train_GP, data_train.u, λ_vec ) 
+    
+    # save ξ with smallest x error  
+    Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
+    
+    # build dx_fn from Ξ and integrate 
+    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train_GP, x0_test_GP ) 
+
+    # plot 
+    if plot_option == 1 
+
+        # plot training 
+        fig_train = plot_noise_GP_sindy_gpsindy( data_train.t[:], data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+
+        # plot testing 
+        fig_test = plot_noise_GP_sindy_gpsindy( data_test.t[:], data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
+
+    end 
+
+    return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test  
+end 
+
 ## ============================================ ##
 # compare sindy, gpsindy, and gpsindy_gpsindy 
 

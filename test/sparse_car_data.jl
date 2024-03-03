@@ -225,6 +225,12 @@ t_Fhz, x_Fhz_mat, u_Fhz_mat = Fhz_data( x, u, 10 )
 ## ============================================ ##
 # make better plot 
 
+path          = "test/data/jake_car_csvs_control_adjust_5hz/" 
+csv_files_vec = readdir( path ) 
+for i in eachindex(csv_files_vec)  
+    csv_files_vec[i] = string( path, csv_files_vec[i] ) 
+end 
+
 i = 4 
 csv_file = csv_files_vec[i] 
 df       = CSV.read(csv_file, DataFrame) 
@@ -261,54 +267,7 @@ x_gpsindy = integrate_euler( dx_fn_gpsindy, x0, t, u )
 
 ## ============================================ ##
 
-csv_string = replace( csv_file, path => "" ) 
-
-# make figure of size 400, 800 
-fig = Figure( size = (800, 600) ) 
-
-    noise = 0 ; GP = 0 ; sindy = 0 ; gpsindy = 0 
-    for i_fig = 1 : 4 
-
-        if i_fig == 1 
-            Axis( fig[i_fig, 1], xlabel = "t", ylabel = string( "x", i_fig ), title = string("Trajectory: ", csv_string) ) 
-        else 
-            Axis( fig[i_fig,1], xlabel = "t", ylabel = string( "x", i_fig ) ) 
-        end 
-            noise   = lines!( fig[i_fig,1], t, x[:,i_fig], linewidth = 4, label = "noise" ) 
-            GP      = lines!( fig[i_fig,1], t, x_GP[:,i_fig], linewidth = 2, label = "GP" ) 
-            sindy   = lines!( fig[i_fig,1], t, x_sindy[:,i_fig], linestyle = :dash, label = "sindy" ) 
-            gpsindy = lines!( fig[i_fig,1], t, x_gpsindy[:,i_fig], linestyle = :dash, label = "gpsindy" ) 
-
-    end 
-    
-    Legend(fig[5, 1],
-    [ noise, GP, sindy, gpsindy ],
-    ["noise", "GP", "sindy", "gpsindy"], 
-    orientation = :horizontal 
-    )
-
-    for i_fig = 1 : 4 
-
-        if i_fig == 1 
-            Axis( fig[i_fig, 2], xlabel = "t", ylabel = string( "x", i_fig ), title = "Error" ) 
-        else 
-            Axis( fig[i_fig, 2], xlabel = "t", ylabel = string( "x", i_fig ) ) 
-        end 
-            # noise   = lines!( fig[i_fig,2], t, x[:,i_fig] - x[:,i_fig], linewidth = 4, label = string( "x", i_fig ) ) 
-            noise   = lines!( fig[i_fig, 2], NaN, NaN ) 
-            GP      = lines!( fig[i_fig,2], t, x[:,i_fig] - x_GP[:,i_fig], linewidth = 2, label = string( "x", i_fig, "_GP" ) ) 
-            sindy   = lines!( fig[i_fig,2], t, x[:,i_fig] - x_sindy[:,i_fig], linestyle = :dash, label = string( "x", i_fig, "_sindy" ) ) 
-            gpsindy = lines!( fig[i_fig,2], t, x[:,i_fig] - x_gpsindy[:,i_fig], linestyle = :dash, label = string( "x", i_fig, "_gpsindy" ) ) 
-    
-    Legend(fig[5, 2],
-    [ GP, sindy, gpsindy ],
-    [ "GP", "sindy", "gpsindy" ], 
-    orientation = :horizontal
-    )
-
-    end 
-
-fig 
+fig = plot_noise_GP_sindy_gpsindy( t, x, x_GP, x_sindy, x_gpsindy, "all data" ) 
 
 
 
