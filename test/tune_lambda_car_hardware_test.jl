@@ -80,7 +80,7 @@ csv_path = "test/data/jake_car_csvs_control_adjust_5hz_noise_0.1/"
 img_path = "test/images/5hz_noise_0.1/" 
 csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
-    csv_files_vec[i] = string( path, csv_files_vec[i] ) 
+    csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
 end 
 
 # check if save_path exists 
@@ -107,6 +107,7 @@ for i = eachindex(csv_files_vec)
     
     push!( x_err_hist_5hz.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
     push!( x_err_hist_5hz.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
+
 end 
 
 # find index that is equal to maximum 

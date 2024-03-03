@@ -50,7 +50,7 @@ for i = eachindex(csv_files_vec)
 
     # save noisy data 
     data_save      = replace( csv_file, csv_path => "" ) 
-    data_save      = replace( data_save, ".csv" => string( "_noise_", noise, ".csv" ) ) 
+    data_save      = replace( data_save, ".csv" => string( "_noise", ".csv" ) ) 
     data_save_path = string( save_path, data_save ) 
     CSV.write( data_save_path, df_noise ) 
 
