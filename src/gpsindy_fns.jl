@@ -40,10 +40,10 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     if plot_option == 1 
 
         # plot training 
-        fig_train = plot_noise_GP_sindy_gpsindy( data_train.t[:], data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+        fig_train = plot_noise_GP_sindy_gpsindy( data_train.t, data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
 
         # plot testing 
-        fig_test = plot_noise_GP_sindy_gpsindy( data_test.t[:], data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
+        fig_test = plot_noise_GP_sindy_gpsindy( data_test.t, data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
 
     end 
 

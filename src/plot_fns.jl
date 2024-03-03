@@ -1,4 +1,30 @@
 
+function plot_car_x_dx( t, x, dx ) 
+# plot car x and dx data 
+
+fig = Figure() 
+
+    Axis( fig[1:2, 1], xlabel = "x", ylabel = "y" ) 
+        lines!( fig[1:2,1] , x[:,1], x[:,2], label = "raw" ) 
+    Axis( fig[3, 1], xlabel = "t", ylabel = "v" ) 
+        lines!( fig[3,1] , t, x[:,3], label = "v" ) 
+    Axis( fig[4, 1], xlabel = "t", ylabel = "θ" ) 
+        lines!( fig[4,1] , t, x[:,4], label = "θ" ) 
+
+    Axis( fig[1, 2], ylabel = "xdot" ) 
+        lines!( fig[1,2] , t, dx[:,1], label = "raw" ) 
+    Axis( fig[2, 2], ylabel = "ydot" ) 
+        lines!( fig[2,2] , t, dx[:,2], label = "raw" ) 
+    Axis( fig[3, 2], ylabel = "vdot" ) 
+        lines!( fig[3,2] , t, dx[:,3], label = "v" ) 
+    Axis( fig[4, 2], xlabel = "t", ylabel = "θdot" ) 
+        lines!( fig[4,2] , t, dx[:,4], label = "θ" ) 
+
+    return fig 
+end 
+
+export plot_car_x_dx 
+
 
 ## ============================================ ##
 
