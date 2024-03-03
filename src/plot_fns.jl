@@ -195,15 +195,15 @@ end
 # plot noise, GP, SINDy, GPSINDy 
 
 export plot_noise_sindy_gpsindy 
-function plot_noise_sindy_gpsindy( t_train, x_train_noise, x_train_GP, x_train_sindy, x_train_gpsindy, plot_suptitle ) 
+function plot_noise_sindy_gpsindy( t, x_noise, x_GP, x_sindy, x_gpsindy, plot_suptitle ) 
     
     # get sizes 
-    x_vars = size( x_train_noise, 2 ) 
+    x_vars = size( x_noise, 2 ) 
 
     plt_x_vec = [] 
     for j = 1 : x_vars 
-        ymin, dy, ymax = min_d_max( x_train_noise[:,j] ) 
-        plt_x = Plots.plot( t_train, x_train_noise[:,j], 
+        ymin, dy, ymax = min_d_max( x_noise[:,j] ) 
+        plt_x = Plots.plot( t, x_noise[:,j], 
             xlabel = "t (s)", 
             ylabel = "x", 
             ylim   = ( ymin, ymax ), 
@@ -212,15 +212,15 @@ function plot_noise_sindy_gpsindy( t_train, x_train_noise, x_train_GP, x_train_s
             size   = (1000, 400), 
             label  = "noise", 
         ) 
-        Plots.plot!( plt_x, t_train, x_train_GP[:,j], 
+        Plots.plot!( plt_x, t, x_GP[:,j], 
             label = "GP", 
             ls    = :dash,   
         ) 
-        Plots.plot!( plt_x, t_train, x_train_sindy[:,j], 
+        Plots.plot!( plt_x, t, x_sindy[:,j], 
             label = "SINDy", 
             ls    = :dashdot,   
         ) 
-        Plots.plot!( plt_x, t_train, x_train_gpsindy[:,j], 
+        Plots.plot!( plt_x, t, x_gpsindy[:,j], 
         label = string("GPSINDy"),
         ls    = :dot,   
         ) 

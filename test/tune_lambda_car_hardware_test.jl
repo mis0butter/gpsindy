@@ -69,10 +69,36 @@ findall( x_err_hist_control_adjust_10hz.sindy_lasso .== maximum( x_err_hist_cont
 
 
 # reject 3-sigma outliers 
-sindy_lasso_3sigma = reject_outliers( x_err_hist_control_adjust_10hz.sindy_lasso ) 
+sindy_10hz_3sigma   = reject_outliers( x_err_hist_control_adjust_10hz.sindy_lasso ) 
+gpsindy_10hz_3sigma = reject_outliers( x_err_hist_control_adjust_10hz.gpsindy ) 
 
-gpsindy_3sigma = reject_outliers( x_err_hist_control_adjust_10hz.gpsindy ) 
-x_err_hist_control_adjust_10hz.gpsindy[ x_err_hist_control_adjust_10hz.gpsindy .< ( mean( x_err_hist_control_adjust_10hz.gpsindy ) + 3*std( x_err_hist_control_adjust_10hz.gpsindy ) ) ] 
+
+## ============================================ ##
+# controls adjust sparse 5 hz 
+
+path          = "test/data/jake_car_csvs_control_adjust_5hz/" 
+csv_files_vec = readdir( path ) 
+for i in eachindex(csv_files_vec)  
+    csv_files_vec[i] = string( path, csv_files_vec[i] ) 
+end 
+
+x_err_hist_5hz  = x_err_struct([], [], [], [])
+# for i = eachindex(csv_files_vec) 
+# for i = [ 4 ]
+    i = 4 
+    csv_file = csv_files_vec[i] 
+    t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_stls, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy = cross_validate_gpsindy( csv_file, 1 ) 
+
+    push!( x_err_hist_5hz.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
+    push!( x_err_hist_5hz.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
+# end 
+
+# find index that is equal to maximum 
+findall( x_err_hist_5hz.sindy_lasso .== maximum( x_err_hist_5hz.sindy_lasso ) ) 
+
+# reject 3-sigma outliers 
+sindy_5hz_3sigma   = reject_outliers( x_err_hist_5hz.sindy_lasso ) 
+gpsindy_5hz_3sigma = reject_outliers( x_err_hist_5hz.gpsindy ) 
 
 
 
