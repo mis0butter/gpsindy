@@ -73,6 +73,7 @@ function car_data_struct( csv_file )
     portion       = 5 
     u_train,  u_test  = split_train_test( u, test_fraction, portion ) 
     t_train,  t_test  = split_train_test( t, test_fraction, portion ) 
+    t_train = t_train[:] ; t_test = t_test[:] 
     x_train_noise,  x_test_noise  = split_train_test( x, test_fraction, portion ) 
     dx_train_noise, dx_test_noise = split_train_test( dx_fd, test_fraction, portion ) 
     
