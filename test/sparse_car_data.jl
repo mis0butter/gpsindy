@@ -220,3 +220,96 @@ t_Fhz, x_Fhz_mat, u_Fhz_mat = Fhz_data( x, u, 10 )
 
 
 
+
+
+## ============================================ ##
+# make better plot 
+
+i = 4 
+csv_file = csv_files_vec[i] 
+df       = CSV.read(csv_file, DataFrame) 
+data     = Matrix(df) 
+
+# get data 
+t = data[:,1] 
+x = data[:,2:5] 
+u = data[:,6:7] 
+
+# get derivative data 
+x, dx = unroll( t, x ) 
+
+# truth coeffs 
+x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+
+λ = 0.1 
+
+x_GP  = gp_post( t, 0 * x, t, 0 * x, x )
+dx_GP = gp_post( x, 0 * dx, x, 0 * dx, dx )
+
+# learn coefficients 
+Ξ_sindy   = sindy_lasso( x, dx, λ, u )
+Ξ_gpsindy = sindy_lasso( x_GP, dx_GP, λ, u )
+
+# build dx fns 
+dx_fn_sindy    = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy )
+dx_fn_gpsindy  = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy )
+
+# generate predicts 
+x0        = x[1,:] 
+x_sindy   = integrate_euler( dx_fn_sindy, x0, t, u ) 
+x_gpsindy = integrate_euler( dx_fn_gpsindy, x0, t, u ) 
+
+## ============================================ ##
+
+csv_string = replace( csv_file, path => "" ) 
+
+# make figure of size 400, 800 
+fig = Figure( size = (800, 600) ) 
+
+    noise = 0 ; GP = 0 ; sindy = 0 ; gpsindy = 0 
+    for i_fig = 1 : 4 
+
+        if i_fig == 1 
+            Axis( fig[i_fig, 1], xlabel = "t", ylabel = string( "x", i_fig ), title = string("Trajectory: ", csv_string) ) 
+        else 
+            Axis( fig[i_fig,1], xlabel = "t", ylabel = string( "x", i_fig ) ) 
+        end 
+            noise   = lines!( fig[i_fig,1], t, x[:,i_fig], linewidth = 4, label = "noise" ) 
+            GP      = lines!( fig[i_fig,1], t, x_GP[:,i_fig], linewidth = 2, label = "GP" ) 
+            sindy   = lines!( fig[i_fig,1], t, x_sindy[:,i_fig], linestyle = :dash, label = "sindy" ) 
+            gpsindy = lines!( fig[i_fig,1], t, x_gpsindy[:,i_fig], linestyle = :dash, label = "gpsindy" ) 
+
+    end 
+    
+    Legend(fig[5, 1],
+    [ noise, GP, sindy, gpsindy ],
+    ["noise", "GP", "sindy", "gpsindy"], 
+    orientation = :horizontal 
+    )
+
+    for i_fig = 1 : 4 
+
+        if i_fig == 1 
+            Axis( fig[i_fig, 2], xlabel = "t", ylabel = string( "x", i_fig ), title = "Error" ) 
+        else 
+            Axis( fig[i_fig, 2], xlabel = "t", ylabel = string( "x", i_fig ) ) 
+        end 
+            # noise   = lines!( fig[i_fig,2], t, x[:,i_fig] - x[:,i_fig], linewidth = 4, label = string( "x", i_fig ) ) 
+            noise   = lines!( fig[i_fig, 2], NaN, NaN ) 
+            GP      = lines!( fig[i_fig,2], t, x[:,i_fig] - x_GP[:,i_fig], linewidth = 2, label = string( "x", i_fig, "_GP" ) ) 
+            sindy   = lines!( fig[i_fig,2], t, x[:,i_fig] - x_sindy[:,i_fig], linestyle = :dash, label = string( "x", i_fig, "_sindy" ) ) 
+            gpsindy = lines!( fig[i_fig,2], t, x[:,i_fig] - x_gpsindy[:,i_fig], linestyle = :dash, label = string( "x", i_fig, "_gpsindy" ) ) 
+    
+    Legend(fig[5, 2],
+    [ GP, sindy, gpsindy ],
+    [ "GP", "sindy", "gpsindy" ], 
+    orientation = :horizontal
+    )
+
+    end 
+
+fig 
+
+
+
+
