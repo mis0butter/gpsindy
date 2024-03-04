@@ -1,5 +1,3 @@
-using GLMakie 
-
 
 ## ============================================ ##
 
@@ -226,7 +224,7 @@ function plot_quad_x_train_GP( t_train, x_train, x_train_GP )
 ## ============================================ ##
 
 """
-Plot training and predicted training data using GLMakie 
+Plot training and predicted training data 
 """ 
 function plot_train_test( 
     x_train,            # [N,3] matrix of training data 
@@ -264,7 +262,7 @@ export plot_train_test
 ## ============================================ ##
 
 """
-Plot training and predicted training data using GLMakie 
+Plot training and predicted training data 
 """ 
 function plot_train_pred( 
     x_train,                    # [N,3] matrix of training data 
@@ -320,7 +318,7 @@ export add_title3d
 ## ============================================ ##
 # plot Cartesian axes 
 
-"Plot x, y, and z Cartesian axes using GLMakie "
+"Plot x, y, and z Cartesian axes "
 function plot_axes3d( 
     r   = 0.5,            # radius of axes 
     fig = nothing,      # figure handle 
@@ -347,7 +345,7 @@ export plot_axes3d
 ## ============================================ ## 
 
 """ 
-Plot a 3D line using GLMakie 
+Plot a 3D line 
 
 Example usage: 
 
@@ -384,7 +382,7 @@ export plot_line3d
 ## ============================================ ## 
 
 """ 
-Plot an orbit using GLMakie 
+Plot an orbit 
 
 Example usage: 
 
@@ -440,7 +438,7 @@ export plot_orbit
 #   diverging_tritanopic_cwr_75_98_c20_n256 <-- this one 
 
 """
-Plot a surface with a colorbar using GLMakie 
+Plot a surface with a colorbar 
 
 Example usage: 
 
@@ -479,7 +477,7 @@ export plot_surface
 ## ============================================ ##
 
 """
-Plot scatter using GLMakie
+Plot scatter 
 
 Example usage: 
 
@@ -526,7 +524,7 @@ export plot_scatter3d
 ## ============================================ ##
 
 """ 
-Plot a contour with a colorbar using GLMakie
+Plot a contour with a colorbar 
 
 Example usage: 
 
@@ -563,7 +561,7 @@ export plot_contour3d
 ## ============================================ ## 
 
 """
-Plot vector using GLMakie. 
+Plot vector 
 
 Example usage: 
 

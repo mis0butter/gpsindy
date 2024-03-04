@@ -1,7 +1,7 @@
 using GaussianSINDy 
 using LinearAlgebra 
 using CSV, DataFrames 
-using GLMakie 
+using CairoMakie 
 
 
 ## ============================================ ##

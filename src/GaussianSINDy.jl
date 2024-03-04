@@ -8,7 +8,8 @@ using Optim
 using DifferentialEquations
 
 using Plots 
-using Latexify
+using Latexify 
+using CairoMakie 
 
 using GaussianProcesses
 using LineSearches 

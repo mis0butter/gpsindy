@@ -254,7 +254,9 @@ function plot_x_sindy_nn_gpsindy( t_test, x_test, x_sindy_lasso, x_nn, x_gpsindy
 end 
 
 
-## ============================================ ##
+## ============================================ ## 
+
+using CairoMakie 
 
 function plot_noise_GP_sindy_gpsindy( t, x_noise, x_GP, x_sindy, x_gpsindy, csv_string ) 
 
