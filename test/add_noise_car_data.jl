@@ -8,7 +8,7 @@ using CairoMakie
 # control input delay  
 
 # add how much noise to all data? 
-noise = 0.1 
+noise = 0.01 
 
 csv_path  = "test/data/jake_car_csvs_control_adjust/" 
 save_path = replace( csv_path, "_adjust" => string( "_adjust_50hz_noise_", noise ) ) 
