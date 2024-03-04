@@ -6,7 +6,7 @@ using Statistics
 ## ============================================ ##
 # controls adjust sparse 5 hz 
 
-csv_path = "test/data/jake_car_csvs_control_adjust_5hz_noise_0.1/" 
+csv_path = "test/data/jake_car_csvs_control_adjust_50hz_noise_0.1/" 
 img_path = "test/images/5hz_noise_0.1/" 
 
 csv_files_vec = readdir( csv_path ) 
@@ -19,8 +19,8 @@ if !isdir( img_path )
     mkdir( img_path ) 
 end 
 
-x_err_hist_5hz  = x_err_struct([], [], [], [])
-for i = eachindex(csv_files_vec) 
+x_err_hist_5hz  = x_err_struct( [], [], [], [] ) 
+for i = eachindex( csv_files_vec ) 
 # for i = [ 4 ]
     i = 42 
     csv_file = csv_files_vec[i] 

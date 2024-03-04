@@ -10,8 +10,8 @@ using CairoMakie
 # add how much noise to all data? 
 noise = 0.1 
 
-csv_path  = "test/data/jake_car_csvs_control_adjust_5hz/" 
-save_path = replace( csv_path, "_5hz" => string( "_5hz_noise_", noise ) ) 
+csv_path  = "test/data/jake_car_csvs_control_adjust/" 
+save_path = replace( csv_path, "_adjust" => string( "_adjust_50hz_noise_", noise ) ) 
 csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
