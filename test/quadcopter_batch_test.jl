@@ -2,7 +2,7 @@ using GaussianSINDy
 using LinearAlgebra 
 using CSV, DataFrames 
 using BenchmarkTools 
-using GLMakie 
+using CairoMakie 
 
 Infiltrator.clear_disabled!() 
 Infiltrator.toggle_async_check(false) 

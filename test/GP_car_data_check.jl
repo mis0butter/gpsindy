@@ -1,6 +1,6 @@
 using GaussianSINDy 
 using LinearAlgebra 
-using GLMakie 
+using CairoMakie 
 
 ## ============================================ ##
 # single run (good) 

@@ -298,10 +298,10 @@ export plot_train_pred
 
 
 ## ============================================ ##
-# add title to Axis3 of GLMakie figures 
+# add title to Axis3 of CairoMakie figures 
 
 """ 
-Add title to Axis3 of GLMakie figures 
+Add title to Axis3 of CairoMakie figures 
 """ 
 function add_title3d( 
     fig,        # figure handle 
@@ -463,7 +463,7 @@ function plot_surface(
     end 
 
     cmap = ( :diverging_tritanopic_cwr_75_98_c20_n256, alpha )
-    hm   = GLMakie.surface!( x, y, z, colormap = cmap ) 
+    hm   = CairoMakie.surface!( x, y, z, colormap = cmap ) 
 
     if fignothing 
         Colorbar( fig[1,2], hm, height = Relative(0.5) )
@@ -508,12 +508,12 @@ function plot_scatter3d(
     end 
 
     if isequal(length(z), 1)
-        GLMakie.scatter!( x, y, z, marker = marker, markersize = 20, color = color, strokecolor = color ) 
+        CairoMakie.scatter!( x, y, z, marker = marker, markersize = 20, color = color, strokecolor = color ) 
         if !isnothing(text) 
             text!( x, y, z; text = text, color = :black, offset = (0,15), align = (:center, :bottom) ) 
         end
     else 
-        hm = GLMakie.scatter!( x, y, z, markersize = 5, color = color, strokecolor = color ) 
+        hm = CairoMakie.scatter!( x, y, z, markersize = 5, color = color, strokecolor = color ) 
     end 
 
     return fig 
@@ -546,7 +546,7 @@ function plot_contour3d(
         Axis3(fig[1, 1]) 
     end 
 
-    hm  = GLMakie.contour3d!(x, y, z, levels = levels) 
+    hm  = CairoMakie.contour3d!(x, y, z, levels = levels) 
 
     if fignothing 
         clim = ( minimum(z), maximum(z) ) 
