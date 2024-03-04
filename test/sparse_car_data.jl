@@ -31,8 +31,7 @@ end
     du  = fdiff(t, u, 1) 
     ddu = fdiff(t, du, 1) 
 
-    # smooth so that it's not so noisy ... 
-    
+    # smooth so that it's not so noisy ...     
     x_GP  = gp_post( t, 0*x, t, 0*x, x ) 
     dx_GP = gp_post( x, 0*dx, x, 0*dx, dx ) 
 
@@ -264,6 +263,7 @@ dx_fn_gpsindy  = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy )
 x0        = x[1,:] 
 x_sindy   = integrate_euler( dx_fn_sindy, x0, t, u ) 
 x_gpsindy = integrate_euler( dx_fn_gpsindy, x0, t, u ) 
+
 
 ## ============================================ ##
 
