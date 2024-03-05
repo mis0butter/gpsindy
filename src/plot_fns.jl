@@ -293,11 +293,11 @@ function plot_noise_GP_sindy_gpsindy( t, x_noise, x_GP, x_sindy, x_gpsindy, csv_
         for i = 1 : 4  
             
             err_GP          = x_noise[:,i] - x_GP[:,i] 
-            err_GP_str      = @sprintf "%.3g" mean(err_GP) 
+            err_GP_str      = @sprintf "%.3g" norm(err_GP) 
             err_sindy       = x_noise[:,i] - x_sindy[:,i] 
-            err_sindy_str   = @sprintf "%.3g" mean(err_sindy) 
+            err_sindy_str   = @sprintf "%.3g" norm(err_sindy) 
             err_gpsindy     = x_noise[:,i] - x_gpsindy[:,i] 
-            err_gpsindy_str = @sprintf "%.3g" mean(err_gpsindy) 
+            err_gpsindy_str = @sprintf "%.3g" norm(err_gpsindy) 
 
             err_title = string( "GP = ", err_GP_str, " | sindy = ", err_sindy_str, " | gpsindy = ", err_gpsindy_str ) 
     
