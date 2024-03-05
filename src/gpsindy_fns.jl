@@ -13,6 +13,10 @@ function cross_validate_all_csvs( csv_path, save_path )
     if !isdir( save_path ) 
         mkdir( save_path ) 
     end 
+    fig_save_path = string( save_path, "figs/" ) 
+    if !isdir( fig_save_path ) 
+        mkdir( fig_save_path ) 
+    end 
     
     x_err_hist = x_err_struct( Float64[], Float64[], Float64[], Float64[] ) 
     for i = eachindex( csv_files_vec ) 
@@ -25,12 +29,12 @@ function cross_validate_all_csvs( csv_path, save_path )
         push!( x_err_hist.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
     
         # save fig_train 
-        fig_train_save = replace( csv_file, csv_path => save_path )  
+        fig_train_save = replace( csv_file, csv_path => fig_save_path )  
         fig_train_save = replace( fig_train_save, ".csv" => "_train.png" ) 
         save( fig_train_save, fig_train ) 
     
         # save fig_test 
-        fig_test_save = replace( csv_file, csv_path => save_path )  
+        fig_test_save = replace( csv_file, csv_path => fig_save_path )  
         fig_test_save = replace( fig_test_save, ".csv" => "_test.png" ) 
         save( fig_test_save, fig_test ) 
         

@@ -6,10 +6,24 @@ using Statistics
 ## ============================================ ##
 # cross validation function 
 
-csv_path  = "test/data/jake_car_csvs_control_adjust_5hz/" 
-save_path = "test/results/5hz/" 
+csv_path  = "test/data/jake_car_csvs_control_adjust_10hz/" 
+save_path = "test/results/10hz/" 
 
 sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
+
+csv_path  = "test/data/jake_car_csvs_control_adjust_25hz/" 
+save_path = "test/results/25hz/" 
+
+sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
+
+csv_path  = "test/data/jake_car_csvs_control_adjust_50hz/" 
+save_path = "test/results/50hz/" 
+
+sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
+
+
+
+
 
 
 
