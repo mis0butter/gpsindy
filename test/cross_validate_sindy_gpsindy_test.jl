@@ -2,12 +2,54 @@ using GaussianSINDy
 using LinearAlgebra 
 using Statistics 
 
+## ============================================ ##
+# cross validation function 
+
+csv_path = "test/data/jake_car_csvs_control_adjust_1hz/" 
+img_path = "test/images/1hz/" 
+
+sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, img_path ) 
+
+csv_path = "test/data/jake_car_csvs_control_adjust_25hz/" 
+img_path = "test/images/25hz/" 
+
+sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, img_path ) 
+
+csv_path = "test/data/jake_car_csvs_control_adjust_50hz/" 
+img_path = "test/images/50hz/" 
+
+sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, img_path ) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## ============================================ ##
 # run cross validation 
 
-csv_path = "test/data/jake_car_csvs_control_adjust_25hz/" 
-img_path = "test/images/25hz/" 
+csv_path = "test/data/jake_car_csvs_control_adjust_5hz/" 
+img_path = "test/images/5hz/" 
 
 csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
@@ -62,9 +104,46 @@ gpsindy_3sigma_mean = mean( reject_outliers( x_err_hist.gpsindy ) )
 ## ============================================ ##
 # test cross_validate_sindy_gpsindy  
 
-csv_file = "test/data/jake_car_csvs_control_adjust_50hz_noise_0.01/rollout_shift_19_noise.csv" 
+csv_file = "test/data/jake_car_csvs_control_adjust_5hz/rollout_shift_5hz_1.csv" 
 
 data_train, data_test = car_data_struct( csv_file ) 
+
+# let's double the points 
+t_train = data_train.t 
+dt = t_train[2] - t_train[1] 
+
+t_train_double = [  ] 
+for i in eachindex(t_train) 
+
+    println(i) 
+    push!( t_train_double, t_train[i] ) 
+    push!( t_train_double, t_train[i] + dt/2 ) 
+
+end 
+
+x_col, x_row = size( data_train.x_noise ) 
+
+# first - smooth measurements with Gaussian processes 
+x_train_GP  = gp_post( t_train_double, zeros(2 * x_col, x_row), data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
+
+x_test = t_train_double 
+μ_prior = zeros(2 * x_col, x_row) 
+x_train = data_train.t 
+μ_train = 0 * data_train.x_noise 
+y_train = data_train.x_noise 
+
+
+
+## ============================================ ##
+
+dx_train_GP = gp_post( x_train_GP, zeros(x_col, x_row), x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
+x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+
+
+
+## ============================================ ##
+
 
 # smooth with GPs 
 # x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
