@@ -34,20 +34,24 @@ function Fhz_data( t, x, u, F_hz_des, F_hz_OG = 50 )
 end 
 
 
-
-
 ## ============================================ ##
 # control input delay  
 
-path          = "test/data/jake_car_csvs_control_adjust/" 
-csv_files_vec = readdir( path ) 
+F_hz      = 25 
+csv_path  = "test/data/jake_car_csvs_control_adjust/" 
+
+save_path = replace( csv_path, "_adjust" => string( "_adjust_", F_hz, "hz" ) ) 
+if !isdir( save_path ) 
+    mkdir( save_path ) 
+end 
+
+csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( path, csv_files_vec[i] ) 
 end 
 
-# for i = eachindex(csv_files_vec) 
-# for i = [ 4 ]
-    i = 1 
+for i = eachindex(csv_files_vec) 
+    # i = 1 
     csv_file = csv_files_vec[i] 
     df       = CSV.read(csv_file, DataFrame) 
     data     = Matrix(df) 
@@ -57,17 +61,18 @@ end
     t = data[:,1] ; x = data[:,2:5] ; u = data[:,6:7] 
 
     # save data at 10 Hz (assuming that previous data is 50 Hz) 
-    F_hz = 1 
     t_Fhz, x_Fhz_mat, u_Fhz_mat = Fhz_data( t, x, u, F_hz ) 
 
     # save sparse data 
     data_sparse = [ t_Fhz x_Fhz_mat u_Fhz_mat ]
     
     # save data_shift as csv file 
-    csv_file_sparse = replace( csv_file, "rollout_shift_" => string("rollout_shift_", F_hz, "hz_") )  
-    CSV.write( csv_file_sparse, DataFrame(data_sparse, header) ) 
+    csv_file_save = string( save_path, replace( csv_file, csv_path => "" ) ) 
+    csv_file_save = replace( csv_file_save, "rollout_shift_" => string("rollout_shift_", F_hz, "hz_") )  
 
-# end 
+    CSV.write( csv_file_save, DataFrame(data_sparse, header) ) 
+
+end 
 
 
 
