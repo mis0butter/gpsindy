@@ -184,6 +184,7 @@ function gp_post( x_test, μ_prior, x_train, μ_train, y_train )
         
         # y_train = dx_noise[:,i] - dx_mean[:,i]
         gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
+        # gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
         optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
     
         # return HPs 

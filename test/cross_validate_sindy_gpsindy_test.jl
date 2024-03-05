@@ -2,23 +2,16 @@ using GaussianSINDy
 using LinearAlgebra 
 using Statistics 
 
+
 ## ============================================ ##
 # cross validation function 
 
-csv_path = "test/data/jake_car_csvs_control_adjust_1hz/" 
-img_path = "test/images/1hz/" 
+csv_path  = "test/data/jake_car_csvs_control_adjust_5hz/" 
+save_path = "test/results/5hz/" 
 
-sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, img_path ) 
+sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
 
-csv_path = "test/data/jake_car_csvs_control_adjust_25hz/" 
-img_path = "test/images/25hz/" 
 
-sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, img_path ) 
-
-csv_path = "test/data/jake_car_csvs_control_adjust_50hz/" 
-img_path = "test/images/50hz/" 
-
-sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, img_path ) 
 
 
 
@@ -131,6 +124,11 @@ x_test = t_train_double
 x_train = data_train.t 
 μ_train = 0 * data_train.x_noise 
 y_train = data_train.x_noise 
+
+f2 = Figure() 
+    Axis( f2[1,1] )
+        lines!( data_train.x_noise[:,1], data_train.x_noise[:,2] )
+        lines!( x_train_GP[:,1], x_train_GP[:,2] )   
 
 
 
