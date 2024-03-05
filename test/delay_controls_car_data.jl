@@ -77,15 +77,15 @@ end
 ## ============================================ ##
 # control input delay  
 
-path          = "test/data/jake_car_csvs_control_adjust_sparse/" 
+path          = "test/data/jake_car_csvs_control_adjust/" 
 csv_files_vec = readdir( path ) 
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( path, csv_files_vec[i] ) 
 end 
 
-for i = eachindex(csv_files_vec) 
+# for i = eachindex(csv_files_vec) 
 # for i = [ 4 ]
-    # i = 1 
+    i = 1 
     csv_file = csv_files_vec[i] 
     df       = CSV.read(csv_file, DataFrame) 
     data     = Matrix(df) 
@@ -105,7 +105,7 @@ for i = eachindex(csv_files_vec)
     csv_file_sparse = replace( csv_file, "rollout_shift_" => string("rollout_shift_", F_hz, "hz_") )  
     CSV.write( csv_file_sparse, DataFrame(data_sparse, header) ) 
 
-end 
+# end 
 
 
 
