@@ -6,8 +6,8 @@ using Statistics
 ## ============================================ ##
 # run cross validation 
 
-csv_path = "test/data/jake_car_csvs_control_adjust_50hz/" 
-img_path = "test/images/50hz/" 
+csv_path = "test/data/jake_car_csvs_control_adjust_25hz/" 
+img_path = "test/images/25hz/" 
 
 csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
