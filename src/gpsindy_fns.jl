@@ -1,4 +1,52 @@
 
+## ============================================ ##
+# run cross validation, save plots, and return metrics 
+
+function cross_validate_all_csvs( csv_path, img_path ) 
+
+    csv_files_vec = readdir( csv_path ) 
+    for i in eachindex(csv_files_vec)  
+        csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
+    end 
+    
+    # check if save_path exists 
+    if !isdir( img_path ) 
+        mkdir( img_path ) 
+    end 
+    
+    x_err_hist  = x_err_struct( [], [], [], [] ) 
+    for i = eachindex( csv_files_vec ) 
+    # for i = [ 4 ]
+        # i = 42 
+        csv_file = csv_files_vec[i] 
+        t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_stls, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
+    
+        # save fig_train 
+        fig_train_save = replace( csv_file, csv_path => img_path )  
+        fig_train_save = replace( fig_train_save, ".csv" => "_train.png" ) 
+        save( fig_train_save, fig_train ) 
+    
+        # save fig_test 
+        fig_test_save = replace( csv_file, csv_path => img_path )  
+        fig_test_save = replace( fig_test_save, ".csv" => "_test.png" ) 
+        save( fig_test_save, fig_test ) 
+        
+        push!( x_err_hist.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
+        push!( x_err_hist.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
+    
+    end 
+    
+    # find index that is equal to maximum 
+    findall( x_err_hist.sindy_lasso .== maximum( x_err_hist.sindy_lasso ) ) 
+    
+    # reject 3-sigma outliers 
+    sindy_3sigma_mean   = mean( reject_outliers( x_err_hist.sindy_lasso ) ) 
+    gpsindy_3sigma_mean = mean( reject_outliers( x_err_hist.gpsindy ) ) 
+
+    return sindy_3sigma_mean, gpsindy_3sigma_mean 
+end 
+
+export cross_validate_all_csvs 
 
 
 
@@ -24,7 +72,7 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
     
     # build dx_fn from Ξ and integrate 
-    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test_GP )
+    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test_GP ) 
     
     # cross-validate GPSINDy!!!  
     λ_vec = λ_vec_fn() 
@@ -439,7 +487,7 @@ function cross_validate_λ( t_train, x_train_GP, dx_train_GP, u_train, λ_vec )
         for i = eachindex(λ_vec) 
         
             λ = λ_vec[i] 
-            println( "x", j, ": λ = ", λ ) 
+            # println( "x", j, ": λ = ", λ ) 
     
             # GPSINDy-lasso ! 
             Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 

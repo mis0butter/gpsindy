@@ -1,5 +1,40 @@
 
 
+
+## ============================================ ##
+# save data at certain rate 
+
+function Fhz_data( t, x, u, F_hz_des, F_hz_OG = 50 ) 
+
+    N = size(x, 1) 
+
+    x_Fhz_mat = zeros(1,13) 
+    u_Fhz_mat = zeros(1,4) 
+    t_Fhz_mat = zeros(1) 
+    for i = 1 : Int(F_hz_OG / F_hz_des) : N      # assuming the quadcopter data is already at 100 Hz - so we can just take every 100 / F_hz-th point 
+        x_Fhz = x[i,:] 
+        u_Fhz = u[i,:] 
+        t_Fhz = t[i] 
+        if i == 1 
+            x_Fhz_mat = x_Fhz' 
+            u_Fhz_mat = u_Fhz' 
+            t_Fhz_mat = t_Fhz 
+        else 
+            x_Fhz_mat = vcat( x_Fhz_mat, x_Fhz' ) 
+            u_Fhz_mat = vcat( u_Fhz_mat, u_Fhz' ) 
+            t_Fhz_mat = vcat( t_Fhz_mat, t_Fhz ) 
+        end 
+    end
+
+    return t_Fhz_mat, x_Fhz_mat, u_Fhz_mat 
+end 
+
+export Fhz_data 
+
+
+## ============================================ ##
+# reject outliers 
+
 function reject_outliers( data ) 
 
     # reject 3-sigma outliers 
