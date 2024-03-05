@@ -4,10 +4,10 @@ using Statistics
 
 
 ## ============================================ ##
-# controls adjust sparse 5 hz 
+# run cross validation 
 
-csv_path = "test/data/jake_car_csvs_control_adjust_50hz_noise_0.01/" 
-img_path = "test/images/50hz_noise_0.01/" 
+csv_path = "test/data/jake_car_csvs_control_adjust_50hz/" 
+img_path = "test/images/50hz/" 
 
 csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
@@ -19,7 +19,7 @@ if !isdir( img_path )
     mkdir( img_path ) 
 end 
 
-x_err_hist_5hz  = x_err_struct( [], [], [], [] ) 
+x_err_hist  = x_err_struct( [], [], [], [] ) 
 for i = eachindex( csv_files_vec ) 
 # for i = [ 4 ]
     # i = 42 
@@ -36,17 +36,17 @@ for i = eachindex( csv_files_vec )
     fig_test_save = replace( fig_test_save, ".csv" => "_test.png" ) 
     save( fig_test_save, fig_test ) 
     
-    push!( x_err_hist_5hz.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
-    push!( x_err_hist_5hz.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
+    push!( x_err_hist.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
+    push!( x_err_hist.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
 
 end 
 
 # find index that is equal to maximum 
-findall( x_err_hist_5hz.sindy_lasso .== maximum( x_err_hist_5hz.sindy_lasso ) ) 
+findall( x_err_hist.sindy_lasso .== maximum( x_err_hist.sindy_lasso ) ) 
 
 # reject 3-sigma outliers 
-sindy_5hz_3sigma   = reject_outliers( x_err_hist_5hz.sindy_lasso ) 
-gpsindy_5hz_3sigma = reject_outliers( x_err_hist_5hz.gpsindy ) 
+sindy_3sigma_mean   = mean( reject_outliers( x_err_hist.sindy_lasso ) ) 
+gpsindy_3sigma_mean = mean( reject_outliers( x_err_hist.gpsindy ) ) 
 
 
 
