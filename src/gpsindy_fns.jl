@@ -23,15 +23,18 @@ function cross_validate_all_csvs( csv_path, save_path )
         mkdir( fig_save_path ) 
     end 
     
-    x_err_hist = x_err_struct( Float64[], Float64[], Float64[], Float64[] ) 
+    x_err_train = x_err_struct( Float64[], Float64[], Float64[], Float64[] ) 
+    x_err_test  = x_err_struct( Float64[], Float64[], Float64[], Float64[] ) 
     for i = eachindex( csv_files_vec ) 
-    # for i = [ 4 ]
+    # for i = [ 4 ] 
         # i = 42 
         csv_file = csv_files_vec[i] 
         t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
     
-        push!( x_err_hist.sindy_lasso, norm( x_test_noise - x_test_sindy )  ) 
-        push!( x_err_hist.gpsindy,     norm( x_test_noise - x_test_gpsindy )  ) 
+        push!( x_err_train.sindy_lasso, norm( x_train_noise - x_train_sindy ) ) 
+        push!( x_err_train.gpsindy,     norm( x_train_noise - x_train_gpsindy ) ) 
+        push!( x_err_test.sindy_lasso,  norm( x_test_noise - x_test_sindy ) ) 
+        push!( x_err_test.gpsindy,      norm( x_test_noise - x_test_gpsindy ) ) 
     
         # save fig_train 
         fig_train_save = replace( csv_file, csv_path => fig_save_path )  
@@ -46,18 +49,22 @@ function cross_validate_all_csvs( csv_path, save_path )
     end 
 
     # reject 3-sigma outliers 
-    sindy_3sigma_mean   = mean( reject_outliers( x_err_hist.sindy_lasso ) ) 
-    gpsindy_3sigma_mean = mean( reject_outliers( x_err_hist.gpsindy ) ) 
+    sindy_3sigma_mean_train   = mean( reject_outliers( x_err_train.sindy_lasso ) ) 
+    gpsindy_3sigma_mean_train = mean( reject_outliers( x_err_train.gpsindy ) ) 
+    sindy_3sigma_mean_test    = mean( reject_outliers( x_err_test.sindy_lasso ) ) 
+    gpsindy_3sigma_mean_test  = mean( reject_outliers( x_err_test.gpsindy ) ) 
 
     # save x_err_hist as CSV 
-    header = [ "sindy_lasso", "gpsindy" ] 
-    df     = DataFrame( [ x_err_hist.sindy_lasso, x_err_hist.gpsindy ], header )  
+    header = [ "sindy_train", "gpsindy_train", "sindy_test", "gpsindy_test" ] 
+    df     = DataFrame( [ x_err_train.sindy_lasso, x_err_train.gpsindy, x_err_test.sindy_lasso, x_err_test.gpsindy ], header ) 
     CSV.write( string( save_path, "err_x_hist.csv" ), df ) 
-    header = [ "sindy_3sigma_mean", "gpsindy_3sigma_mean" ]
-    df     = DataFrame( [ [ sindy_3sigma_mean ], [ gpsindy_3sigma_mean ] ], header )
+
+    # save 3-sigma mean as CSV 
+    header = [ "sindy_3sigma_mean_train", "gpsindy_3sigma_mean_train", "sindy_3sigma_mean_test", "gpsindy_3sigma_mean_test" ] 
+    df     = DataFrame( [ [ sindy_3sigma_mean_train ], [ gpsindy_3sigma_mean_train ], [ sindy_3sigma_mean_test ], [ gpsindy_3sigma_mean_test ] ], header )
     CSV.write( string( save_path, "err_3sigma_mean.csv" ), df ) 
 
-    return sindy_3sigma_mean, gpsindy_3sigma_mean 
+    return sindy_3sigma_mean_test, gpsindy_3sigma_mean_test 
 end 
 
 export cross_validate_all_csvs 
