@@ -5,6 +5,11 @@
 function cross_validate_all_csvs( csv_path, save_path ) 
 
     csv_files_vec = readdir( csv_path ) 
+
+    # if csv_files_vec contains "fig", remove from vector 
+    deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) )  
+
+    # add entire path to csv_files_vec 
     for i in eachindex(csv_files_vec)  
         csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
     end 
