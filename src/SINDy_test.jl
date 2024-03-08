@@ -231,13 +231,13 @@ end
 # build data matrix 
 
 export pool_data_test
-function pool_data_test(xmat, n_vars, poly_order) 
+function pool_data_test(xu_mat, n_vars, poly_order) 
 # ----------------------- #
 # Purpose: Build data matrix based on possible functions 
 # 
 # Inputs: 
-#   x           = data input 
-#   n_vars      = # elements in state 
+#   xu_mat      = data input 
+#   n_vars      = # elements in state and/or control  
 #   poly_order  = polynomial order (goes up to order 3) 
 # 
 # Outputs: 
@@ -246,7 +246,7 @@ function pool_data_test(xmat, n_vars, poly_order)
 
     # turn x into matrix and get length 
     # xmat = mapreduce(permutedims, vcat, x) 
-    l = size(xmat, 1) 
+    l = size(xu_mat, 1) 
 
     # # fill out 1st column of Θx with ones (poly order = 0) 
     ind = 1 ; 
@@ -255,19 +255,19 @@ function pool_data_test(xmat, n_vars, poly_order)
     # poly order 1 
     for i = 1 : n_vars 
         ind += 1 
-        Θx   = [ Θx xmat[:,i] ]
+        Θx   = [ Θx xu_mat[:,i] ]
     end 
 
-    # # poly order 2 
-    # if poly_order >= 2 
-    #     for i = 1 : n_vars 
-    #         for j = i : n_vars 
-    #             ind += 1 ; 
-    #             vec  = xmat[:,i] .* xmat[:,j] 
-    #             Θx   = [Θx vec] 
-    #         end 
-    #     end 
-    # end 
+    # poly order 2 
+    if poly_order >= 2 
+        for i = 1 : n_vars 
+            for j = i : n_vars 
+                ind += 1 ; 
+                vec  = xu_mat[:,i] .* xu_mat[:,j] 
+                Θx   = [Θx vec] 
+            end 
+        end 
+    end 
 
     # # poly order 3 
     # if poly_order >= 3 
@@ -285,14 +285,14 @@ function pool_data_test(xmat, n_vars, poly_order)
     # sine functions 
     for i = 1 : n_vars 
         ind  += 1 
-        vec   = sin.(xmat[:,i]) 
+        vec   = sin.(xu_mat[:,i]) 
         Θx    = [Θx vec] 
     end 
 
     # cos functions 
     for i = 1 : n_vars 
         ind  += 1 
-        vec   = cos.(xmat[:,i]) 
+        vec   = cos.(xu_mat[:,i]) 
         Θx    = [Θx vec] 
     end 
 
@@ -300,7 +300,7 @@ function pool_data_test(xmat, n_vars, poly_order)
     for i = 1 : n_vars 
         for j = 1 : n_vars 
             ind  += 1 
-            vec   = xmat[:,i] .* sin.(xmat[:,j]) 
+            vec   = xu_mat[:,i] .* sin.(xu_mat[:,j]) 
             Θx    = [Θx vec]     
         end 
     end 
@@ -309,7 +309,7 @@ function pool_data_test(xmat, n_vars, poly_order)
     for i = 1 : n_vars 
         for j = 1 : n_vars 
             ind  += 1 
-            vec   = xmat[:,i] .* cos.(xmat[:,j]) 
+            vec   = xu_mat[:,i] .* cos.(xu_mat[:,j]) 
             Θx    = [Θx vec]     
         end 
     end 
@@ -374,18 +374,15 @@ function pool_data_vecfn_test(n_vars, poly_order)
         push!( Θx, x -> x[i] ) 
     end 
 
-    # ind += 1 
-    # push!( Θ, x[1] .* x[2] )
-
-    # # poly order 2 
-    # if poly_order >= 2 
-    #     for i = 1 : n_vars 
-    #         for j = i:n_vars 
-    #             ind += 1 ; 
-    #             push!( Θx, x -> x[i] .* x[j] ) 
-    #         end 
-    #     end 
-    # end 
+    # poly order 2 
+    if poly_order >= 2 
+        for i = 1 : n_vars 
+            for j = i:n_vars 
+                ind += 1 ; 
+                push!( Θx, x -> x[i] .* x[j] ) 
+            end 
+        end 
+    end 
 
     # # poly order 3 
     # if poly_order >= 3 

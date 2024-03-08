@@ -6,21 +6,19 @@ using Statistics
 ## ============================================ ##
 # cross validation function 
 
-csv_path  = "test/data/jake_car_csvs_ctrlshift/10hz_noise_0.01/" 
-save_path = "test/results/10hz_noise_0.01/" 
+csv_path  = "test/data/jake_car_csvs_ctrlshift/5hz/" 
+save_path = "test/results/5hz_p2/" 
 
 sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
 
 
 ## ============================================ ##
 
-freq_hz   = 25 
-# noise     = 0.02   
-
+freq_hz   = 10 
 for noise = 0.01 : 0.01 : 0.04 
 
     csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "/" )  
-    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "/" ) 
+    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "_p2/" ) 
 
     println(csv_path) 
     println(save_path) 
@@ -28,6 +26,19 @@ for noise = 0.01 : 0.01 : 0.04
     sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
 
 end 
+
+# freq_hz   = 50  
+# for noise = 0.01 : 0.01 : 0.01 
+
+#     csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "/" )  
+#     save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "/" ) 
+
+#     println(csv_path) 
+#     println(save_path) 
+
+#     sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
+
+# end 
 
 
 

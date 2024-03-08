@@ -8,11 +8,11 @@ using CairoMakie
 # control input delay  
 
 # add how much noise to all data? 
-noise   = 0.01 
-freq_hz = 25 
+noise   = 0.01   
+freq_hz = 5 
 
-csv_path  = string( "test/data/jake_car_csvs_control_adjust_", freq_hz, "hz/" ) 
-save_path = string( "test/data/jake_car_csvs_control_adjust_", freq_hz, "hz_noise_", noise, "/" ) 
+csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz/" ) 
+save_path = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "p2/" ) 
 add_noise_car( csv_path, save_path, noise )  
 
 
@@ -33,6 +33,7 @@ add_noise_car( csv_path, save_path, noise )
 
 
 
+## ============================================ ##
 ## ============================================ ##
 # add_noise_car 
 

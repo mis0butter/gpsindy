@@ -1,2 +1,2 @@
-sindy_3sigma_mean,gpsindy_3sigma_mean
-18.884328132629758,20.946289508184805
+sindy_3sigma_mean_train,gpsindy_3sigma_mean_train,sindy_3sigma_mean_test,gpsindy_3sigma_mean_test
+2.453813736937756e6,1.692213149087346e6,18.884328132629758,20.946289508184805
