@@ -86,9 +86,9 @@ function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false
     t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test ) 
     
     # get x0 from smoothed data 
-    x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
+    x0_train = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
     # x0_test     = x_test_GP[1,:] 
-    x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
+    x0_test  = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
 
     # cross-validate SINDy!!! 
     λ_vec = λ_vec_fn() 
@@ -110,11 +110,15 @@ function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false
     # build dx_fn from Ξ and integrate 
     x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train, x0_test ) 
 
+    # downsample x_train_GP (again) 
+    x_train_GP = x_train_GP[1:2:end,:] 
+
     # plot 
     if plot_option == 1 
 
         # plot training 
-        fig_train = plot_noise_GP_sindy_gpsindy_traindouble( data_train.t, data_train.x_noise, t_train_GP, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+        # fig_train = plot_noise_GP_sindy_gpsindy_traindouble( data_train.t, data_train.x_noise, t_train_GP, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+        fig_train = plot_noise_GP_sindy_gpsindy( data_train.t, data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
 
         # plot testing 
         fig_test = plot_noise_GP_sindy_gpsindy( data_test.t, data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 

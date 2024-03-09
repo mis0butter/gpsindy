@@ -183,12 +183,13 @@ function gp_post( x_test, μ_prior, x_train, μ_train, y_train )
         log_noise = log(0.1)                # (optional) log std dev of obs 
         
         # y_train = dx_noise[:,i] - dx_mean[:,i]
-        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
-        # gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
+        # gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
+        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
         optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
     
         # return HPs 
         σ_f = sqrt( gp.kernel.σ2 ) ; l = sqrt.( gp.kernel.ℓ2 ) ; σ_n = exp( gp.logNoise.value )  
+        # println( "σ_n = ", σ_n ) 
         hp  = [σ_f, l, σ_n] 
     
         # compute kernels 
