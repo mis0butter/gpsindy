@@ -258,16 +258,16 @@ function pool_data_test(xu_mat, n_vars, poly_order)
         Θx   = [ Θx xu_mat[:,i] ]
     end 
 
-    # poly order 2 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i : n_vars 
-                ind += 1 ; 
-                vec  = xu_mat[:,i] .* xu_mat[:,j] 
-                Θx   = [Θx vec] 
-            end 
-        end 
-    end 
+    # # poly order 2 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i : n_vars 
+    #             ind += 1 ; 
+    #             vec  = xu_mat[:,i] .* xu_mat[:,j] 
+    #             Θx   = [Θx vec] 
+    #         end 
+    #     end 
+    # end 
 
     # # poly order 3 
     # if poly_order >= 3 
@@ -374,15 +374,15 @@ function pool_data_vecfn_test(n_vars, poly_order)
         push!( Θx, x -> x[i] ) 
     end 
 
-    # poly order 2 
-    if poly_order >= 2 
-        for i = 1 : n_vars 
-            for j = i:n_vars 
-                ind += 1 ; 
-                push!( Θx, x -> x[i] .* x[j] ) 
-            end 
-        end 
-    end 
+    # # poly order 2 
+    # if poly_order >= 2 
+    #     for i = 1 : n_vars 
+    #         for j = i:n_vars 
+    #             ind += 1 ; 
+    #             push!( Θx, x -> x[i] .* x[j] ) 
+    #         end 
+    #     end 
+    # end 
 
     # # poly order 3 
     # if poly_order >= 3 

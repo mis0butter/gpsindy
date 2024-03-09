@@ -1,4 +1,24 @@
 
+function downsample( t, t_double, x_double ) 
+
+    t_dbl_dwnsmpl = Float64[] 
+    x_dbl_dwnsmpl = []
+    for i in eachindex(t) 
+        # println(i) 
+        push!( t_dbl_dwnsmpl, t_double[2*i-1] ) 
+        push!( x_dbl_dwnsmpl, x_double[2*i-1,:] ) 
+    end 
+
+    x_dbl_dwnsmpl = vv2m( x_dbl_dwnsmpl ) 
+
+    return t_dbl_dwnsmpl, x_dbl_dwnsmpl 
+end 
+
+export downsample 
+
+
+## ============================================ ##
+
 function add_noise_car( csv_path, save_path, noise )  
 
     fig_save_path = string( save_path, "figs/"  ) 
