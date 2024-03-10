@@ -30,9 +30,9 @@ function cross_validate_all_csvs( csv_path, save_path )
         # i = 42 
         csv_file = csv_files_vec[i] 
 
-        # t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
+        t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
     
-        t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy_traindouble( csv_file, 1 ) 
+        # t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy_traindouble( csv_file, 1 ) 
     
         push!( x_err_train.sindy_lasso, norm( x_train_noise - x_train_sindy ) ) 
         push!( x_err_train.gpsindy,     norm( x_train_noise - x_train_gpsindy ) ) 
@@ -155,7 +155,7 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
     
     # build dx_fn from Ξ and integrate 
-    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train, x0_test ) 
+    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test ) 
     
     # cross-validate GPSINDy!!!  
     λ_vec = λ_vec_fn() 
@@ -165,7 +165,7 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
     
     # build dx_fn from Ξ and integrate 
-    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train, x0_test ) 
+    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train_GP, x0_test ) 
 
     # plot 
     if plot_option == 1 
