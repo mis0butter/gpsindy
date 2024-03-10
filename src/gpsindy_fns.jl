@@ -30,9 +30,9 @@ function cross_validate_all_csvs( csv_path, save_path )
         # i = 42 
         csv_file = csv_files_vec[i] 
 
-        # t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
+        t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy( csv_file, 1 ) 
     
-        t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy_traindouble( csv_file, 1 ) 
+        # t_train, t_test, x_train_noise, x_test_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy_minerr, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test = cross_validate_sindy_gpsindy_traindouble( csv_file, 1 ) 
     
         push!( x_err_train.sindy_lasso, norm( x_train_noise - x_train_sindy ) ) 
         push!( x_err_train.gpsindy,     norm( x_train_noise - x_train_gpsindy ) ) 
@@ -280,6 +280,22 @@ function gp_train_double_test( data_train, data_test )
     dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
     return t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+end 
+
+
+## ============================================ ##
+# smooth training and test data with GPs 
+
+export gp_train_test 
+function gp_train_test( data_train, data_test ) 
+
+    # first - smooth measurements with Gaussian processes 
+    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
+    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
+    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+
+    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
 
 
@@ -610,22 +626,6 @@ function err_Ξ_x( Ξ, x, Ξ_err, x_err )
     push!( Ξ_err.gpsindy, Ξ_gpsindy_err ) 
 
     return Ξ_err, x_err 
-end 
-
-
-## ============================================ ##
-# smooth training and test data with GPs 
-
-export gp_train_test 
-function gp_train_test( data_train, data_test ) 
-
-    # first - smooth measurements with Gaussian processes 
-    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
-    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
-    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
-    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
-
-    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
 
 

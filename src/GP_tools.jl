@@ -1,4 +1,48 @@
 ## ============================================ ##
+# posterior GP and optimize hps 
+
+export gp_post 
+function gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
+# ----------------------- #
+# PURPOSE: 
+#       Compute posterior of Gaussian process and optimize hyperparameters 
+# INPUTS: 
+#       x_prior : input points for the PRIOR model (TEST points) 
+#       μ_prior : mean function m(x) of the PRIOR model 
+#       x_train : input points for the TRAINING (meas) data 
+#       μ_train : mean function m(x) for the TRAINING (meas) data 
+#       y_train : output points for the TRAINING (meas) data 
+# OUTPUTS: 
+#       y_post  : posterior output based on TRAINING (meas) data 
+# ----------------------- # 
+
+    # set up posterior 
+    x_rows = size( x_prior, 1 ) ; n_vars = size(y_train, 2) 
+    y_post = zeros( x_rows, n_vars ) 
+    
+    # optimize hyperparameters, compute posterior y_post for each state 
+    for i = 1 : n_vars 
+    
+        # kernel  
+        mZero     = MeanZero()              # zero mean function 
+        kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
+        log_noise = log(0.01)                # (optional) log std dev of obs 
+        
+        # y_train = dx_noise[:,i] - dx_mean[:,i]
+        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
+        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
+
+        # compute posterior 
+        y_post[:,i] = predict_y( gp, x_prior' )[1] 
+    
+    end 
+
+    return y_post 
+
+end 
+
+
+## ============================================ ##
 # sample from given mean and covariance 
 
 export gauss_sample 
@@ -138,74 +182,6 @@ function post_dist( x_train, y_train, x_test, σ_f, l, σ_n )
     Σ_post = Kss - v'*v 
 
     return μ_post, Σ_post
-
-end 
-
-
-## ============================================ ##
-# posterior GP and optimize hps 
-
-export gp_post 
-function gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
-# ----------------------- #
-# PURPOSE: 
-#       Compute posterior of Gaussian process and optimize hyperparameters 
-# INPUTS: 
-#       x_prior : input points for the PRIOR model (TEST points) 
-#       μ_prior : mean function m(x) of the PRIOR model 
-#       x_train : input points for the TRAINING (meas) data 
-#       μ_train : mean function m(x) for the TRAINING (meas) data 
-#       y_train : output points for the TRAINING (meas) data 
-# OUTPUTS: 
-#       y_post  : posterior output based on TRAINING (meas) data 
-# ----------------------- # 
-
-    # transform x inputs matrices --> vectors for kernel computations 
-    x_test_vec = [] 
-    for i = 1 : size(x_prior, 1) 
-        push!( x_test_vec, x_prior[i,:] ) 
-    end 
-    x_train_vec = [] 
-    for i = 1 : size(x_train, 1) 
-        push!( x_train_vec, x_train[i,:] ) 
-    end 
-
-    # set up posterior 
-    r      = size(x_prior, 1) ; n_vars = size(y_train, 2) 
-    y_post = zeros( r, n_vars ) 
-    
-    # optimize hyperparameters, compute posterior y_post for each state 
-    for i = 1 : n_vars 
-    
-        # kernel  
-        mZero     = MeanZero()              # zero mean function 
-        kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
-        log_noise = log(0.1)                # (optional) log std dev of obs 
-        
-        # y_train = dx_noise[:,i] - dx_mean[:,i]
-        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
-        # gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
-        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
-    
-        # # return HPs 
-        # σ_f = sqrt( gp.kernel.σ2 ) ; l = sqrt.( gp.kernel.ℓ2 ) ; σ_n = exp( gp.logNoise.value )  
-        # # println( "σ_n = ", σ_n ) 
-        # hp  = [σ_f, l, σ_n] 
-    
-        # # compute kernels 
-        # Kss = k_SE( σ_f, l, x_test_vec, x_test_vec ) 
-        # Ks  = k_SE( σ_f, l, x_test_vec, x_train_vec ) 
-        # K   = k_SE( σ_f, l, x_train_vec, x_train_vec ) 
-
-        # # posterior 
-        # y_post[:,i] = μ_prior[:,i] + Ks * ( ( K + σ_n^2 * I ) \ ( y_train[:,i] - μ_train[:,i] ) ) 
-        # Σ           = Kss - Ks * ( ( K + σ_n^2 * I ) \ Ks' ) 
-
-        y_post[:,i] = predict_y( gp, x_prior' )[1] 
-    
-    end 
-
-    return y_post 
 
 end 
 
