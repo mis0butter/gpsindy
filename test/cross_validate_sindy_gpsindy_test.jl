@@ -18,7 +18,7 @@ freq_hz   = 10
 for noise = 0.01 : 0.01 : 0.04 
 
     csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "/" )  
-    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "dbl/" ) 
+    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "_dbl_u_linear/" ) 
 
     println(csv_path) 
     println(save_path) 
