@@ -53,6 +53,12 @@ y_post = zeros( prior_row, n_vars )
 
 
 ## ============================================ ##
+# make sure the changes I'm making to gp_post are correct 
+
+y_post = gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
+
+
+## ============================================ ##
 # manually tuning the hyperparameters 
 
 σ_f = 1.0   # signal variance 
@@ -81,15 +87,14 @@ i = 3
 
 σ_f = 1.0  
 l   = 1.0 
-σ_n = 0.1 
+σ_n = 1e-2 
 
 # kernel  
 mZero     = MeanZero()                  # zero mean function 
 kern      = SE( log( σ_f ), log( l ) )  # squared eponential kernel (hyperparams on LOG scale)  
 log_noise = log( σ_n )                  # (optional) log std dev of obs 
 
-gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
-# gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
+gp        = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
 
 optimize!( gp; method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = false ) 
 

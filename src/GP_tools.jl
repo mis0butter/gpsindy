@@ -183,23 +183,25 @@ function gp_post( x_prior, μ_prior, x_train, μ_train, y_train )
         log_noise = log(0.1)                # (optional) log std dev of obs 
         
         # y_train = dx_noise[:,i] - dx_mean[:,i]
-        # gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
-        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
+        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
+        # gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern ) 
         optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
     
-        # return HPs 
-        σ_f = sqrt( gp.kernel.σ2 ) ; l = sqrt.( gp.kernel.ℓ2 ) ; σ_n = exp( gp.logNoise.value )  
-        # println( "σ_n = ", σ_n ) 
-        hp  = [σ_f, l, σ_n] 
+        # # return HPs 
+        # σ_f = sqrt( gp.kernel.σ2 ) ; l = sqrt.( gp.kernel.ℓ2 ) ; σ_n = exp( gp.logNoise.value )  
+        # # println( "σ_n = ", σ_n ) 
+        # hp  = [σ_f, l, σ_n] 
     
-        # compute kernels 
-        Kss = k_SE( σ_f, l, x_test_vec, x_test_vec ) 
-        Ks  = k_SE( σ_f, l, x_test_vec, x_train_vec ) 
-        K   = k_SE( σ_f, l, x_train_vec, x_train_vec ) 
+        # # compute kernels 
+        # Kss = k_SE( σ_f, l, x_test_vec, x_test_vec ) 
+        # Ks  = k_SE( σ_f, l, x_test_vec, x_train_vec ) 
+        # K   = k_SE( σ_f, l, x_train_vec, x_train_vec ) 
 
-        # posterior 
-        y_post[:,i] = μ_prior[:,i] + Ks * ( ( K + σ_n^2 * I ) \ ( y_train[:,i] - μ_train[:,i] ) ) 
-        Σ           = Kss - Ks * ( ( K + σ_n^2 * I ) \ Ks' ) 
+        # # posterior 
+        # y_post[:,i] = μ_prior[:,i] + Ks * ( ( K + σ_n^2 * I ) \ ( y_train[:,i] - μ_train[:,i] ) ) 
+        # Σ           = Kss - Ks * ( ( K + σ_n^2 * I ) \ Ks' ) 
+
+        y_post[:,i] = predict_y( gp, x_prior' )[1] 
     
     end 
 
