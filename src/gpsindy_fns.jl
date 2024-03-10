@@ -147,6 +147,8 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     # x0_test     = x_test_GP[1,:] 
     x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
 
+    # ----------------------- #
+    
     # cross-validate SINDy!!! 
     λ_vec = λ_vec_fn() 
     Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
@@ -155,7 +157,9 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
     
     # build dx_fn from Ξ and integrate 
-    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train_GP, x0_test ) 
+    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train, x0_test ) 
+    
+    # ----------------------- #
     
     # cross-validate GPSINDy!!!  
     λ_vec = λ_vec_fn() 
@@ -167,6 +171,8 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     # build dx_fn from Ξ and integrate 
     x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train_GP, x0_test ) 
 
+    # ----------------------- #
+    
     # plot 
     if plot_option == 1 
 
