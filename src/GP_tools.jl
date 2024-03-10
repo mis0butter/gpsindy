@@ -92,10 +92,10 @@ function log_p( σ_f, l, σ_n, x, y, μ )
     Ky = k_SE(σ_f, l, x, x) 
     Ky += σ_n^2 * I 
     
-    while det(Ky) == 0 
-        println( "det(Ky) = 0" )
-        Ky += σ_n * I 
-    end 
+    # while det(Ky) == 0 
+    #     println( "det(Ky) = 0" )
+    #     Ky += σ_n * I 
+    # end 
 
     # term  = 1/2 * ( y - μ )' * inv( Ky ) * ( y - μ ) 
     term  = 1/2 * ( y - μ )' * ( Ky \ ( y - μ ) ) 
@@ -146,24 +146,24 @@ end
 # posterior GP and optimize hps 
 
 export gp_post 
-function gp_post( x_test, μ_prior, x_train, μ_train, y_train ) 
+function gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
 # ----------------------- #
 # PURPOSE: 
 #       Compute posterior of Gaussian process and optimize hyperparameters 
 # INPUTS: 
-#       x_test  : TEST input points for the PRIOR model 
+#       x_prior : input points for the PRIOR model (TEST points) 
 #       μ_prior : mean function m(x) of the PRIOR model 
-#       x_train : input points for the TRAINING data 
-#       y_train : output points for the TRAINING data 
-#       μ_train : mean function m(x) for the TRAINING data 
+#       x_train : input points for the TRAINING (meas) data 
+#       μ_train : mean function m(x) for the TRAINING (meas) data 
+#       y_train : output points for the TRAINING (meas) data 
 # OUTPUTS: 
-#       y_post  : 
+#       y_post  : posterior output based on TRAINING (meas) data 
 # ----------------------- # 
 
     # transform x inputs matrices --> vectors for kernel computations 
     x_test_vec = [] 
-    for i = 1 : size(x_test, 1) 
-        push!( x_test_vec, x_test[i,:] ) 
+    for i = 1 : size(x_prior, 1) 
+        push!( x_test_vec, x_prior[i,:] ) 
     end 
     x_train_vec = [] 
     for i = 1 : size(x_train, 1) 
@@ -171,7 +171,7 @@ function gp_post( x_test, μ_prior, x_train, μ_train, y_train )
     end 
 
     # set up posterior 
-    r      = size(x_test, 1) ; n_vars = size(y_train, 2) 
+    r      = size(x_prior, 1) ; n_vars = size(y_train, 2) 
     y_post = zeros( r, n_vars ) 
     
     # optimize hyperparameters, compute posterior y_post for each state 
