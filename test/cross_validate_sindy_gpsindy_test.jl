@@ -7,7 +7,7 @@ using Statistics
 # cross validation function 
 
 csv_path  = "test/data/jake_car_csvs_ctrlshift/5hz/" 
-save_path = "test/results/5hz σn_0.01/" 
+save_path = "test/results/5hz dbl u_σn_1e-2/" 
 
 sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
 

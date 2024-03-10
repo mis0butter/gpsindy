@@ -24,6 +24,8 @@ end
     # get data 
     t = data[:,1] ; x = data[:,2:5] ; u = data[:,6:7] 
 
+    x, dx = unroll( t, x )
+
 
 ## ============================================ ##
 # gp_post function: 
@@ -41,12 +43,12 @@ prior_row = size(t)[1]
 train_row = size(x)[1]   
 
 # massage inputs 
-x_prior = t 
+x_prior = x 
 μ_prior = zeros( prior_row, n_vars ) 
 
-x_train = t 
+x_train = x 
 μ_train = zeros( train_row, n_vars ) 
-y_train = x 
+y_train = dx 
 
 # set up posterior (will have same dimension as the PRIOR / test output points) 
 y_post = zeros( prior_row, n_vars ) 
@@ -56,6 +58,21 @@ y_post = zeros( prior_row, n_vars )
 # make sure the changes I'm making to gp_post are correct 
 
 y_post = gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
+
+## ============================================ ##
+
+i = 3 
+
+f = Figure() 
+ax = Axis( f[1,1] ) 
+    CairoMakie.scatter!( ax, t, y_train[:,i] ) 
+
+# y_post_OG uses predict_y 
+
+
+
+# y_post uses manually computed posterior 
+
 
 
 ## ============================================ ##
