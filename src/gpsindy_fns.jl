@@ -1,5 +1,39 @@
 
+export cross_validate 
 
+function cross_validate( csv_path_file, plot_option = false ) 
+
+    # extract data 
+    data_train, data_test = car_data_struct( csv_path_file ) 
+
+    # smooth with GPs 
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+
+    λ_vec = λ_vec_fn() 
+
+    # ----------------------- #
+    # test cross_validate_λ for sindy and gpsindy 
+
+    x_err_hist = x_train_test_err_struct( [], [], [], [] ) 
+    for i_λ = eachindex( λ_vec ) 
+
+        λ   = λ_vec[i_λ] 
+        println( "λ = ", @sprintf "%.3g" λ ) 
+
+        data_pred_train, data_pred_test = sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
+        
+        # plot and save metrics 
+        if plot_option == true     
+            f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, freq_hz, csv_file)     
+            display(f) 
+        end 
+
+        x_err_hist = push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 
+        
+    end 
+
+    return x_err_hist
+end 
 
 ## ============================================ ##
 
