@@ -8,10 +8,11 @@ using Printf
 ## ============================================ ##
 # test single file 
 
-csv_file = "test/data/jake_car_csvs_ctrlshift/10hz/rollout_shift_10hz_4_notrans.csv" 
+csv_path = "test/data/jake_car_csvs_ctrlshift/50hz/" 
+csv_file = "rollout_shift_2_notrans.csv" 
 
 # extract data 
-data_train, data_test = car_data_struct( csv_file ) 
+data_train, data_test = car_data_struct( string(csv_path, csv_file) ) 
 
 t_train        = data_train.t           ; t_test        = data_test.t 
 x_train_noise  = data_train.x_noise     ; x_test_noise  = data_test.x_noise 
@@ -20,8 +21,8 @@ u_train        = data_train.u           ; u_test        = data_test.u
 
 # smooth with GPs 
 σ_n = 1e-2 
-x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, false ) 
-dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise, σ_n, false ) 
+x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise, ) 
+dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise, ) 
 x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
 dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
@@ -43,38 +44,41 @@ x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train_GP, u_train )
 Θx_gp  = pool_data_test( [ x_train_GP u_train ], n_vars, poly_order ) 
 
 # try i = 1 
-# i_λ = 27 
-# λ   = λ_vec[i_λ] ; 
-λ = 29 
+i_λ = 19 
+λ   = λ_vec[i_λ] ; 
+# λ = 29 
 println( "λ = ", @sprintf "%.3g" λ ) 
 
 # ----------------------- # 
 # SINDY-lasso ! 
-Ξ_sindy = sindy_lasso( x_train_noise, dx_train_noise, λ, u_train ) 
-println( "size of Ξ_sindy = ", @sprintf "%.3g" norm( Ξ_sindy ) ) 
+Ξ_sindy = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
 dx_sindy = Θx_gp * Ξ_sindy 
 
 # integrate discovered dynamics 
 dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
-x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, t_train, u_train ) 
-x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, t_test, u_test ) 
+x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
+x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
 
 # ----------------------- #
 # GPSINDy-lasso ! 
 Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
-println( "size of Ξ_gpsindy = ", @sprintf "%.3g" norm( Ξ_gpsindy ) ) 
 dx_gpsindy = Θx_gp * Ξ_gpsindy 
 
 # integrate discovered dynamics 
 dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
-x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, t_train, u_train ) 
-x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, t_test, u_test ) 
+x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
+x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
+
+# ----------------------- #
+# collect data 
+
+data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
+data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
 
 # ----------------------- #
 # plot 
 
-f = plot_err_train_test( x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-
+f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, csv_file) 
 
 
 
@@ -97,21 +101,31 @@ f = plot_err_train_test( x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, 
 ## ============================================ ##
 # plotting fns 
 
-function plot_err_train_test( x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+function plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, csv_file) 
+
+    x_train_GP      = data_pred_train.x_GP 
+    x_sindy_train   = data_pred_train.x_sindy 
+    x_gpsindy_train = data_pred_train.x_gpsindy 
+    x_test_GP       = data_pred_test.x_GP 
+    x_sindy_test    = data_pred_test.x_sindy 
+    x_gpsindy_test  = data_pred_test.x_gpsindy 
+
+    x_train_noise   = data_train.x_noise 
+    x_test_noise    = data_test.x_noise 
 
     x_gp_err_train       = @sprintf "%.3g" norm( x_train_noise - x_train_GP ) 
     x_sindy_err_train    = @sprintf "%.3g" norm( x_train_noise - x_sindy_train ) 
     x_gpsindy_err_train  = @sprintf "%.3g" norm( x_train_noise - x_gpsindy_train ) 
 
-    x_gp_err_test       = @sprintf "%.3g" norm( x_test_noise - x_test_GP ) 
-    x_sindy_err_test    = @sprintf "%.3g" norm( x_test_noise - x_sindy_test ) 
-    x_gpsindy_err_test  = @sprintf "%.3g" norm( x_test_noise - x_gpsindy_test ) 
+    x_gp_err_test        = @sprintf "%.3g" norm( x_test_noise - x_test_GP ) 
+    x_sindy_err_test     = @sprintf "%.3g" norm( x_test_noise - x_sindy_test ) 
+    x_gpsindy_err_test   = @sprintf "%.3g" norm( x_test_noise - x_gpsindy_test ) 
 
-    f = Figure( size = ( 700,700 ) ) 
-    f = plot_ix_err_train_test( f, 1, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-    f = plot_ix_err_train_test( f, 2, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-    f = plot_ix_err_train_test( f, 3, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-    f = plot_ix_err_train_test( f, 4, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+    f = Figure( size = ( 800,700 ) ) 
+    f = plot_ix_err_train_test( f, 1, data_pred_train, data_pred_test, data_train, data_test) 
+    f = plot_ix_err_train_test( f, 2, data_pred_train, data_pred_test, data_train, data_test) 
+    f = plot_ix_err_train_test( f, 3, data_pred_train, data_pred_test, data_train, data_test) 
+    f = plot_ix_err_train_test( f, 4, data_pred_train, data_pred_test, data_train, data_test) 
     # ax = Axis( f[5,1:2] ) 
     ax_text = "total err: GP = $x_gp_err_train, \n SINDy = $x_sindy_err_train, GPSINDy = $x_gpsindy_err_train" 
     Textbox( f[5,1:2], placeholder = ax_text, textcolor_placeholder = :black ) 
@@ -119,12 +133,22 @@ function plot_err_train_test( x_train_GP, x_sindy_train, x_gpsindy_train, x_test
     ax_text = "total err: GP = $x_gp_err_test, \n SINDy = $x_sindy_err_test, GPSINDy = $x_gpsindy_err_test" 
     Textbox( f[5,3:4], placeholder = ax_text, textcolor_placeholder = :black ) 
 
+    ax_text = "λ = $λ, \n $csv_file" 
+    Textbox( f[5,5], placeholder = ax_text, textcolor_placeholder = :black ) 
+
     return f 
 end 
 
 ## ============================================ ##
 
-function plot_ix_err_train_test( f, i_x, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+function plot_ix_err_train_test( f, i_x, data_pred_train, data_pred_test, data_train, data_test) 
+
+    x_train_GP      = data_pred_train.x_GP 
+    x_sindy_train   = data_pred_train.x_sindy 
+    x_gpsindy_train = data_pred_train.x_gpsindy 
+    x_test_GP       = data_pred_test.x_GP 
+    x_sindy_test    = data_pred_test.x_sindy 
+    x_gpsindy_test  = data_pred_test.x_gpsindy 
 
     x_train_noise = data_train.x_noise 
     x_test_noise  = data_test.x_noise 

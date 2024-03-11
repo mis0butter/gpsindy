@@ -59,5 +59,14 @@ struct data_struct
     dx_noise 
 end 
 
-export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct, x_struct, x_err_struct
+struct data_predicts 
+    x_GP 
+    dx_GP 
+    x_sindy 
+    dx_sindy 
+    x_gpsindy 
+    dx_gpsindy 
+end 
+
+export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct, x_struct, x_err_struct, data_predicts 
 
