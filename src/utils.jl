@@ -1,4 +1,20 @@
 
+function extract_preds( data_pred_train, data_pred_test ) 
+
+    x_train_GP      = data_pred_train.x_GP 
+    x_sindy_train   = data_pred_train.x_sindy 
+    x_gpsindy_train = data_pred_train.x_gpsindy 
+    x_test_GP       = data_pred_test.x_GP 
+    x_sindy_test    = data_pred_test.x_sindy 
+    x_gpsindy_test  = data_pred_test.x_gpsindy 
+
+    return x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test 
+end 
+
+export extract_preds 
+
+## ============================================ ##
+
 function min_max_y( input, percent = 30 )  
 
     min_y   = minimum( input ) ; max_y = maximum( input ) 
