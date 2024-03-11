@@ -162,13 +162,13 @@ export λ_vec_fn
 function λ_vec_fn(  ) 
 
     λ_vec = [ 1e-6 ] 
-    while λ_vec[end] < 1e-1 
-        push!( λ_vec, 10 * λ_vec[end] ) 
+    while λ_vec[end] <= 1e-1 
+        push!( λ_vec, 10.0 * λ_vec[end] ) 
     end 
-    while λ_vec[end] < 1.0  
+    while round(λ_vec[end], digits = 1) < 1.0  
         push!( λ_vec, 0.1 + λ_vec[end] ) 
     end 
-    while λ_vec[end] < 10 
+    while round(λ_vec[end], digits = 1) < 10 
         push!( λ_vec, 1.0 + λ_vec[end] ) 
     end 
     while λ_vec[end] < 100 

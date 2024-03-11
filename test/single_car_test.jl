@@ -8,8 +8,8 @@ using Printf
 ## ============================================ ##
 # test single file 
 
-csv_path = "test/data/jake_car_csvs_ctrlshift/50hz/" 
-csv_file = "rollout_shift_2_notrans.csv" 
+csv_path = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz/" 
+csv_file = "rollout_3.csv" 
 
 # extract data 
 data_train, data_test = car_data_struct( string(csv_path, csv_file) ) 
@@ -45,7 +45,6 @@ x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_tra
 
 # try i = 1 
 i_λ = 25 
-
 
 for i_λ = eachindex( λ_vec )
 
