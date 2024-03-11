@@ -9,7 +9,7 @@ using Printf
 # test single file 
 
 csv_path = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz/" 
-csv_file = "rollout_3.csv" 
+csv_file = "rollout_20.csv" 
 
 # extract data 
 data_train, data_test = car_data_struct( string(csv_path, csv_file) ) 
@@ -46,7 +46,9 @@ x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_tra
 # try i = 1 
 i_λ = 25 
 
-for i_λ = eachindex( λ_vec )
+x_sindy_train_err_hist   = [] ; x_sindy_test_err_hist   = [] 
+x_gpsindy_train_err_hist = [] ; x_gpsindy_test_err_hist = [] 
+for i_λ = eachindex( λ_vec ) 
 
     λ   = λ_vec[i_λ] 
     println( "λ = ", @sprintf "%.3g" λ ) 
@@ -78,14 +80,39 @@ for i_λ = eachindex( λ_vec )
     data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
     
     # ----------------------- #
-    # plot 
+    # plot and save metrics 
     
     f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, csv_file)     
     display(f) 
+
+    x_sindy_train_err   = norm( data_train.x_noise - x_sindy_train ) 
+    x_gpsindy_train_err = norm( data_train.x_noise - x_gpsindy_train ) 
+    push!( x_sindy_train_err_hist, x_sindy_train_err ) 
+    push!( x_gpsindy_train_err_hist, x_gpsindy_train_err ) 
+
+    x_sindy_test_err   = norm( data_test.x_noise - x_sindy_test ) 
+    x_gpsindy_test_err = norm( data_test.x_noise - x_gpsindy_test ) 
+    push!( x_sindy_test_err_hist, x_sindy_test_err ) 
+    push!( x_gpsindy_test_err_hist, x_gpsindy_test_err ) 
     
 end 
 
+header = [ "λ", "x_sindy_train_err", "x_gpsindy_train_err", "x_sindy_test_err", "x_gpsindy_test_err" ] 
+data = [ λ_vec x_sindy_train_err_hist x_gpsindy_train_err_hist x_sindy_test_err_hist x_gpsindy_test_err_hist ] 
+df = DataFrame( data, header ) ; display(df) 
 
+# get indices with smallest error 
+i_min_sindy   = argmin( x_sindy_train_err_hist ) 
+i_min_gpsindy = argmin( x_gpsindy_train_err_hist ) 
+
+# print above as data  frame 
+header = [ "λ min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
+data   = [ λ_vec[i_min_sindy] x_sindy_train_err_hist[i_min_sindy] x_sindy_test_err_hist[i_min_sindy] ] 
+df = DataFrame( data, header ) ; display(df) 
+
+header = ["λ min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
+data   = [ λ_vec[i_min_gpsindy] x_gpsindy_train_err_hist[i_min_gpsindy] x_gpsindy_test_err_hist[i_min_gpsindy] ] 
+df = DataFrame( data, header ) ; display(df) 
 
 
 

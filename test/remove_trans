@@ -25,21 +25,24 @@ for i in eachindex(csv_files_vec)
     csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
 end 
 
-i = 1 
-csv_file = csv_files_vec[i] 
+for i in eachindex(csv_files_vec) 
 
-df       = CSV.read(csv_file, DataFrame) 
-data     = Matrix(df) 
+    csv_file = csv_files_vec[i] 
 
-# remove all rows where first row is < 1 
-data_notrans = data[ data[:,1] .> 1, : ] 
-
-# remove all rows from dataframe where first row is < 1 
-df_notrans = df[ df[:,1] .> 1, : ] 
-
-# save to new csv 
-csv_file_notrans = string( save_path, "rollout_", i, ".csv" ) 
-CSV.write( csv_file_notrans, df_notrans ) 
+    df       = CSV.read(csv_file, DataFrame) 
+    data     = Matrix(df) 
+    
+    # remove all rows where first row is < 1 
+    data_notrans = data[ data[:,1] .> 1, : ] 
+    
+    # remove all rows from dataframe where first row is < 1 
+    df_notrans = df[ df[:,1] .> 1, : ] 
+    
+    # save to new csv 
+    csv_file_notrans = string( save_path, "rollout_", i, ".csv" ) 
+    CSV.write( csv_file_notrans, df_notrans ) 
+        
+end 
 
 
 
