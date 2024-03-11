@@ -73,16 +73,54 @@ x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, t_test, u_test )
 # ----------------------- #
 # plot 
 
-f = Figure( size = ( 700,700 ) ) 
-f = plot_ix_err_train_test( f, 1, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-f = plot_ix_err_train_test( f, 2, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-f = plot_ix_err_train_test( f, 3, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-f = plot_ix_err_train_test( f, 4, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
-ax = Axis( f[5,1:2] ) 
-    ax_text = "this is text \n this is text \n this is text \n this is text this is text " 
-    text!( ax, ax_text, valign = :center, halign = :center ) 
+f = plot_err_train_test( x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
 
-f 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## ============================================ ##
+## ============================================ ##
+# plotting fns 
+
+function plot_err_train_test( x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+
+    x_gp_err_train       = @sprintf "%.3g" norm( x_train_noise - x_train_GP ) 
+    x_sindy_err_train    = @sprintf "%.3g" norm( x_train_noise - x_sindy_train ) 
+    x_gpsindy_err_train  = @sprintf "%.3g" norm( x_train_noise - x_gpsindy_train ) 
+
+    x_gp_err_test       = @sprintf "%.3g" norm( x_test_noise - x_test_GP ) 
+    x_sindy_err_test    = @sprintf "%.3g" norm( x_test_noise - x_sindy_test ) 
+    x_gpsindy_err_test  = @sprintf "%.3g" norm( x_test_noise - x_gpsindy_test ) 
+
+    f = Figure( size = ( 700,700 ) ) 
+    f = plot_ix_err_train_test( f, 1, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+    f = plot_ix_err_train_test( f, 2, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+    f = plot_ix_err_train_test( f, 3, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+    f = plot_ix_err_train_test( f, 4, x_train_GP, x_sindy_train, x_gpsindy_train, x_test_GP, x_sindy_test, x_gpsindy_test, data_train, data_test) 
+    # ax = Axis( f[5,1:2] ) 
+    ax_text = "total err: GP = $x_gp_err_train, \n SINDy = $x_sindy_err_train, GPSINDy = $x_gpsindy_err_train" 
+    Textbox( f[5,1:2], placeholder = ax_text, textcolor_placeholder = :black ) 
+
+    ax_text = "total err: GP = $x_gp_err_test, \n SINDy = $x_sindy_err_test, GPSINDy = $x_gpsindy_err_test" 
+    Textbox( f[5,3:4], placeholder = ax_text, textcolor_placeholder = :black ) 
+
+    return f 
+end 
 
 ## ============================================ ##
 
