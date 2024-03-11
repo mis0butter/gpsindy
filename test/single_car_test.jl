@@ -10,7 +10,7 @@ using Printf
 
 freq_hz  = 50 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz/" )
-csv_file = "rollout_27.csv" 
+csv_file = "rollout_28.csv" 
 
 # extract data 
 data_train, data_test = car_data_struct( string(csv_path, csv_file) ) 
@@ -31,8 +31,8 @@ for i_λ = eachindex( λ_vec )
     data_pred_train, data_pred_test = sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
     
     # plot and save metrics     
-    f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, freq_hz, csv_file)     
-    display(f) 
+    # f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, freq_hz, csv_file)     
+    # display(f) 
 
     x_err_hist = push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 
     
