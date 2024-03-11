@@ -33,6 +33,44 @@ x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:]
 # get λ_vec 
 λ_vec = λ_vec_fn() 
 
+## ============================================ ##
+
+function find_int_sindy_gpsindy( data_train, data_test, x_train_GP, x_test_GP, λ ) 
+
+    # get sizes 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    
+    # get x0 from noisy and smoothed data 
+    x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
+    x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
+    
+    # ----------------------- # 
+    # SINDY-lasso ! 
+    Ξ_sindy = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
+    
+    # integrate discovered dynamics 
+    dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
+    x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
+    x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
+    
+    # ----------------------- #
+    # GPSINDy-lasso ! 
+    Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, data_train.u ) 
+    
+    # integrate discovered dynamics 
+    dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+    x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
+    x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
+    
+    # ----------------------- #
+    # collect data 
+    
+    data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
+    data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
+
+    return data_pred_train, data_pred_test 
+end 
+
 
 ## ============================================ ## 
 # test cross_validate_λ for gpsindy 
@@ -50,29 +88,31 @@ for i_λ = eachindex( λ_vec )
     λ   = λ_vec[i_λ] 
     println( "λ = ", @sprintf "%.3g" λ ) 
     
-    # ----------------------- # 
-    # SINDY-lasso ! 
-    Ξ_sindy = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
+    # # ----------------------- # 
+    # # SINDY-lasso ! 
+    # Ξ_sindy = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
     
-    # integrate discovered dynamics 
-    dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
-    x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
-    x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
+    # # integrate discovered dynamics 
+    # dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
+    # x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
+    # x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
     
-    # ----------------------- #
-    # GPSINDy-lasso ! 
-    Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
+    # # ----------------------- #
+    # # GPSINDy-lasso ! 
+    # Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
     
-    # integrate discovered dynamics 
-    dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
-    x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
-    x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
+    # # integrate discovered dynamics 
+    # dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+    # x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
+    # x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
     
-    # ----------------------- #
-    # collect data 
+    # # ----------------------- #
+    # # collect data 
     
-    data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
-    data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
+    # data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
+    # data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
+
+    data_pred_train, data_pred_test = find_int_sindy_gpsindy( data_train, data_test, x_train_GP, x_test_GP, λ ) 
     
     # ----------------------- #
     # plot and save metrics 
