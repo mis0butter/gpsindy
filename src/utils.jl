@@ -1,4 +1,30 @@
 
+export df_metrics 
+
+function df_metrics( x_err_hist, λ_vec ) 
+
+    header = [ "λ", "x_sindy_train_err", "x_gpsindy_train_err", "x_sindy_test_err", "x_gpsindy_test_err" ] 
+    data = [ λ_vec x_err_hist.sindy_train x_err_hist.gpsindy_train x_err_hist.sindy_test x_err_hist.gpsindy_test ] 
+    df_λ_vec = DataFrame( data, header ) ; display(df_λ_vec) 
+    
+    # get indices with smallest error 
+    i_min_sindy   = argmin( x_err_hist.sindy_train ) 
+    i_min_gpsindy = argmin( x_err_hist.gpsindy_train ) 
+    
+    # print above as data  frame 
+    header = [ "λ min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
+    data   = [ λ_vec[i_min_sindy] x_err_hist.sindy_train[i_min_sindy] x_err_hist.sindy_test[i_min_sindy] ] 
+    df_sindy = DataFrame( data, header ) ; display(df_sindy) 
+    
+    header = ["λ min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
+    data   = [ λ_vec[i_min_gpsindy] x_err_hist.gpsindy_train[i_min_gpsindy] x_err_hist.gpsindy_test[i_min_gpsindy] ] 
+    df_gpsindy = DataFrame( data, header ) ; display(df_gpsindy) 
+
+    return df_λ_vec, df_sindy, df_gpsindy 
+end 
+
+## ============================================ ##
+
 export push_err_metrics 
 
 function push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 

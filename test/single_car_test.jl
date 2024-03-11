@@ -9,15 +9,10 @@ using Printf
 # test single file 
 
 csv_path = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz/" 
-csv_file = "rollout_26.csv" 
+csv_file = "rollout_25.csv" 
 
 # extract data 
 data_train, data_test = car_data_struct( string(csv_path, csv_file) ) 
-
-t_train        = data_train.t           ; t_test        = data_test.t 
-x_train_noise  = data_train.x_noise     ; x_test_noise  = data_test.x_noise 
-dx_train_noise = data_train.dx_noise    ; dx_test_noise = data_test.dx_noise 
-u_train        = data_train.u           ; u_test        = data_test.u 
 
 # smooth with GPs 
 σ_n = 1e-2 
@@ -26,29 +21,10 @@ dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_tra
 x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
 dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
-# get x0 from smoothed data 
-x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
-x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
-
 # get λ_vec 
 λ_vec = λ_vec_fn() 
 
 ## ============================================ ##
-
-function push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 
-
-    x_sindy_train_err   = norm( data_train.x_noise - data_pred_train.x_sindy ) 
-    x_gpsindy_train_err = norm( data_train.x_noise - data_pred_train.x_gpsindy ) 
-    push!( x_err_hist.sindy_train, x_sindy_train_err ) 
-    push!( x_err_hist.gpsindy_train, x_gpsindy_train_err ) 
-
-    x_sindy_test_err   = norm( data_test.x_noise - data_pred_test.x_sindy ) 
-    x_gpsindy_test_err = norm( data_test.x_noise - data_pred_test.x_gpsindy ) 
-    push!( x_err_hist.sindy_test, x_sindy_test_err ) 
-    push!( x_err_hist.gpsindy_test, x_gpsindy_test_err ) 
-
-    return x_err_hist 
-end 
 
 
 ## ============================================ ## 
@@ -78,25 +54,7 @@ for i_λ = eachindex( λ_vec )
     
 end 
 
-
-header = [ "λ", "x_sindy_train_err", "x_gpsindy_train_err", "x_sindy_test_err", "x_gpsindy_test_err" ] 
-data = [ λ_vec x_err_hist.sindy_train x_err_hist.gpsindy_train x_err_hist.sindy_test x_err_hist.gpsindy_test ] 
-df = DataFrame( data, header ) ; display(df) 
-
-# get indices with smallest error 
-i_min_sindy   = argmin( x_err_hist.sindy_train ) 
-i_min_gpsindy = argmin( x_err_hist.gpsindy_train ) 
-
-# print above as data  frame 
-header = [ "λ min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
-data   = [ λ_vec[i_min_sindy] x_err_hist.sindy_train[i_min_sindy] x_err_hist.sindy_test[i_min_sindy] ] 
-df = DataFrame( data, header ) ; display(df) 
-
-header = ["λ min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
-data   = [ λ_vec[i_min_gpsindy] x_err_hist.gpsindy_train[i_min_gpsindy] x_err_hist.gpsindy_test[i_min_gpsindy] ] 
-df = DataFrame( data, header ) ; display(df) 
-
-
+df_λ_vec, df_sindy, df_gpsindy = df_metrics( x_err_hist, λ_vec )
 
 
 
