@@ -5,6 +5,7 @@ function df_metrics( x_err_hist, λ_vec )
 
     header = [ "λ", "x_sindy_train_err", "x_gpsindy_train_err", "x_sindy_test_err", "x_gpsindy_test_err" ] 
     data = [ λ_vec x_err_hist.sindy_train x_err_hist.gpsindy_train x_err_hist.sindy_test x_err_hist.gpsindy_test ] 
+    data = convert( Matrix{Float64}, data ) 
     df_λ_vec = DataFrame( data, header ) ; display(df_λ_vec) 
     
     # get indices with smallest error 
