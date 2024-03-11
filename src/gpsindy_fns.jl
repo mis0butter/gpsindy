@@ -3,9 +3,9 @@
 
 ## ============================================ ##
 
-export find_int_sindy_gpsindy 
+export sindy_gpsindy_λ 
 
-function find_int_sindy_gpsindy( data_train, data_test, x_train_GP, x_test_GP, λ ) 
+function sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
 
     # get sizes 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
@@ -35,8 +35,8 @@ function find_int_sindy_gpsindy( data_train, data_test, x_train_GP, x_test_GP, �
     # ----------------------- #
     # collect data 
     
-    data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
-    data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
+    data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, [], x_gpsindy_train, [] ) 
+    data_pred_test  = data_predicts( x_test_GP, [], x_sindy_test, [], x_gpsindy_test, [] ) 
 
     return data_pred_train, data_pred_test 
 end 

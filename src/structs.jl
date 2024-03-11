@@ -68,5 +68,12 @@ struct data_predicts
     dx_gpsindy 
 end 
 
-export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct, x_struct, x_err_struct, data_predicts 
+struct x_train_test_err_struct  
+    sindy_train 
+    sindy_test 
+    gpsindy_train 
+    gpsindy_test 
+end 
+
+export Hist, hist_lasso_struct, Ξ_struct, Ξ_err_struct, data_struct, x_struct, x_err_struct, data_predicts, x_train_test_err_struct
 

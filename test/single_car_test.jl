@@ -35,40 +35,19 @@ x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:]
 
 ## ============================================ ##
 
-function find_int_sindy_gpsindy( data_train, data_test, x_train_GP, x_test_GP, λ ) 
+function push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 
 
-    # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
-    
-    # get x0 from noisy and smoothed data 
-    x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
-    x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
-    
-    # ----------------------- # 
-    # SINDY-lasso ! 
-    Ξ_sindy = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
-    
-    # integrate discovered dynamics 
-    dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
-    x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
-    x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
-    
-    # ----------------------- #
-    # GPSINDy-lasso ! 
-    Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, data_train.u ) 
-    
-    # integrate discovered dynamics 
-    dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
-    x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
-    x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
-    
-    # ----------------------- #
-    # collect data 
-    
-    data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
-    data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
+    x_sindy_train_err   = norm( data_train.x_noise - data_pred_train.x_sindy ) 
+    x_gpsindy_train_err = norm( data_train.x_noise - data_pred_train.x_gpsindy ) 
+    push!( x_err_hist.sindy_train, x_sindy_train_err ) 
+    push!( x_err_hist.gpsindy_train, x_gpsindy_train_err ) 
 
-    return data_pred_train, data_pred_test 
+    x_sindy_test_err   = norm( data_test.x_noise - data_pred_test.x_sindy ) 
+    x_gpsindy_test_err = norm( data_test.x_noise - data_pred_test.x_gpsindy ) 
+    push!( x_err_hist.sindy_test, x_sindy_test_err ) 
+    push!( x_err_hist.gpsindy_test, x_gpsindy_test_err ) 
+
+    return x_err_hist 
 end 
 
 
@@ -81,38 +60,13 @@ x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_tra
 # try i = 1 
 i_λ = 1 
 
-x_sindy_train_err_hist   = [] ; x_sindy_test_err_hist   = [] 
-x_gpsindy_train_err_hist = [] ; x_gpsindy_test_err_hist = [] 
+x_err_hist = x_train_test_err_struct( [], [], [], [] ) 
 for i_λ = eachindex( λ_vec ) 
 
     λ   = λ_vec[i_λ] 
     println( "λ = ", @sprintf "%.3g" λ ) 
-    
-    # # ----------------------- # 
-    # # SINDY-lasso ! 
-    # Ξ_sindy = sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train.u ) 
-    
-    # # integrate discovered dynamics 
-    # dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
-    # x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
-    # x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
-    
-    # # ----------------------- #
-    # # GPSINDy-lasso ! 
-    # Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
-    
-    # # integrate discovered dynamics 
-    # dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
-    # x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
-    # x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
-    
-    # # ----------------------- #
-    # # collect data 
-    
-    # data_pred_train = data_predicts( x_train_GP, dx_train_GP, x_sindy_train, dx_sindy, x_gpsindy_train, dx_gpsindy ) 
-    # data_pred_test  = data_predicts( x_test_GP, dx_test_GP, x_sindy_test, [], x_gpsindy_test, [] ) 
 
-    data_pred_train, data_pred_test = find_int_sindy_gpsindy( data_train, data_test, x_train_GP, x_test_GP, λ ) 
+    data_pred_train, data_pred_test = sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
     
     # ----------------------- #
     # plot and save metrics 
@@ -120,34 +74,26 @@ for i_λ = eachindex( λ_vec )
     f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, csv_file)     
     display(f) 
 
-    x_sindy_train_err   = norm( data_train.x_noise - data_pred_train.x_sindy ) 
-    x_gpsindy_train_err = norm( data_train.x_noise - data_pred_train.x_gpsindy ) 
-    push!( x_sindy_train_err_hist, x_sindy_train_err ) 
-    push!( x_gpsindy_train_err_hist, x_gpsindy_train_err ) 
-
-    x_sindy_test_err   = norm( data_test.x_noise - data_pred_test.x_sindy ) 
-    x_gpsindy_test_err = norm( data_test.x_noise - data_pred_test.x_gpsindy ) 
-    push!( x_sindy_test_err_hist, x_sindy_test_err ) 
-    push!( x_gpsindy_test_err_hist, x_gpsindy_test_err ) 
+    x_err_hist = push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 
     
 end 
 
 
 header = [ "λ", "x_sindy_train_err", "x_gpsindy_train_err", "x_sindy_test_err", "x_gpsindy_test_err" ] 
-data = [ λ_vec x_sindy_train_err_hist x_gpsindy_train_err_hist x_sindy_test_err_hist x_gpsindy_test_err_hist ] 
+data = [ λ_vec x_err_hist.sindy_train x_err_hist.gpsindy_train x_err_hist.sindy_test x_err_hist.gpsindy_test ] 
 df = DataFrame( data, header ) ; display(df) 
 
 # get indices with smallest error 
-i_min_sindy   = argmin( x_sindy_train_err_hist ) 
-i_min_gpsindy = argmin( x_gpsindy_train_err_hist ) 
+i_min_sindy   = argmin( x_err_hist.sindy_train ) 
+i_min_gpsindy = argmin( x_err_hist.gpsindy_train ) 
 
 # print above as data  frame 
 header = [ "λ min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
-data   = [ λ_vec[i_min_sindy] x_sindy_train_err_hist[i_min_sindy] x_sindy_test_err_hist[i_min_sindy] ] 
+data   = [ λ_vec[i_min_sindy] x_err_hist.sindy_train[i_min_sindy] x_err_hist.sindy_test[i_min_sindy] ] 
 df = DataFrame( data, header ) ; display(df) 
 
 header = ["λ min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
-data   = [ λ_vec[i_min_gpsindy] x_gpsindy_train_err_hist[i_min_gpsindy] x_gpsindy_test_err_hist[i_min_gpsindy] ] 
+data   = [ λ_vec[i_min_gpsindy] x_err_hist.gpsindy_train[i_min_gpsindy] x_err_hist.gpsindy_test[i_min_gpsindy] ] 
 df = DataFrame( data, header ) ; display(df) 
 
 
