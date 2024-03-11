@@ -1,4 +1,24 @@
 
+export push_err_metrics 
+
+function push_err_metrics( x_err_hist, data_train, data_test, data_pred_train, data_pred_test ) 
+
+    x_sindy_train_err   = norm( data_train.x_noise - data_pred_train.x_sindy ) 
+    x_gpsindy_train_err = norm( data_train.x_noise - data_pred_train.x_gpsindy ) 
+    push!( x_err_hist.sindy_train, x_sindy_train_err ) 
+    push!( x_err_hist.gpsindy_train, x_gpsindy_train_err ) 
+
+    x_sindy_test_err   = norm( data_test.x_noise - data_pred_test.x_sindy ) 
+    x_gpsindy_test_err = norm( data_test.x_noise - data_pred_test.x_gpsindy ) 
+    push!( x_err_hist.sindy_test, x_sindy_test_err ) 
+    push!( x_err_hist.gpsindy_test, x_gpsindy_test_err ) 
+
+    return x_err_hist 
+end 
+
+
+## ============================================ ##
+
 function extract_preds( data_pred_train, data_pred_test ) 
 
     x_train_GP      = data_pred_train.x_GP 
