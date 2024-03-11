@@ -18,7 +18,7 @@ function cross_validate( csv_path_file, plot_option = false )
     for i_λ = eachindex( λ_vec ) 
 
         λ   = λ_vec[i_λ] 
-        println( "λ = ", @sprintf "%.3g" λ ) 
+        # println( "λ = ", @sprintf "%.3g" λ ) 
 
         data_pred_train, data_pred_test = sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
         
