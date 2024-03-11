@@ -1,4 +1,19 @@
 
+function min_max_y( input, percent = 30 )  
+
+    min_y   = minimum( input ) ; max_y = maximum( input ) 
+    range_y = abs.(max_y - min_y)  
+    max_y   = max_y + percent/100 * range_y 
+    min_y   = min_y - percent/100 * range_y 
+
+    return min_y, max_y  
+end 
+
+export min_max_y 
+
+
+## ============================================ ##
+
 function downsample( t, t_double, x_double ) 
 
     t_dbl_dwnsmpl = Float64[] 
@@ -182,8 +197,8 @@ function car_data_struct( csv_file )
     x, dx_fd = unroll( t, x ) 
     
     # split into training and test data 
-    test_fraction = 0.2 
-    portion       = 5 
+    test_fraction = 0.3 
+    portion       = "last" 
     u_train,  u_test  = split_train_test( u, test_fraction, portion ) 
     t_train,  t_test  = split_train_test( t, test_fraction, portion ) 
     t_train = t_train[:] ; t_test = t_test[:] 
@@ -334,10 +349,10 @@ export split_train_test_Npoints
 # split into training and validation data 
 
 export split_train_test 
-function split_train_test(x, test_fraction, portion)
+function split_train_test(x, test_fraction, portion = "last")
 
     # if test data = LAST portion 
-    if portion == 1/test_fraction 
+    if portion == "last"
 
         ind = Int(round( size(x,1) * (1 - test_fraction) ))   
 
@@ -345,7 +360,7 @@ function split_train_test(x, test_fraction, portion)
         x_test  = x[ind:end,:] 
 
     # if test data = FIRST portion 
-    elseif portion == 1 
+    elseif portion == "first" 
 
         ind = Int(round( size(x,1) * (test_fraction) ))  
 
@@ -354,6 +369,8 @@ function split_train_test(x, test_fraction, portion)
 
     # test data is in MIDDLE portion 
     else 
+
+        println( "function is broken for middle portion, fix" ) 
 
         ind1 = Int(round( size(x,1) * (test_fraction*( portion-1 )) )) 
         ind2 = Int(round( size(x,1) * (test_fraction*( portion )) )) 

@@ -6,8 +6,8 @@ using Statistics
 ## ============================================ ##
 # cross validation function 
 
-csv_path  = "test/data/jake_car_csvs_ctrlshift/5hz_noise_0.04/" 
-save_path = "test/results/5hz_noise_0.04_check_check/" 
+csv_path  = "test/data/jake_car_csvs_ctrlshift/10hz/" 
+save_path = "test/results/10hz/" 
 
 sigma_3sigma_mean, gpsindy_3sigma_mean = cross_validate_all_csvs( csv_path, save_path ) 
 
@@ -18,7 +18,7 @@ freq_hz   = 5
 for noise = 0.01 : 0.01 : 0.1 
 
     csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "/" )  
-    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "_check/" ) 
+    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "/" ) 
 
     println(csv_path) 
     println(save_path) 
@@ -31,7 +31,7 @@ freq_hz   = 10
 for noise = 0.01 : 0.01 : 0.1 
 
     csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "/" )  
-    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "_check/" ) 
+    save_path = string( "test/results/", freq_hz, "hz_noise_", noise, "/" ) 
 
     println(csv_path) 
     println(save_path) 
@@ -60,6 +60,14 @@ end
 
 
 
+
+
+## ============================================ ##
+# test single file 
+
+csv_file = "test/data/jake_car_csvs_ctrlshift/10hz/rollout_shift_10hz_6.csv" 
+
+# cross_validate_sindy_gpsindy 
 
 
 
