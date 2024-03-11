@@ -8,7 +8,7 @@ using Printf
 ## ============================================ ##
 # test single file 
 
-freq_hz  = 50 
+freq_hz  = 10 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz/" )
 
 csv_files_vec = readdir( csv_path ) 
@@ -23,7 +23,7 @@ for i in eachindex(csv_files_vec)
 
     df_λ_vec, df_sindy, df_gpsindy = df_metrics( x_err_hist, λ_vec ) 
     # f = plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_file ) 
-    # display(f)
+    # display(f) 
     
     push!( x_min_err_hist.sindy_train, df_sindy.x_sindy_train_err[1] ) 
     push!( x_min_err_hist.sindy_test,  df_sindy.x_sindy_test_err[1]  ) 

@@ -7,23 +7,30 @@ using CairoMakie
 ## ============================================ ##
 # control input delay  
 
-# add how much noise to all data? 
-freq_hz = 50 
-
-csv_path  = string( "test/data/jake_car_csvs_ctrlshift/50hz/" ) 
-save_path = string( "test/data/jake_car_csvs_ctrlshift_no_trans/50hz/" )  
+csv_path  = string( "test/data/jake_car_csvs_ctrlshift/10hz_noise_0.04/" ) 
+save_path = string( "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.04/" )  
 
 if !isdir( save_path ) 
     mkdir( save_path ) 
 end
 
 
-## ============================================ ##
+# ----------------------- #
 
 csv_files_vec = readdir( csv_path ) 
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
 end 
+
+# check if figs in list 
+for i in eachindex(csv_files_vec) 
+    if occursin( "figs", csv_files_vec[i] ) 
+        deleteat!( csv_files_vec, i ) 
+    end 
+end 
+
+## ============================================ ##
+
 
 for i in eachindex(csv_files_vec) 
 
