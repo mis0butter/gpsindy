@@ -13,11 +13,11 @@ function df_metrics( x_err_hist, λ_vec )
     i_min_gpsindy = argmin( x_err_hist.gpsindy_train ) 
     
     # print above as data  frame 
-    header = [ "λ min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
+    header = [ "λ_min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
     data   = [ λ_vec[i_min_sindy] x_err_hist.sindy_train[i_min_sindy] x_err_hist.sindy_test[i_min_sindy] ] 
     df_sindy = DataFrame( data, header ) ; display(df_sindy) 
     
-    header = ["λ min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
+    header = ["λ_min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
     data   = [ λ_vec[i_min_gpsindy] x_err_hist.gpsindy_train[i_min_gpsindy] x_err_hist.gpsindy_test[i_min_gpsindy] ] 
     df_gpsindy = DataFrame( data, header ) ; display(df_gpsindy) 
 
@@ -357,13 +357,14 @@ function unroll( t, x )
         rollover_rng = x[ i0 : end , 4 ]
         dθ = π .- rollover_rng 
         θ  = -π .- dθ 
+        x[ i0 : end , 4 ] = θ
     elseif up_length < dn_length 
         i0   = rollover_dn_ind[end] + 1 
         rollover_rng = x[ i0 : end , 4 ]
         dθ = π .+ rollover_rng 
         θ  = π .+ dθ     
+        x[ i0 : end , 4 ] = θ
     end 
-    x[ i0 : end , 4 ] = θ
     
     # use central finite differencing now  
     dx = fdiff(t, x, 2) 

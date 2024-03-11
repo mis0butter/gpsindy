@@ -2,6 +2,113 @@ using CairoMakie
 
 ## ============================================ ##
 
+export plot_λ_err_log
+
+function plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_file ) 
+
+    i1 = 7 
+    i2 = 16 
+    
+    f = Figure( size = ( 800,600 ) ) 
+    
+    ax = Axis( f[1:2,1:3], xscale = log10, yscale = log10, xlabel = "λ", title = "cross-validation λ error (log)" ) 
+        sindy_train = lines!( ax, λ_vec, df_λ_vec.x_sindy_train_err, color = :blue, linewidth = 2, label="sindy train" ) 
+        sindy_test = lines!( ax, λ_vec, df_λ_vec.x_sindy_test_err, color = :blue, linestyle = :dash, linewidth = 2, label="sindy test" ) 
+        gpsindy_train = lines!( ax, λ_vec, df_λ_vec.x_gpsindy_train_err, color = :red, linewidth = 2, label = "gpsindy train" ) 
+        gpsindy_test = lines!( ax, λ_vec, df_λ_vec.x_gpsindy_test_err, color = :red, linestyle = :dash, linewidth = 2, label = "gpsindy test" ) 
+    
+    ax = Axis( f[3:4,1:3], limits = ( nothing, nothing, -10, 80 ), xscale = log10, xlabel = "λ", title = "cross-validation λ error (zoom)" ) 
+        sindy_train = lines!( ax, λ_vec[i1:end], df_λ_vec.x_sindy_train_err[i1:end], color = :blue, linewidth = 2, label="sindy train" ) 
+        sindy_test = lines!( ax, λ_vec[i1:end], df_λ_vec.x_sindy_test_err[i1:end], color = :blue, linestyle = :dash, linewidth = 2, label="sindy test" ) 
+        gpsindy_train = lines!( ax, λ_vec[i1:end], df_λ_vec.x_gpsindy_train_err[i1:end], color = :red, linewidth = 2, label="gpsindy train" ) 
+        gpsindy_test = lines!( ax, λ_vec[i1:end], df_λ_vec.x_gpsindy_test_err[i1:end], color = :red, linestyle = :dash, linewidth = 2, label="gpsindy test" ) 
+    
+    # horizontal legend 
+    Legend( f[2,4], [ sindy_train, sindy_test, gpsindy_train, gpsindy_test ], [ "sindy train", "sindy test", "gpsindy train", "gpsindy test" ] )
+    
+    λ_min_sindy         = @sprintf "%.3g" df_sindy.λ_min_sindy[1] 
+    λ_min_gpsindy       = @sprintf "%.3g" df_gpsindy.λ_min_gpsindy[1] 
+    x_sindy_train_err   = @sprintf "%.3g" df_sindy.x_sindy_train_err[1] 
+    x_sindy_test_err    = @sprintf "%.3g" df_sindy.x_sindy_test_err[1] 
+    x_gpsindy_train_err = @sprintf "%.3g" df_gpsindy.x_gpsindy_train_err[1] 
+    x_gpsindy_test_err  = @sprintf "%.3g" df_gpsindy.x_gpsindy_test_err[1] 
+
+    ax_text = "min λ sindy = $λ_min_sindy \n err train = $x_sindy_train_err \n --> test = $x_sindy_test_err."
+    Textbox( f[3,4], placeholder = ax_text, textcolor_placeholder = :black ) 
+    
+    ax_text = "min λ gpsindy = $λ_min_gpsindy \n err train = $x_gpsindy_train_err \n --> test = $x_gpsindy_test_err"  
+    Textbox( f[4,4], placeholder = ax_text, textcolor_placeholder = :black ) 
+
+    ax_text = "$freq_hz Hz \n $csv_file"
+    Textbox( f[1,4], placeholder = ax_text, textcolor_placeholder = :black ) 
+    
+    return f 
+end 
+
+## ============================================ ##
+
+export plot_λ_err 
+
+function plot_λ_err( λ_vec, df_λ_vec, df_sindy, df_gpsindy, λ, freq_hz, csv_file ) 
+
+    i1 = 7 
+    i2 = 16 
+    
+    f = Figure( size = ( 700,700 ) ) 
+    
+    ax = Axis( f[1,1], xscale = log10, title = "err λ = 1e-6 : 1" ) 
+        sindy_train = lines!( ax, λ_vec[1:i1], df_λ_vec.x_sindy_train_err[1:i1], color = :blue, label="sindy train" ) 
+    ax = Axis( f[2,1], xscale = log10 )  
+        sindy_test = lines!( ax, λ_vec[1:i1], df_λ_vec.x_sindy_test_err[1:i1], color = :green, label="sindy test" ) 
+    ax = Axis( f[3,1], xscale = log10 ) 
+        gpsindy_train = lines!( ax, λ_vec[1:i1], df_λ_vec.x_gpsindy_train_err[1:i1], color = :red, label="gpsindy train" ) 
+    ax = Axis( f[4,1], xlabel="λ", xscale = log10 ) 
+        gpsindy_test = lines!( ax, λ_vec[1:i1], df_λ_vec.x_gpsindy_test_err[1:i1], color = :orange, label="gpsindy test" ) 
+    
+    
+    ax = Axis( f[1,2], title = "err λ = 1 : 10" ) 
+        lines!( ax, λ_vec[i1:i2], df_λ_vec.x_sindy_train_err[i1:i2],color = :blue, label="sindy" ) 
+    ax = Axis( f[2,2], ) 
+        lines!( ax, λ_vec[i1:i2], df_λ_vec.x_sindy_test_err[i1:i2], color = :green, label="sindy" ) 
+    ax = Axis( f[3,2], ) 
+        lines!( ax, λ_vec[i1:i2], df_λ_vec.x_gpsindy_train_err[i1:i2], color = :red, label="gpsindy" ) 
+    ax = Axis( f[4,2], xlabel="λ" ) 
+        lines!( ax, λ_vec[i1:i2], df_λ_vec.x_gpsindy_test_err[i1:i2], color = :orange, label="gpsindy" ) 
+    
+    ax = Axis( f[1,3], title = "err λ = 10 : 100" ) 
+        lines!( ax, λ_vec[i2:end], df_λ_vec.x_sindy_train_err[i2:end],color = :blue, label="sindy" ) 
+    ax = Axis( f[2,3] ) 
+        lines!( ax, λ_vec[i2:end], df_λ_vec.x_sindy_test_err[i2:end], color = :green, label="sindy" ) 
+    ax = Axis( f[3,3] ) 
+        lines!( ax, λ_vec[i2:end], df_λ_vec.x_gpsindy_train_err[i2:end], color = :red, label="gpsindy" ) 
+    ax = Axis( f[4,3], xlabel = "λ" ) 
+        lines!( ax, λ_vec[i2:end], df_λ_vec.x_gpsindy_test_err[i2:end],color = :orange, label="gpsindy" ) 
+    
+    # horizontal legend 
+    Legend( f[5,1:3], [ sindy_train, sindy_test, gpsindy_train, gpsindy_test ], [ "sindy train", "sindy test", "gpsindy train", "gpsindy test" ], orientation = :horizontal)
+    
+    λ = @sprintf "%.3g" λ 
+    λ_min_sindy         = @sprintf "%.3g" df_sindy.λ_min_sindy[1] 
+    λ_min_gpsindy       = @sprintf "%.3g" df_gpsindy.λ_min_gpsindy[1] 
+    x_sindy_train_err   = @sprintf "%.3g" df_sindy.x_sindy_train_err[1] 
+    x_sindy_test_err    = @sprintf "%.3g" df_sindy.x_sindy_test_err[1] 
+    x_gpsindy_train_err = @sprintf "%.3g" df_gpsindy.x_gpsindy_train_err[1] 
+    x_gpsindy_test_err  = @sprintf "%.3g" df_gpsindy.x_gpsindy_test_err[1] 
+
+    ax_text = "λ = $λ \n $freq_hz Hz \n $csv_file"
+    Textbox( f[6,1], placeholder = ax_text, textcolor_placeholder = :black ) 
+    
+    ax_text = "min λ sindy = $λ_min_sindy \n err train = $x_sindy_train_err \n err test = $x_sindy_test_err."
+    Textbox( f[6,2], placeholder = ax_text, textcolor_placeholder = :black ) 
+    
+    ax_text = "min λ gpsindy = $λ_min_gpsindy \n err train = $x_gpsindy_train_err \n err test = $x_gpsindy_test_err"  
+    Textbox( f[6,3], placeholder = ax_text, textcolor_placeholder = :black ) 
+
+    return f 
+end 
+
+## ============================================ ##
+
 export plot_err_train_test 
 
 function plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, freq_hz, csv_file) 
