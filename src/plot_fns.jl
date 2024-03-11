@@ -11,13 +11,13 @@ function plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_
     
     f = Figure( size = ( 800,600 ) ) 
     
-    ax = Axis( f[1:2,1:3], xscale = log10, yscale = log10, xlabel = "λ", title = "cross-validation λ error (log)" ) 
-        sindy_train = lines!( ax, λ_vec, df_λ_vec.x_sindy_train_err, color = :blue, linewidth = 2, label="sindy train" ) 
-        sindy_test = lines!( ax, λ_vec, df_λ_vec.x_sindy_test_err, color = :blue, linestyle = :dash, linewidth = 2, label="sindy test" ) 
+    ax = Axis( f[1:2,1:3], xscale = log10, yscale = log10, limits = ( nothing, nothing, 1, 1e4 ), xlabel = "λ", title = "cross-validation λ error (log)" ) 
+        sindy_train   = lines!( ax, λ_vec, df_λ_vec.x_sindy_train_err, color = :blue, linewidth = 2, label="sindy train" ) 
+        sindy_test    = lines!( ax, λ_vec, df_λ_vec.x_sindy_test_err, color = :blue, linestyle = :dash, linewidth = 2, label="sindy test" ) 
         gpsindy_train = lines!( ax, λ_vec, df_λ_vec.x_gpsindy_train_err, color = :red, linewidth = 2, label = "gpsindy train" ) 
-        gpsindy_test = lines!( ax, λ_vec, df_λ_vec.x_gpsindy_test_err, color = :red, linestyle = :dash, linewidth = 2, label = "gpsindy test" ) 
+        gpsindy_test  = lines!( ax, λ_vec, df_λ_vec.x_gpsindy_test_err, color = :red, linestyle = :dash, linewidth = 2, label = "gpsindy test" ) 
     
-    ax = Axis( f[3:4,1:3], limits = ( nothing, nothing, -10, 80 ), xscale = log10, xlabel = "λ", title = "cross-validation λ error (zoom)" ) 
+    ax = Axis( f[3:4,1:3], limits = ( nothing, nothing, -10, 80 ), xlabel = "λ", title = "cross-validation λ error (zoom)" ) 
         sindy_train = lines!( ax, λ_vec[i1:end], df_λ_vec.x_sindy_train_err[i1:end], color = :blue, linewidth = 2, label="sindy train" ) 
         sindy_test = lines!( ax, λ_vec[i1:end], df_λ_vec.x_sindy_test_err[i1:end], color = :blue, linestyle = :dash, linewidth = 2, label="sindy test" ) 
         gpsindy_train = lines!( ax, λ_vec[i1:end], df_λ_vec.x_gpsindy_train_err[i1:end], color = :red, linewidth = 2, label="gpsindy train" ) 
