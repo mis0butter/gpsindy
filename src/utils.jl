@@ -327,27 +327,42 @@ function unroll( t, x )
     rollover_up_ind = findall( x -> x > 10, dx[:,4] ) 
     rollover_dn_ind = findall( x -> x < -10, dx[:,4] ) 
 
-    for i in eachindex(rollover_up_ind) 
-        # i = 1 
-    
-            if rollover_up_ind[i] < rollover_dn_ind[i] 
-                i0   = rollover_up_ind[i] + 1 
-                ifin = rollover_dn_ind[i]     
-                rollover_rng = x[ i0 : ifin , 4 ]
-                dθ = π .- rollover_rng 
-                θ  = -π .- dθ 
-            else 
-                i0   = rollover_dn_ind[i] + 1 
-                ifin = rollover_up_ind[i]     
-                rollover_rng = x[ i0 : ifin , 4 ]
-                dθ = π .+ rollover_rng 
-                θ  = π .+ dθ     
-            end 
-            x[ i0 : ifin , 4 ] = θ
-    
-        end 
+    up_length = length(rollover_up_ind) 
+    dn_length = length(rollover_dn_ind) 
 
-    # @infiltrate 
+    ind_min = minimum( [ up_length, dn_length ] ) 
+
+    for i in 1 : ind_min  
+        
+        if rollover_up_ind[i] < rollover_dn_ind[i] 
+            i0   = rollover_up_ind[i] + 1 
+            ifin = rollover_dn_ind[i]     
+            rollover_rng = x[ i0 : ifin , 4 ]
+            dθ = π .- rollover_rng 
+            θ  = -π .- dθ 
+        else 
+            i0   = rollover_dn_ind[i] + 1 
+            ifin = rollover_up_ind[i]     
+            rollover_rng = x[ i0 : ifin , 4 ]
+            dθ = π .+ rollover_rng 
+            θ  = π .+ dθ     
+        end 
+        x[ i0 : ifin , 4 ] = θ
+
+    end 
+
+    if up_length > dn_length 
+        i0   = rollover_up_ind[end] + 1 
+        rollover_rng = x[ i0 : end , 4 ]
+        dθ = π .- rollover_rng 
+        θ  = -π .- dθ 
+    elseif up_length < dn_length 
+        i0   = rollover_dn_ind[end] + 1 
+        rollover_rng = x[ i0 : end , 4 ]
+        dθ = π .+ rollover_rng 
+        θ  = π .+ dθ     
+    end 
+    x[ i0 : end , 4 ] = θ
     
     # use central finite differencing now  
     dx = fdiff(t, x, 2) 
