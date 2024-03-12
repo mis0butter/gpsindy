@@ -32,28 +32,6 @@ for noise = 0.01 : 0.01 : 0.1
 end 
 
 
-## ============================================ ##
-
-freq_hz  = 10 
-
-mean_10hz_err_hist = x_train_test_err_struct( [], [], [], [] ) 
-for noise = 0.01 : 0.01 : 0.1 
-
-    csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
-
-    x_min_err_hist = cross_validate_csv_path( csv_path ) 
-    
-    sindy_train_err_mean   = mean( x_min_err_hist.sindy_train   ) 
-    sindy_test_err_mean    = mean( x_min_err_hist.sindy_test    ) 
-    gpsindy_train_err_mean = mean( x_min_err_hist.gpsindy_train ) 
-    gpsindy_test_err_mean  = mean( x_min_err_hist.gpsindy_test  )     
-
-    push!( mean_10hz_err_hist.sindy_train,   sindy_train_err_mean   ) 
-    push!( mean_10hz_err_hist.sindy_test,    sindy_test_err_mean    ) 
-    push!( mean_10hz_err_hist.gpsindy_train, gpsindy_train_err_mean ) 
-    push!( mean_10hz_err_hist.gpsindy_test,  gpsindy_test_err_mean  ) 
-
-end 
 
 
 

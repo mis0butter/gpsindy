@@ -8,7 +8,7 @@ using CairoMakie
 # control input delay  
 
 # add how much noise to all data? 
-noise   = 0.02 
+noise   = 0.1 
 freq_hz = 50 
 
 csv_path  = string( "test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz/" ) 
