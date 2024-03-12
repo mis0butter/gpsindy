@@ -22,25 +22,9 @@ end
 export cross_validate_csv_path
 
 function cross_validate_csv_path( csv_path, freq_hz, plot_option = false ) 
-
-    csv_files_vec = readdir( csv_path ) 
-    deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
-
-    for i in eachindex(csv_files_vec)  
-        csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
-    end 
-
-    save_path = replace( csv_path, "/data/" => "/results/" ) 
-    if !isdir( save_path ) 
-        mkdir( save_path ) 
-    end  
-
-    save_path_fig = string( save_path, "figs/" ) 
-    if !isdir( save_path_fig ) 
-        mkdir( save_path_fig ) 
-    end 
     
-    # csv_files_vec, save_path, save_path_fig = mkdir_save_path( csv_path ) 
+    # create save path 
+    csv_files_vec, save_path, save_path_fig = mkdir_save_path( csv_path ) 
 
     λ_vec = λ_vec_fn() 
 
@@ -52,6 +36,7 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
         df_λ_vec, df_sindy, df_gpsindy = df_metrics( x_err_hist, λ_vec ) 
 
         if plot_option == true 
+            
             csv_file = replace( csv_files_vec[i], csv_path => "") 
             f = plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_file ) 
 
@@ -60,7 +45,6 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
             fig_save = string( save_path_fig, fig_save )  
             save( fig_save, f ) 
 
-            display(f)     
         end 
 
         # save df_λ_vec as CSV 
