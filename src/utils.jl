@@ -1,4 +1,31 @@
 
+export mkdir_save_path 
+
+function mkdir_save_path( csv_path ) 
+
+    csv_files_vec = readdir( csv_path ) 
+    deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
+
+    for i in eachindex(csv_files_vec)  
+        csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
+    end 
+
+    save_path = replace( csv_path, "/data/" => "/results/" ) 
+    if !isdir( save_path ) 
+        mkdir( save_path ) 
+    end  
+
+    save_path_fig = string( save_path, "figs/" ) 
+    if !isdir( save_path_fig ) 
+        mkdir( save_path_fig ) 
+    end 
+
+    return csv_files_vec, save_path, save_path_fig 
+end 
+
+
+## ============================================ ##
+
 export df_metrics 
 
 function df_metrics( x_err_hist, λ_vec ) 

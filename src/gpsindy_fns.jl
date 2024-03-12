@@ -29,7 +29,19 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
     for i in eachindex(csv_files_vec)  
         csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
     end 
+
+    save_path = replace( csv_path, "/data/" => "/results/" ) 
+    if !isdir( save_path ) 
+        mkdir( save_path ) 
+    end  
+
+    save_path_fig = string( save_path, "figs/" ) 
+    if !isdir( save_path_fig ) 
+        mkdir( save_path_fig ) 
+    end 
     
+    # csv_files_vec, save_path, save_path_fig = mkdir_save_path( csv_path ) 
+
     λ_vec = λ_vec_fn() 
 
     x_min_err_hist = x_train_test_err_struct( [], [], [], [] ) 
@@ -42,8 +54,18 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
         if plot_option == true 
             csv_file = replace( csv_files_vec[i], csv_path => "") 
             f = plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_file ) 
+
+            # save fig 
+            fig_save = replace( csv_file, ".csv" => "_λ_err_log.png" ) 
+            fig_save = string( save_path_fig, fig_save )  
+            save( fig_save, f ) 
+
             display(f)     
         end 
+
+        # save df_λ_vec as CSV 
+        df_save = replace( csv_file, ".csv" => "_df_λ_vec.csv" ) 
+        CSV.write( string( save_path, df_save ), df_λ_vec ) 
         
         push!( x_min_err_hist.sindy_train, df_sindy.x_sindy_train_err[1] ) 
         push!( x_min_err_hist.sindy_test,  df_sindy.x_sindy_test_err[1]  ) 
@@ -76,8 +98,7 @@ function cross_validate( csv_path, csv_path_file, freq_hz, plot_option = false )
     x_err_hist = x_train_test_err_struct( [], [], [], [] ) 
     for i_λ = eachindex( λ_vec ) 
 
-        λ   = λ_vec[i_λ] 
-        # println( "λ = ", @sprintf "%.3g" λ ) 
+        λ = λ_vec[i_λ] 
 
         data_pred_train, data_pred_test = sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
         
@@ -134,6 +155,25 @@ function sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_tes
 
     return data_pred_train, data_pred_test 
 end 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## ============================================ ##
