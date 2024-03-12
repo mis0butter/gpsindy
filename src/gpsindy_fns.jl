@@ -28,7 +28,6 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
 
     λ_vec = λ_vec_fn() 
 
-    # x_min_err_hist = x_train_test_err_struct( [], [], [], [] ) 
     header = [ "csv_file", "λ_min_sindy", "x_sindy_train_err", "x_sindy_test_err", "λ_min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
     df_min_err_hist = DataFrame( fill( [], 7 ), header ) 
     for i in eachindex(csv_files_vec) 
