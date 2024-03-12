@@ -3,13 +3,13 @@
 # smooth training and test data with GPs 
 
 export gp_train_test 
-function gp_train_test( data_train, data_test ) 
+function gp_train_test( data_train, data_test, opt_σn = true ) 
 
     σ_n = 0.01 
 
     # first - smooth measurements with Gaussian processes 
-    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, false ) 
-    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, false ) 
+    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn) 
+    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn ) 
     x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise ) 
     dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise ) 
 
@@ -24,20 +24,24 @@ export cross_validate_csv_path
 function cross_validate_csv_path( csv_path, freq_hz, plot_option = false ) 
     
     # create save path 
-    csv_files_vec, save_path, save_path_fig = mkdir_save_path( csv_path ) 
+    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path( csv_path ) 
 
     λ_vec = λ_vec_fn() 
 
-    x_min_err_hist = x_train_test_err_struct( [], [], [], [] ) 
+    # x_min_err_hist = x_train_test_err_struct( [], [], [], [] ) 
+    header = [ "csv_file", "λ_min_sindy", "x_sindy_train_err", "x_sindy_test_err", "λ_min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
+    df_min_err_hist = DataFrame( fill( [], 7 ), header ) 
     for i in eachindex(csv_files_vec) 
+
+        csv_file_path = csv_files_vec[i] 
+        csv_file = replace( csv_file_path, csv_path => "") 
     
-        x_err_hist = cross_validate( csv_path, csv_files_vec[i], freq_hz, plot_option ) 
+        x_err_hist = cross_validate( csv_path, csv_file_path, freq_hz, false ) 
     
-        df_λ_vec, df_sindy, df_gpsindy = df_metrics( x_err_hist, λ_vec ) 
+        df_λ_vec, df_sindy, df_gpsindy = df_metrics( x_err_hist, λ_vec, csv_path, csv_file_path ) 
 
         if plot_option == true 
             
-            csv_file = replace( csv_files_vec[i], csv_path => "") 
             f = plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_file ) 
 
             # save fig 
@@ -49,16 +53,14 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
 
         # save df_λ_vec as CSV 
         df_save = replace( csv_file, ".csv" => "_df_λ_vec.csv" ) 
-        CSV.write( string( save_path, df_save ), df_λ_vec ) 
+        CSV.write( string( save_path_dfs, df_save ), df_λ_vec ) 
         
-        push!( x_min_err_hist.sindy_train, df_sindy.x_sindy_train_err[1] ) 
-        push!( x_min_err_hist.sindy_test,  df_sindy.x_sindy_test_err[1]  ) 
-        push!( x_min_err_hist.gpsindy_train, df_gpsindy.x_gpsindy_train_err[1] ) 
-        push!( x_min_err_hist.gpsindy_test,  df_gpsindy.x_gpsindy_test_err[1]  ) 
+        data_sindy = Matrix( df_sindy ) ; data_gpsindy = Matrix( df_gpsindy ) 
+        push!( df_min_err_hist, [ data_sindy data_gpsindy[:,2:end] ] )  
     
     end 
 
-    return x_min_err_hist 
+    return df_min_err_hist 
 end 
 
 
@@ -79,7 +81,7 @@ function cross_validate( csv_path, csv_path_file, freq_hz, plot_option = false )
     # ----------------------- #
     # test cross_validate_λ for sindy and gpsindy 
 
-    x_err_hist = x_train_test_err_struct( [], [], [], [] ) 
+    x_err_hist = x_train_test_err_struct( Float64[], Float64[], Float64[], Float64[] ) 
     for i_λ = eachindex( λ_vec ) 
 
         λ = λ_vec[i_λ] 

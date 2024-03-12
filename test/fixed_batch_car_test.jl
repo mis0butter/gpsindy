@@ -33,32 +33,37 @@ for noise = 0.01 : 0.01 : 0.1
 end 
 
 
+
 ## ============================================ ##
-# let's break sindy 
 
-freq_hz  = 50 
+freq_hz = 5 
 
-df_λ_vec_hist     = [] 
-mean_5hz_err_hist = x_train_test_err_struct( [], [], [], [] ) 
-# for noise = 0.01 : 0.01 : 0.1 
-noise = 0.01 
+csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz/" )
 
-    csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
+df_min_err_hist = cross_validate_csv_path( csv_path, freq_hz, true ) 
 
-    x_min_err_hist, df_λ_vec = cross_validate_csv_path( csv_path, freq_hz, true ) 
-    
-    sindy_train_err_mean   = mean( x_min_err_hist.sindy_train   ) 
-    sindy_test_err_mean    = mean( x_min_err_hist.sindy_test    ) 
-    gpsindy_train_err_mean = mean( x_min_err_hist.gpsindy_train ) 
-    gpsindy_test_err_mean  = mean( x_min_err_hist.gpsindy_test  )     
 
-    push!( df_λ_vec_hist, df_λ_vec ) 
-    push!( mean_5hz_err_hist.sindy_train,   sindy_train_err_mean    ) 
-    push!( mean_5hz_err_hist.sindy_test,    sindy_test_err_mean     ) 
-    push!( mean_5hz_err_hist.gpsindy_train, gpsindy_train_err_mean  ) 
-    push!( mean_5hz_err_hist.gpsindy_test,  gpsindy_test_err_mean   ) 
 
-# end 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -123,13 +128,23 @@ for i in eachindex(csv_files_vec)
     
 end 
 
+min_train_err_hist = min_train_err_hist[2:end,:] 
+
 ## ============================================ ##
 
-header = [ "λ" "train_err" "test_err" ]
-df = DataFrame( min_train_err_hist, header ) 
+using CSV 
 
-# convert any matrix to float64 
-# vv2m( min_train_err_hist ) 
+for i in eachindex( csv_files_vec )
+    csv_files_vec[i] = replace( csv_files_vec[i], csv_path => "" ) 
+end 
+
+header = [ "csv_file", "λ_min", "min_train_err", "--> test_err" ]
+data   = [ csv_files_vec min_train_err_hist ] 
+df = DataFrame( data, header ) 
+
+# save to csv 
+csv_save = string( "min_train_err_hist.csv" ) 
+CSV.write( csv_save, df ) 
 
 
 

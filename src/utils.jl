@@ -20,7 +20,12 @@ function mkdir_save_path( csv_path )
         mkdir( save_path_fig ) 
     end 
 
-    return csv_files_vec, save_path, save_path_fig 
+    save_path_dfs = string( save_path, "dfs/" ) 
+    if !isdir( save_path_dfs ) 
+        mkdir( save_path_dfs ) 
+    end 
+
+    return csv_files_vec, save_path, save_path_fig, save_path_dfs 
 end 
 
 
@@ -28,24 +33,28 @@ end
 
 export df_metrics 
 
-function df_metrics( x_err_hist, λ_vec ) 
+function df_metrics( x_err_hist, λ_vec, csv_path, csv_file_path ) 
+
+    csv_file = replace( csv_file_path, csv_path => "" ) 
+
+    # csv_file_str = fill( csv_file, length(λ_vec) ) 
 
     header = [ "λ", "x_sindy_train_err", "x_gpsindy_train_err", "x_sindy_test_err", "x_gpsindy_test_err" ] 
     data = [ λ_vec x_err_hist.sindy_train x_err_hist.gpsindy_train x_err_hist.sindy_test x_err_hist.gpsindy_test ] 
-    data = convert( Matrix{Float64}, data ) 
+    # data = convert( Matrix{Float64}, data ) 
     df_λ_vec = DataFrame( data, header )  
     
-    # get indices with smallest error 
+    # get indices with smallest error for TRAINING data 
     i_min_sindy   = argmin( x_err_hist.sindy_train ) 
     i_min_gpsindy = argmin( x_err_hist.gpsindy_train ) 
     
     # print above as data  frame 
-    header = [ "λ_min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
-    data   = [ λ_vec[i_min_sindy] x_err_hist.sindy_train[i_min_sindy] x_err_hist.sindy_test[i_min_sindy] ] 
+    header = [ "csv_file", "λ_min_sindy", "x_sindy_train_err", "x_sindy_test_err" ]
+    data   = [ csv_file λ_vec[i_min_sindy] x_err_hist.sindy_train[i_min_sindy] x_err_hist.sindy_test[i_min_sindy] ] 
     df_sindy = DataFrame( data, header )  
     
-    header = ["λ_min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
-    data   = [ λ_vec[i_min_gpsindy] x_err_hist.gpsindy_train[i_min_gpsindy] x_err_hist.gpsindy_test[i_min_gpsindy] ] 
+    header = ["csv_file", "λ_min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
+    data   = [ csv_file λ_vec[i_min_gpsindy] x_err_hist.gpsindy_train[i_min_gpsindy] x_err_hist.gpsindy_test[i_min_gpsindy] ] 
     df_gpsindy = DataFrame( data, header )   
 
     return df_λ_vec, df_sindy, df_gpsindy 
