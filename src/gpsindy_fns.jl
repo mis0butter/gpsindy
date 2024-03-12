@@ -30,6 +30,7 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
 
     header = [ "csv_file", "λ_min_sindy", "x_sindy_train_err", "x_sindy_test_err", "λ_min_gpsindy", "x_gpsindy_train_err", "x_gpsindy_test_err" ] 
     df_min_err_hist = DataFrame( fill( [], 7 ), header ) 
+
     for i in eachindex(csv_files_vec) 
 
         csv_file_path = csv_files_vec[i] 
@@ -58,6 +59,9 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
         push!( df_min_err_hist, [ data_sindy data_gpsindy[:,2:end] ] )  
     
     end 
+
+    # save df_min_err_hist as CSV 
+    CSV.write( string( save_path, "df_min_err_hist.csv" ), df_min_err_hist ) 
 
     return df_min_err_hist 
 end 
