@@ -1,7 +1,66 @@
 
+## ============================================ ##
+# smooth training and test data with GPs 
+
+export gp_train_test 
+function gp_train_test( data_train, data_test ) 
+
+    σ_n = 0.01 
+
+    # first - smooth measurements with Gaussian processes 
+    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, false ) 
+    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, false ) 
+    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise ) 
+    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise ) 
+
+    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+end 
+
+
+## ============================================ ##
+
+export cross_validate_csv_path
+
+function cross_validate_csv_path( csv_path, freq_hz, plot_option = false ) 
+
+    csv_files_vec = readdir( csv_path ) 
+    deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
+
+    for i in eachindex(csv_files_vec)  
+        csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
+    end 
+    
+    λ_vec = λ_vec_fn() 
+
+    x_min_err_hist = x_train_test_err_struct( [], [], [], [] ) 
+    for i in eachindex(csv_files_vec) 
+    
+        x_err_hist = cross_validate( csv_path, csv_files_vec[i], freq_hz, plot_option ) 
+    
+        df_λ_vec, df_sindy, df_gpsindy = df_metrics( x_err_hist, λ_vec ) 
+
+        if plot_option == true 
+            csv_file = replace( csv_files_vec[i], csv_path => "") 
+            f = plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_file ) 
+            display(f)     
+        end 
+        
+        push!( x_min_err_hist.sindy_train, df_sindy.x_sindy_train_err[1] ) 
+        push!( x_min_err_hist.sindy_test,  df_sindy.x_sindy_test_err[1]  ) 
+        push!( x_min_err_hist.gpsindy_train, df_gpsindy.x_gpsindy_train_err[1] ) 
+        push!( x_min_err_hist.gpsindy_test,  df_gpsindy.x_gpsindy_test_err[1]  ) 
+    
+    end 
+
+    return x_min_err_hist 
+end 
+
+
+## ============================================ ##
+
 export cross_validate 
 
-function cross_validate( csv_path_file, plot_option = false ) 
+function cross_validate( csv_path, csv_path_file, freq_hz, plot_option = false ) 
 
     # extract data 
     data_train, data_test = car_data_struct( csv_path_file ) 
@@ -24,7 +83,8 @@ function cross_validate( csv_path_file, plot_option = false )
         
         # plot and save metrics 
         if plot_option == true     
-            f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, freq_hz, csv_file)     
+            csv_string = replace( csv_path_file, csv_path => "" ) 
+            f = plot_err_train_test( data_pred_train, data_pred_test, data_train, data_test, λ, freq_hz, csv_string)     
             display(f) 
         end 
 
@@ -372,22 +432,6 @@ function gp_train_double_test( data_train, data_test )
     dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
     return t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
-end 
-
-
-## ============================================ ##
-# smooth training and test data with GPs 
-
-export gp_train_test 
-function gp_train_test( data_train, data_test ) 
-
-    # first - smooth measurements with Gaussian processes 
-    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
-    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
-    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
-    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
-
-    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
 
 

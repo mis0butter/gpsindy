@@ -7,8 +7,11 @@ using CairoMakie
 ## ============================================ ##
 # control input delay  
 
-csv_path  = string( "test/data/jake_car_csvs_ctrlshift/10hz_noise_0.04/" ) 
-save_path = string( "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.04/" )  
+freq_hz = 5 
+noise   = 0.05  
+
+csv_path  = string( "test/data/jake_car_csvs_ctrlshift/", freq_hz, "hz_noise_", noise, "/" ) 
+save_path = string( "test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )  
 
 if !isdir( save_path ) 
     mkdir( save_path ) 
@@ -18,19 +21,13 @@ end
 # ----------------------- #
 
 csv_files_vec = readdir( csv_path ) 
+
+# if csv_files_vec contains "fig", remove from vector 
+deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) )  
+
 for i in eachindex(csv_files_vec)  
     csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
 end 
-
-# check if figs in list 
-for i in eachindex(csv_files_vec) 
-    if occursin( "figs", csv_files_vec[i] ) 
-        deleteat!( csv_files_vec, i ) 
-    end 
-end 
-
-## ============================================ ##
-
 
 for i in eachindex(csv_files_vec) 
 

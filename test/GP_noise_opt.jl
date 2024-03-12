@@ -24,7 +24,7 @@ end
     # get data 
     t = data[:,1] ; x = data[:,2:5] ; u = data[:,6:7] 
 
-    x, dx = unroll( t, x )
+    x, dx = unroll( t, x ) 
 
 
 ## ============================================ ##
@@ -133,6 +133,30 @@ f
 
 
 
+## ============================================ ##
+
+
+f = Figure( size = ( 800,600 ) )
+
+i = 1 
+ax = Axis( f[i,1], title = "u GP smoothing (t_train_double)" ) 
+    CairoMakie.scatter!( ax, data_train.t, data_train.u[:,i], color = :black, label = "u1 raw" ) 
+    lines!( ax, t_train_double, u_train_GP[:,i], label = "u1 GP" )   
+    lines!( ax, t_train_double, u_train_GP_up01[:,i], label = "u1 GP σ_n = 0.01 " )
+    # lines!( ax, t_train_double, u_train_GP_up001[:,i], color = :red, label = "u1 GP σ_n = 0.001" )
+    # lines!( ax, t_train_double, u_train_GP_up0001[:,i], label = "u1 GP σ_n = 0.0001" )
+    axislegend()   
+i = 2 
+ax = Axis( f[i,1], xlabel = "t (s)" ) 
+    CairoMakie.scatter!( ax, data_train.t, data_train.u[:,i], color = :black, label = "u1" ) 
+    lines!( ax, t_train_double, u_train_GP[:,i], label = "u2 GP" )   
+    lines!( ax, t_train_double, u_train_GP_up01[:,i], label = "u2 GP σ_n = 0.01 " )
+    # lines!( ax, t_train_double, u_train_GP_up001[:,i], color = :red, label = "u2 GP σ_n = 0.001" )
+    # lines!( ax, t_train_double, u_train_GP_up0001[:,i], label = "u1 GP σ_n = 0.0001" )
+    axislegend()   
+    
+
+f 
 
 
 
