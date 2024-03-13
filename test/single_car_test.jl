@@ -10,12 +10,12 @@ using DataFrames
 ## ============================================ ##
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
-
-
 freq_hz = 50 
 noise   = 0.02 
 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
+
+
 csv_file      = "rollout_17.csv" 
 csv_path_file = string(csv_path, csv_file ) 
 
@@ -28,34 +28,6 @@ opt_σn = true
 # run cross-validation 
 
 df_min_err_sindy, df_min_err_gpsindy = cross_validate_dfs( csv_path_file, σn, opt_σn ) 
-
-# # extract data 
-# data_train, data_test = car_data_struct( csv_path_file ) 
-
-# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
-
-# # cross-validate gpsindy 
-# λ_vec      = λ_vec_fn() 
-# header     = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
-# df_gpsindy = DataFrame( fill( [], 5 ), header ) 
-# df_sindy   = DataFrame( fill( [], 5 ), header ) 
-# for i_λ = eachindex( λ_vec ) 
-
-#     λ = λ_vec[i_λ] 
-    
-#     # sindy!!! 
-#     x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
-#     push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
-
-#     # gpsindy!!! 
-#     x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
-#     push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
-
-# end 
-
-# # save gpsindy min err stats 
-# df_min_err_sindy   = df_min_err_fn( df_sindy ) 
-# df_min_err_gpsindy = df_min_err_fn( df_gpsindy ) 
 
 
 # ----------------------- #
@@ -107,7 +79,6 @@ ax_text = "training \n $csv_file"
 Textbox( f_train[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
 display(f_train) 
-
 
 
 # ----------------------- #
@@ -195,21 +166,24 @@ function cross_validate_dfs( csv_path_file, σn, opt_σn )
     end 
 
     # save gpsindy min err stats 
-    df_min_err_sindy   = df_min_err_fn( df_sindy ) 
-    df_min_err_gpsindy = df_min_err_fn( df_gpsindy ) 
+    df_min_err_sindy   = df_min_err_fn( df_sindy, csv_path_file ) 
+    df_min_err_gpsindy = df_min_err_fn( df_gpsindy, csv_path_file ) 
 
     return df_min_err_sindy, df_min_err_gpsindy 
 end 
 
-function df_min_err_fn( df_gpsindy ) 
+function df_min_err_fn( df_gpsindy, csv_path_file ) 
+    
+    csv_string = split( csv_path_file, "/" )
+    csv_file   = csv_string[end]  
 
-    header = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
+    header = [ "csv_file", "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
 
     # save gpsindy min err stats 
     i_min_gpsindy = argmin( df_gpsindy.train_err )
     λ_min_gpsindy = df_gpsindy.λ[i_min_gpsindy]
-    data          = [ λ_min_gpsindy, df_gpsindy.train_err[i_min_gpsindy], df_gpsindy.test_err[i_min_gpsindy], df_gpsindy.train_traj[i_min_gpsindy], df_gpsindy.test_traj[i_min_gpsindy] ]  
-    df_min_err_gpsindy = DataFrame( fill( [], 5 ), header ) 
+    data          = [ csv_file, λ_min_gpsindy, df_gpsindy.train_err[i_min_gpsindy], df_gpsindy.test_err[i_min_gpsindy], df_gpsindy.train_traj[i_min_gpsindy], df_gpsindy.test_traj[i_min_gpsindy] ]  
+    df_min_err_gpsindy = DataFrame( fill( [], 6 ), header ) 
     push!( df_min_err_gpsindy, data ) 
 
     return df_min_err_gpsindy 
