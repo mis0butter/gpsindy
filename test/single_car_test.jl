@@ -16,7 +16,7 @@ freq_hz = 50
 noise   = 0.02 
 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
-csv_file      = "rollout_10.csv" 
+csv_file      = "rollout_12.csv" 
 csv_path_file = string(csv_path, csv_file ) 
 
 # optimize GPs with GPs 
@@ -24,8 +24,8 @@ csv_path_file = string(csv_path, csv_file )
 opt_σn = false 
 
 
-## ============================================ ##
-
+## ============================================ ## 
+# run cross-validation 
 
 # extract data 
 data_train, data_test = car_data_struct( csv_path_file ) 
@@ -55,12 +55,9 @@ end
 df_min_err_sindy   = df_min_err_fn( df_sindy ) 
 df_min_err_gpsindy = df_min_err_fn( df_gpsindy ) 
 
-# now propagate the discovered dynamics with the test data 
 
-
-
-## ============================================ ##
-# training 
+# ----------------------- #
+# plot training 
 
 f_train = Figure( size = ( 800, 800 ) ) 
 
@@ -111,8 +108,8 @@ display(f_train)
 
 
 
-## ============================================ ##
-# testing 
+# ----------------------- #
+# plot testing 
 
 f_test = Figure( size = ( 800, 800 ) ) 
 

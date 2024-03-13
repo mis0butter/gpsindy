@@ -2,7 +2,7 @@
 # posterior GP and optimize hps 
 
 export gp_post 
-function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, gp_noise = true ) 
+function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true ) 
 # ----------------------- #
 # PURPOSE: 
 #       Compute posterior of Gaussian process and optimize hyperparameters 
@@ -13,7 +13,7 @@ function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, gp
 #       μ_train : mean function m(x) for the TRAINING (meas) data 
 #       y_train : output points for the TRAINING (meas) data 
 #       σ_n     : noise std dev 
-#       gp_noise: optimize σ_n flag, true = optimize, false = use fixed value  
+#       σ_n_opt : optimize σ_n flag, true = optimize, false = use fixed value  
 # OUTPUTS: 
 #       y_post  : posterior output based on TRAINING (meas) data 
 # ----------------------- # 
@@ -32,10 +32,10 @@ function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, gp
         
         # y_train = dx_noise[:,i] - dx_mean[:,i]
         gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
-        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = gp_noise ) 
+        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = σ_n_opt ) 
 
         # report hyperparameter 
-        σ_n = exp( gp.logNoise.value ) ; println( "opt σ_n = ", σ_n )  
+        σ_n = exp( gp.logNoise.value ) ; println( "opt σ_n = ", σ_n ) ; println( "σ_n_opt = ", σ_n_opt ) 
 
         y_post[:,i] = predict_y( gp, x_prior' )[1]  
     

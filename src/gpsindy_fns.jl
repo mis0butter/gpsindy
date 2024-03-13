@@ -8,8 +8,8 @@ function gp_train_test( data_train, data_test, σ_n = 0.1, opt_σn = true )
     # first - smooth measurements with Gaussian processes 
     x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
     dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn ) 
-    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise ) 
-    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise ) 
+    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σ_n, opt_σn ) 
+    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σ_n, opt_σn ) 
 
     return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
