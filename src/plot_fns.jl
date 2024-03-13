@@ -34,13 +34,13 @@ function plot_λ_err_log( λ_vec, df_λ_vec, df_sindy, df_gpsindy, freq_hz, csv_
     x_gpsindy_test_err  = @sprintf "%.3g" df_gpsindy.x_gpsindy_test_err[1] 
 
     ax_text = "min λ sindy = $λ_min_sindy \n err train = $x_sindy_train_err \n --> test = $x_sindy_test_err."
-    Textbox( f[3,4], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[3,4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
     
     ax_text = "min λ gpsindy = $λ_min_gpsindy \n err train = $x_gpsindy_train_err \n --> test = $x_gpsindy_test_err"  
-    Textbox( f[4,4], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[4,4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     ax_text = "$freq_hz Hz \n $csv_file"
-    Textbox( f[1,4], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[1,4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
     
     return f 
 end 
@@ -96,13 +96,13 @@ function plot_λ_err( λ_vec, df_λ_vec, df_sindy, df_gpsindy, λ, freq_hz, csv_
     x_gpsindy_test_err  = @sprintf "%.3g" df_gpsindy.x_gpsindy_test_err[1] 
 
     ax_text = "λ = $λ \n $freq_hz Hz \n $csv_file"
-    Textbox( f[6,1], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[6,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
     
     ax_text = "min λ sindy = $λ_min_sindy \n err train = $x_sindy_train_err \n err test = $x_sindy_test_err."
-    Textbox( f[6,2], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[6,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
     
     ax_text = "min λ gpsindy = $λ_min_gpsindy \n err train = $x_gpsindy_train_err \n err test = $x_gpsindy_test_err"  
-    Textbox( f[6,3], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[6,3], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     return f 
 end 
@@ -133,14 +133,14 @@ function plot_err_train_test( data_pred_train, data_pred_test, data_train, data_
     f = plot_ix_err_train_test( f, 4, data_pred_train, data_pred_test, data_train, data_test) 
     # ax = Axis( f[5,1:2] ) 
     ax_text = "total err: GP = $x_gp_err_train, \n SINDy = $x_sindy_err_train, GPSINDy = $x_gpsindy_err_train" 
-    Textbox( f[5,1:2], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[5,1:2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     ax_text = "total err: GP = $x_gp_err_test, \n SINDy = $x_sindy_err_test, GPSINDy = $x_gpsindy_err_test" 
-    Textbox( f[5,3:4], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     λ = @sprintf "%.3g" λ 
     ax_text = "λ = $λ \n $freq_hz Hz \n $csv_file" 
-    Textbox( f[5,5], placeholder = ax_text, textcolor_placeholder = :black ) 
+    Textbox( f[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     return f 
 end 
