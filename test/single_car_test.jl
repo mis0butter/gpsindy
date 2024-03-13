@@ -16,15 +16,15 @@ freq_hz = 50
 noise   = 0.02 
 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
-csv_file      = "rollout_12.csv" 
+csv_file      = "rollout_17.csv" 
 csv_path_file = string(csv_path, csv_file ) 
 
 # optimize GPs with GPs 
 σn     = 0.2 
-opt_σn = false 
+opt_σn = true 
 
 
-## ============================================ ## 
+# ----------------------- #
 # run cross-validation 
 
 # extract data 
@@ -165,18 +165,6 @@ display(f_test)
 
 ## ============================================ ##
 # functions for the above 
-
-function df_min_err_sindy_fn( data_train, data_test, x_sindy_train, x_sindy_test, λ ) 
-
-    # save sindy stats as dataframe 
-    header = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
-    sindy_train_err  = norm( data_train.x_noise - x_sindy_train ) 
-    sindy_test_err   = norm( data_test.x_noise  - x_sindy_test  ) 
-    df_min_err_sindy = DataFrame( fill( [], 5 ), header ) 
-    push!( df_min_err_sindy, [ λ, sindy_train_err, sindy_test_err, x_sindy_train, x_sindy_test ] ) 
-
-    return df_min_err_sindy 
-end 
 
 function df_min_err_fn( df_gpsindy ) 
 
