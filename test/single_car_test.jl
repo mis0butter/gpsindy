@@ -25,7 +25,7 @@ csv_num = 18
 header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
 df_min_err_csvs_sindy   = DataFrame( fill( [], 6 ), header ) 
 df_min_err_csvs_gpsindy = DataFrame( fill( [], 6 ), header ) 
-for csv_num = 1:10 
+for csv_num = 1:45 
 
     csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
     csv_file = string( "rollout_", csv_num, ".csv" )   
