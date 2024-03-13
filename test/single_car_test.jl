@@ -16,7 +16,7 @@ freq_hz = 50
 noise   = 0.02 
 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
-csv_file      = "rollout_8.csv" 
+csv_file      = "rollout_10.csv" 
 csv_path_file = string(csv_path, csv_file ) 
 
 # extract data 
@@ -32,20 +32,20 @@ x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data
 
 # cross-validate gpsindy 
 λ_vec      = λ_vec_fn() 
-header     = [ "λ", "train_err", "test_err", "train_traj", "test_traj", "dx_fn" ] 
-df_gpsindy = DataFrame( fill( [], 6 ), header ) 
-df_sindy   = DataFrame( fill( [], 6 ), header ) 
+header     = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
+df_gpsindy = DataFrame( fill( [], 5 ), header ) 
+df_sindy   = DataFrame( fill( [], 5 ), header ) 
 for i_λ = eachindex( λ_vec ) 
 
     λ = λ_vec[i_λ] 
     
     # sindy!!! 
-    x_sindy_train, x_sindy_test, dx_fn_sindy  = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
-    push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test, dx_fn_sindy ] ) 
+    x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
+    push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
 
     # gpsindy!!! 
-    x_gpsindy_train, x_gpsindy_test, dx_fn_gpsindy  = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
-    push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test, dx_fn_gpsindy ] ) 
+    x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
+    push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
 
 end 
 
@@ -92,7 +92,7 @@ end
 # legend 
 Legend( f[1,3], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
 
-ax_text = "$csv_file, $freq_hz Hz, noise = $noise \n σ_n = $σn, σ_n opt = $opt_σn" 
+ax_text = "$csv_file, $freq_hz Hz, noise = $noise \n σ_n = $σn, σ_n opt = $opt_σn (training) " 
 Textbox( f[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
 # print total error 
@@ -101,6 +101,53 @@ Textbox( f[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidt
 
 
 display(f) 
+
+
+# ----------------------- #
+# testing 
+
+f_test = Figure( size = ( 800, 800 ) ) 
+
+gp = 0 ; sindy = 0 ; gpsindy = 0 
+for i_x = 1:4 
+    ax = Axis( f_test[i_x,1], title="x$i_x traj" ) 
+        CairoMakie.scatter!( ax, data_test.t, data_test.x_noise[:,i_x], color=:black, label="noise" )     
+        lines!( ax, data_test.t, x_test_GP[:,i_x], linewidth = 2, color = :red, label="GP" ) 
+        lines!( ax, data_test.t, df_min_err_sindy.test_traj[1][:,i_x], linewidth = 2, label="sindy" ) 
+        lines!( ax, data_test.t, df_min_err_gpsindy.test_traj[1][:,i_x], linewidth = 2, label="gpsindy" ) 
+    if i_x == 4 
+        ax.xlabel = "t [s]" 
+    end 
+
+    # get error norm 
+    gp_test_err      = data_test.x_noise[:,i_x] - x_test_GP[:,i_x] 
+    sindy_test_err   = df_min_err_sindy.test_traj[1][:,i_x] - data_test.x_noise[:,i_x]  
+    gpsindy_test_err = df_min_err_gpsindy.test_traj[1][:,i_x] - data_test.x_noise[:,i_x]  
+
+    title_str = string("x$i_x err: GP = ", round( norm( gp_test_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_test_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_test_err ), digits = 2 ) ) 
+    ax = Axis( f_test[i_x,2], title = title_str ) 
+        gp      = lines!( ax, data_test.t, gp_test_err, linewidth = 2, color = :red, label="GP" ) 
+        sindy   = lines!( ax, data_test.t, sindy_test_err, linewidth = 2, label="sindy" ) 
+        gpsindy = lines!( ax, data_test.t, gpsindy_test_err, linewidth = 2, label="gpsindy" ) 
+    if i_x == 4 
+        ax.xlabel = "t [s]" 
+    end 
+    
+end 
+
+# legend 
+Legend( f_test[1,3], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
+
+ax_text = "$csv_file, $freq_hz Hz, noise = $noise \n σ_n = $σn, σ_n opt = $opt_σn (testing) " 
+Textbox( f_test[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+# print total error 
+ax_text = string("total err: GP = ", round( norm( data_test.x_noise - x_test_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.test_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.test_err[1], digits = 2 ) ) 
+Textbox( f_test[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+
+display(f_test) 
+
 
 
 
@@ -122,6 +169,8 @@ function df_min_err_sindy_fn( data_train, data_test, x_sindy_train, x_sindy_test
 end 
 
 function df_min_err_fn( df_gpsindy ) 
+
+    header = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
 
     # save gpsindy min err stats 
     i_min_gpsindy = argmin( df_gpsindy.train_err )
@@ -151,7 +200,7 @@ function sindy_lasso_int( x_train_in, dx_train_in, λ, data_train, data_test )
     x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
     x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
 
-    return x_sindy_train, x_sindy_test, dx_fn_sindy 
+    return x_sindy_train, x_sindy_test 
 end 
 
 
