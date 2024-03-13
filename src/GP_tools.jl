@@ -34,6 +34,9 @@ function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, gp
         gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
         optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = gp_noise ) 
 
+        # report hyperparameter 
+        σ_n = exp( gp.logNoise.value ) ; println( "opt σ_n = ", σ_n )  
+
         y_post[:,i] = predict_y( gp, x_prior' )[1]  
     
     end 
