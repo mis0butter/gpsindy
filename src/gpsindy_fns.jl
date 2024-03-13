@@ -17,6 +17,50 @@ end
 
 ## ============================================ ##
 
+export cross_validate_dfs 
+
+function cross_validate_dfs( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+
+    # extract data 
+    data_train, data_test = car_data_struct( csv_path_file ) 
+
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
+
+    # cross-validate gpsindy 
+    λ_vec      = λ_vec_fn() 
+    header     = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
+    df_gpsindy = DataFrame( fill( [], 5 ), header ) 
+    df_sindy   = DataFrame( fill( [], 5 ), header ) 
+    for i_λ = eachindex( λ_vec ) 
+
+        λ = λ_vec[i_λ] 
+        
+        # sindy!!! 
+        x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
+        push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
+
+        # gpsindy!!! 
+        x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
+        push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
+
+    end 
+
+    # save gpsindy min err stats 
+    df_min_err_sindy   = df_min_err_fn( df_sindy, csv_path_file ) 
+    df_min_err_gpsindy = df_min_err_fn( df_gpsindy, csv_path_file ) 
+
+    # plot 
+    csv_string = split( csv_path_file, "/" )
+    csv_file   = csv_string[end]  
+    f_train = plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file ) 
+    f_test  = plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file )  
+
+    return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test 
+end 
+
+
+## ============================================ ##
+
 export cross_validate_csv_path
 
 function cross_validate_csv_path( csv_path, freq_hz, plot_option = false ) 

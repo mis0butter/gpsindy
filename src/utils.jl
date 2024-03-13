@@ -1,4 +1,26 @@
 
+export df_min_err_fn 
+
+function df_min_err_fn( df_gpsindy, csv_path_file ) 
+    
+    csv_string = split( csv_path_file, "/" )
+    csv_file   = csv_string[end]  
+
+    header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
+
+    # save gpsindy min err stats 
+    i_min_gpsindy = argmin( df_gpsindy.train_err )
+    λ_min_gpsindy = df_gpsindy.λ[i_min_gpsindy]
+    data          = [ csv_file, λ_min_gpsindy, df_gpsindy.train_err[i_min_gpsindy], df_gpsindy.test_err[i_min_gpsindy], df_gpsindy.train_traj[i_min_gpsindy], df_gpsindy.test_traj[i_min_gpsindy] ]  
+    df_min_err_gpsindy = DataFrame( fill( [], 6 ), header ) 
+    push!( df_min_err_gpsindy, data ) 
+
+    return df_min_err_gpsindy 
+end 
+
+
+## ============================================ ##
+
 export mkdir_save_path 
 
 function mkdir_save_path( csv_path ) 
