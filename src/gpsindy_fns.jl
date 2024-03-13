@@ -3,9 +3,7 @@
 # smooth training and test data with GPs 
 
 export gp_train_test 
-function gp_train_test( data_train, data_test, opt_σn = true ) 
-
-    σ_n = 0.01 
+function gp_train_test( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # first - smooth measurements with Gaussian processes 
     x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn) 

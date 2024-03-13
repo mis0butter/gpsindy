@@ -12,19 +12,11 @@ function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, gp
 #       x_train : input points for the TRAINING (meas) data 
 #       μ_train : mean function m(x) for the TRAINING (meas) data 
 #       y_train : output points for the TRAINING (meas) data 
+#       σ_n     : noise std dev 
+#       gp_noise: optimize σ_n flag, true = optimize, false = use fixed value  
 # OUTPUTS: 
 #       y_post  : posterior output based on TRAINING (meas) data 
 # ----------------------- # 
-
-    # # transform x inputs matrices --> vectors for kernel computations 
-    # x_test_vec = [] 
-    # for i = 1 : size(x_prior, 1) 
-    #     push!( x_test_vec, x_prior[i,:] ) 
-    # end 
-    # x_train_vec = [] 
-    # for i = 1 : size(x_train, 1) 
-    #     push!( x_train_vec, x_train[i,:] ) 
-    # end 
 
     # set up posterior 
     x_rows = size( x_prior, 1 ) ; n_vars = size(y_train, 2) 
@@ -36,25 +28,11 @@ function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, gp
         # kernel  
         mZero     = MeanZero()              # zero mean function 
         kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
-        log_noise = log( σ_n )                # (optional) log std dev of obs 
+        log_noise = log( σ_n )              # (optional) log std dev of obs 
         
         # y_train = dx_noise[:,i] - dx_mean[:,i]
         gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
         optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = gp_noise ) 
-    
-        # # return HPs 
-        # σ_f = sqrt( gp.kernel.σ2 ) ; l = sqrt.( gp.kernel.ℓ2 ) ; σ_n = exp( gp.logNoise.value )  
-        # hp  = [σ_f, l, σ_n] 
-        # println( "hp = ", hp ) 
-    
-        # # compute kernels 
-        # Kss = k_SE( σ_f, l, x_test_vec, x_test_vec ) 
-        # Ks  = k_SE( σ_f, l, x_test_vec, x_train_vec ) 
-        # K   = k_SE( σ_f, l, x_train_vec, x_train_vec ) 
-
-        # # posterior 
-        # y_post[:,i] = μ_prior[:,i] + Ks * ( ( K + σ_n^2 * I ) \ ( y_train[:,i] - μ_train[:,i] ) ) 
-        # Σ           = Kss - Ks * ( ( K + σ_n^2 * I ) \ Ks' ) 
 
         y_post[:,i] = predict_y( gp, x_prior' )[1]  
     
