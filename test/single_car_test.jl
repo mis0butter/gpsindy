@@ -59,14 +59,14 @@ df_min_err_gpsindy = df_min_err_fn( df_gpsindy )
 
 
 
-# ----------------------- #
-# plot!!! 
+## ============================================ ##
+# training 
 
-f = Figure( size = ( 800, 800 ) ) 
+f_train = Figure( size = ( 800, 800 ) ) 
 
 gp = 0 ; sindy = 0 ; gpsindy = 0 
 for i_x = 1:4 
-    ax = Axis( f[i_x,1], title="x$i_x traj" ) 
+    ax = Axis( f_train[i_x,1:2], title="x$i_x traj" ) 
         CairoMakie.scatter!( ax, data_train.t, data_train.x_noise[:,i_x], color=:black, label="noise" )     
         lines!( ax, data_train.t, x_train_GP[:,i_x], linewidth = 2, color = :red, label="GP" ) 
         lines!( ax, data_train.t, df_min_err_sindy.train_traj[1][:,i_x], linewidth = 2, label="sindy" ) 
@@ -81,7 +81,7 @@ for i_x = 1:4
     gpsindy_train_err = df_min_err_gpsindy.train_traj[1][:,i_x] - data_train.x_noise[:,i_x]  
 
     title_str = string("x$i_x err: GP = ", round( norm( gp_train_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_train_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_train_err ), digits = 2 ) ) 
-    ax = Axis( f[i_x,2], title = title_str ) 
+    ax = Axis( f_train[i_x,3:4], title = title_str ) 
         gp      = lines!( ax, data_train.t, gp_train_err, linewidth = 2, color = :red, label="GP" ) 
         sindy   = lines!( ax, data_train.t, sindy_train_err, linewidth = 2, label="sindy" ) 
         gpsindy = lines!( ax, data_train.t, gpsindy_train_err, linewidth = 2, label="gpsindy" ) 
@@ -92,16 +92,23 @@ for i_x = 1:4
 end 
 
 # legend 
-Legend( f[1,3], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
+Legend( f_train[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
 
-ax_text = "$csv_file, $freq_hz Hz, noise = $noise \n σ_n = $σn, σ_n opt = $opt_σn (training) " 
-Textbox( f[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
+Textbox( f_train[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+ax_text = "$freq_hz Hz \n noise = $noise " 
+Textbox( f_train[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
 
 # print total error 
 ax_text = string("total err: GP = ", round( norm( data_train.x_noise - x_train_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.train_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.train_err[1], digits = 2 ) ) 
-Textbox( f[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+Textbox( f_train[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
-display(f) 
+ax_text = "training \n $csv_file" 
+Textbox( f_train[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+display(f_train) 
+
 
 
 ## ============================================ ##
