@@ -13,123 +13,37 @@ using DataFrames
 freq_hz = 50 
 noise   = 0.02 
 
-csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
-
-
-csv_file      = "rollout_17.csv" 
-csv_path_file = string(csv_path, csv_file ) 
-
 # optimize GPs with GPs 
-σn     = 0.2 
-opt_σn = true 
+σn      = 0.2 
+opt_σn  = false 
 
+csv_num = 18 
 
 # ----------------------- #
 # run cross-validation 
 
-df_min_err_sindy, df_min_err_gpsindy = cross_validate_dfs( csv_path_file, σn, opt_σn ) 
+header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
+df_min_err_csvs_sindy   = DataFrame( fill( [], 6 ), header ) 
+df_min_err_csvs_gpsindy = DataFrame( fill( [], 6 ), header ) 
+for csv_num = 1:10 
 
+    csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
+    csv_file = string( "rollout_", csv_num, ".csv" )   
+    csv_path_file = string(csv_path, csv_file ) 
 
-# ----------------------- #
-# plot training 
+    df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_dfs( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+    display(f_train) ; display(f_test) 
 
-f_train = Figure( size = ( 800, 800 ) ) 
+    push!( df_min_err_csvs_sindy, df_min_err_sindy[1,:] ) 
+    push!( df_min_err_csvs_gpsindy, df_min_err_gpsindy[1,:] ) 
 
-gp = 0 ; sindy = 0 ; gpsindy = 0 
-for i_x = 1:4 
-    ax = Axis( f_train[i_x,1:2], title="x$i_x traj" ) 
-        CairoMakie.scatter!( ax, data_train.t, data_train.x_noise[:,i_x], color=:black, label="noise" )     
-        lines!( ax, data_train.t, x_train_GP[:,i_x], linewidth = 2, color = :red, label="GP" ) 
-        lines!( ax, data_train.t, df_min_err_sindy.train_traj[1][:,i_x], linewidth = 2, label="sindy" ) 
-        lines!( ax, data_train.t, df_min_err_gpsindy.train_traj[1][:,i_x], linewidth = 2, label="gpsindy" ) 
-    if i_x == 4 
-        ax.xlabel = "t [s]" 
-    end 
-
-    # get error norm 
-    gp_train_err      = data_train.x_noise[:,i_x] - x_train_GP[:,i_x] 
-    sindy_train_err   = df_min_err_sindy.train_traj[1][:,i_x] - data_train.x_noise[:,i_x]  
-    gpsindy_train_err = df_min_err_gpsindy.train_traj[1][:,i_x] - data_train.x_noise[:,i_x]  
-
-    title_str = string("x$i_x err: GP = ", round( norm( gp_train_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_train_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_train_err ), digits = 2 ) ) 
-    ax = Axis( f_train[i_x,3:4], title = title_str ) 
-        gp      = lines!( ax, data_train.t, gp_train_err, linewidth = 2, color = :red, label="GP" ) 
-        sindy   = lines!( ax, data_train.t, sindy_train_err, linewidth = 2, label="sindy" ) 
-        gpsindy = lines!( ax, data_train.t, gpsindy_train_err, linewidth = 2, label="gpsindy" ) 
-    if i_x == 4 
-        ax.xlabel = "t [s]" 
-    end 
-    
 end 
 
-# legend 
-Legend( f_train[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
-
-ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
-Textbox( f_train[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
-
-ax_text = "$freq_hz Hz \n noise = $noise " 
-Textbox( f_train[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
-
-# print total error 
-ax_text = string("total err: GP = ", round( norm( data_train.x_noise - x_train_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.train_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.train_err[1], digits = 2 ) ) 
-Textbox( f_train[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
-
-ax_text = "training \n $csv_file" 
-Textbox( f_train[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
-
-display(f_train) 
 
 
-# ----------------------- #
-# plot testing 
 
-f_test = Figure( size = ( 800, 800 ) ) 
 
-gp = 0 ; sindy = 0 ; gpsindy = 0 
-for i_x = 1:4 
-    ax = Axis( f_test[i_x,1:2], title="x$i_x traj" ) 
-        CairoMakie.scatter!( ax, data_test.t, data_test.x_noise[:,i_x], color=:black, label="noise" )     
-        lines!( ax, data_test.t, x_test_GP[:,i_x], linewidth = 2, color = :red, label="GP" ) 
-        lines!( ax, data_test.t, df_min_err_sindy.test_traj[1][:,i_x], linewidth = 2, label="sindy" ) 
-        lines!( ax, data_test.t, df_min_err_gpsindy.test_traj[1][:,i_x], linewidth = 2, label="gpsindy" ) 
-    if i_x == 4 
-        ax.xlabel = "t [s]" 
-    end 
 
-    # get error norm 
-    gp_test_err      = data_test.x_noise[:,i_x] - x_test_GP[:,i_x] 
-    sindy_test_err   = df_min_err_sindy.test_traj[1][:,i_x] - data_test.x_noise[:,i_x]  
-    gpsindy_test_err = df_min_err_gpsindy.test_traj[1][:,i_x] - data_test.x_noise[:,i_x]  
-
-    title_str = string("x$i_x err: GP = ", round( norm( gp_test_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_test_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_test_err ), digits = 2 ) ) 
-    ax = Axis( f_test[i_x,3:4], title = title_str ) 
-        gp      = lines!( ax, data_test.t, gp_test_err, linewidth = 2, color = :red, label="GP" ) 
-        sindy   = lines!( ax, data_test.t, sindy_test_err, linewidth = 2, label="sindy" ) 
-        gpsindy = lines!( ax, data_test.t, gpsindy_test_err, linewidth = 2, label="gpsindy" ) 
-    if i_x == 4 
-        ax.xlabel = "t [s]" 
-    end 
-    
-end 
-
-# legend 
-Legend( f_test[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
-
-ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
-Textbox( f_test[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
-
-ax_text = "$freq_hz Hz \n noise = $noise " 
-Textbox( f_test[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
-
-# print total error 
-ax_text = string("total err: GP = ", round( norm( data_test.x_noise - x_test_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.test_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.test_err[1], digits = 2 ) ) 
-Textbox( f_test[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
-
-ax_text = "testing \n $csv_file" 
-Textbox( f_test[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
-
-display(f_test) 
 
 
 
@@ -139,7 +53,7 @@ display(f_test)
 ## ============================================ ##
 # functions for the above 
 
-function cross_validate_dfs( csv_path_file, σn, opt_σn ) 
+function cross_validate_dfs( csv_path_file, σn, opt_σn, freq_hz, noise ) 
 
     # extract data 
     data_train, data_test = car_data_struct( csv_path_file ) 
@@ -169,15 +83,24 @@ function cross_validate_dfs( csv_path_file, σn, opt_σn )
     df_min_err_sindy   = df_min_err_fn( df_sindy, csv_path_file ) 
     df_min_err_gpsindy = df_min_err_fn( df_gpsindy, csv_path_file ) 
 
-    return df_min_err_sindy, df_min_err_gpsindy 
+    # plot 
+    csv_string = split( csv_path_file, "/" )
+    csv_file   = csv_string[end]  
+    f_train = plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file ) 
+    f_test  = plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file )  
+
+    return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test 
 end 
+
+
+# ----------------------- #
 
 function df_min_err_fn( df_gpsindy, csv_path_file ) 
     
     csv_string = split( csv_path_file, "/" )
     csv_file   = csv_string[end]  
 
-    header = [ "csv_file", "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
+    header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
 
     # save gpsindy min err stats 
     i_min_gpsindy = argmin( df_gpsindy.train_err )
@@ -210,6 +133,111 @@ function sindy_lasso_int( x_train_in, dx_train_in, λ, data_train, data_test )
     return x_sindy_train, x_sindy_test 
 end 
 
+function plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file ) 
+
+    # ----------------------- #
+    # plot training 
+
+    f_train = Figure( size = ( 800, 800 ) ) 
+
+    gp = 0 ; sindy = 0 ; gpsindy = 0 
+    for i_x = 1:4 
+        ax = Axis( f_train[i_x,1:2], title="x$i_x traj" ) 
+            CairoMakie.scatter!( ax, data_train.t, data_train.x_noise[:,i_x], color=:black, label="noise" )     
+            lines!( ax, data_train.t, x_train_GP[:,i_x], linewidth = 2, color = :red, label="GP" ) 
+            lines!( ax, data_train.t, df_min_err_sindy.train_traj[1][:,i_x], linewidth = 2, label="sindy" ) 
+            lines!( ax, data_train.t, df_min_err_gpsindy.train_traj[1][:,i_x], linewidth = 2, label="gpsindy" ) 
+        if i_x == 4 
+            ax.xlabel = "t [s]" 
+        end 
+
+        # get error norm 
+        gp_train_err      = data_train.x_noise[:,i_x] - x_train_GP[:,i_x] 
+        sindy_train_err   = df_min_err_sindy.train_traj[1][:,i_x] - data_train.x_noise[:,i_x]  
+        gpsindy_train_err = df_min_err_gpsindy.train_traj[1][:,i_x] - data_train.x_noise[:,i_x]  
+
+        title_str = string("x$i_x err: GP = ", round( norm( gp_train_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_train_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_train_err ), digits = 2 ) ) 
+        ax = Axis( f_train[i_x,3:4], title = title_str ) 
+            gp      = lines!( ax, data_train.t, gp_train_err, linewidth = 2, color = :red, label="GP" ) 
+            sindy   = lines!( ax, data_train.t, sindy_train_err, linewidth = 2, label="sindy" ) 
+            gpsindy = lines!( ax, data_train.t, gpsindy_train_err, linewidth = 2, label="gpsindy" ) 
+        if i_x == 4 
+            ax.xlabel = "t [s]" 
+        end 
+        
+    end 
+
+    # legend 
+    Legend( f_train[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
+
+    ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
+    Textbox( f_train[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+    ax_text = "$freq_hz Hz \n noise = $noise " 
+    Textbox( f_train[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
+
+    # print total error 
+    ax_text = string("total err: GP = ", round( norm( data_train.x_noise - x_train_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.train_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.train_err[1], digits = 2 ) ) 
+    Textbox( f_train[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+    ax_text = "training \n $csv_file" 
+    Textbox( f_train[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+    return f_train 
+end 
+
+function plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file )  
+
+    # ----------------------- #
+    # plot testing 
+
+    f_test = Figure( size = ( 800, 800 ) ) 
+
+    gp = 0 ; sindy = 0 ; gpsindy = 0 
+    for i_x = 1:4 
+        ax = Axis( f_test[i_x,1:2], title="x$i_x traj" ) 
+            CairoMakie.scatter!( ax, data_test.t, data_test.x_noise[:,i_x], color=:black, label="noise" )     
+            lines!( ax, data_test.t, x_test_GP[:,i_x], linewidth = 2, color = :red, label="GP" ) 
+            lines!( ax, data_test.t, df_min_err_sindy.test_traj[1][:,i_x], linewidth = 2, label="sindy" ) 
+            lines!( ax, data_test.t, df_min_err_gpsindy.test_traj[1][:,i_x], linewidth = 2, label="gpsindy" ) 
+        if i_x == 4 
+            ax.xlabel = "t [s]" 
+        end 
+
+        # get error norm 
+        gp_test_err      = data_test.x_noise[:,i_x] - x_test_GP[:,i_x] 
+        sindy_test_err   = df_min_err_sindy.test_traj[1][:,i_x] - data_test.x_noise[:,i_x]  
+        gpsindy_test_err = df_min_err_gpsindy.test_traj[1][:,i_x] - data_test.x_noise[:,i_x]  
+
+        title_str = string("x$i_x err: GP = ", round( norm( gp_test_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_test_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_test_err ), digits = 2 ) ) 
+        ax = Axis( f_test[i_x,3:4], title = title_str ) 
+            gp      = lines!( ax, data_test.t, gp_test_err, linewidth = 2, color = :red, label="GP" ) 
+            sindy   = lines!( ax, data_test.t, sindy_test_err, linewidth = 2, label="sindy" ) 
+            gpsindy = lines!( ax, data_test.t, gpsindy_test_err, linewidth = 2, label="gpsindy" ) 
+        if i_x == 4 
+            ax.xlabel = "t [s]" 
+        end 
+        
+    end 
+
+    # legend 
+    Legend( f_test[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
+
+    ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
+    Textbox( f_test[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+    ax_text = "$freq_hz Hz \n noise = $noise " 
+    Textbox( f_test[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
+
+    # print total error 
+    ax_text = string("total err: GP = ", round( norm( data_test.x_noise - x_test_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.test_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.test_err[1], digits = 2 ) ) 
+    Textbox( f_test[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+    ax_text = "testing \n $csv_file" 
+    Textbox( f_test[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+
+    return f_test 
+end 
 
 
 
