@@ -1,4 +1,27 @@
 
+export df_mean_err_fn 
+
+function df_mean_err_fn( df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, freq_hz, noise, σn, opt_σn ) 
+
+    # save mean min err which is what we care about 
+    mean_err_sindy_test    = mean( df_min_err_csvs_sindy.test_err ) 
+    mean_err_gpsindy_test  = mean( df_min_err_csvs_gpsindy.test_err ) 
+    mean_err_sindy_train   = mean( df_min_err_csvs_sindy.train_err ) 
+    mean_err_gpsindy_train = mean( df_min_err_csvs_gpsindy.train_err )  
+
+    header = [ "freq_hz", "noise", "σn", "opt_σn", "mean_err_sindy_train", "mean_err_gpsindy_train", "mean_err_sindy_test", "mean_err_gpsindy_test" ] 
+
+    data = [ freq_hz, noise, σn, opt_σn, mean_err_sindy_train, mean_err_gpsindy_train, mean_err_sindy_test, mean_err_gpsindy_test ] 
+
+    df_mean_err = DataFrame( fill( [], 8 ), header )
+    push!( df_mean_err, data )  
+
+    return df_mean_err 
+end 
+
+
+## ============================================ ##
+
 export df_min_err_fn 
 
 function df_min_err_fn( df_gpsindy, csv_path_file ) 
