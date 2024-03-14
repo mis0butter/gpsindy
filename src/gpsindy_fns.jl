@@ -23,8 +23,8 @@ function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, plot_option = fa
 
     csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
 
-    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path( csv_path ) 
-    
+    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn ) 
+
     # create dataframe to store results 
     header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
     df_min_err_csvs_sindy   = DataFrame( fill( [], 6 ), header ) 

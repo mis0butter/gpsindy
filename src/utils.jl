@@ -44,6 +44,41 @@ end
 
 ## ============================================ ##
 
+export mkdir_save_path_σn 
+
+function mkdir_save_path_σn( csv_path, σn, opt_σn ) 
+
+    csv_files_vec = readdir( csv_path ) 
+    deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
+
+    for i in eachindex(csv_files_vec)  
+        csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
+    end 
+
+    save_path   = replace( csv_path, "/data/" => "/results/" ) 
+    csv_dir     = split( save_path, "/" )[end-1] 
+    csv_dir_new = string( csv_dir, "_σn_", σn, "_opt_σn_", opt_σn )  
+    save_path   = replace( save_path, csv_dir => csv_dir_new ) 
+    if !isdir( save_path ) 
+        mkdir( save_path ) 
+    end  
+
+    save_path_fig = string( save_path, "figs/" ) 
+    if !isdir( save_path_fig ) 
+        mkdir( save_path_fig ) 
+    end 
+
+    save_path_dfs = string( save_path, "dfs/" ) 
+    if !isdir( save_path_dfs ) 
+        mkdir( save_path_dfs ) 
+    end 
+
+    return csv_files_vec, save_path, save_path_fig, save_path_dfs 
+end 
+
+
+## ============================================ ##
+
 export mkdir_save_path 
 
 function mkdir_save_path( csv_path ) 
