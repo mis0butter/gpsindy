@@ -10,12 +10,12 @@ using CSV, DataFrames
 ## ============================================ ##
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
-freq_hz = 10 
+freq_hz = 25 
 noise   = 0
 
 # optimize GPs with GPs 
 σn      = 0.1 
-opt_σn  = false 
+opt_σn  = false  
 
 # csv_num = 18 
 
@@ -23,12 +23,6 @@ opt_σn  = false
 # run cross-validation for a single FOLDER (noise level) 
 
 df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
-
-# report mean error for testing 
-mean_err_sindy   = mean( df_min_err_csvs_sindy.test_err ) 
-mean_err_gpsindy = mean( df_min_err_csvs_gpsindy.test_err ) 
-println( "mean_err_sindy   = ", mean_err_sindy) 
-println( "mean_err_gpsindy = ", mean_err_gpsindy ) 
 
 
 

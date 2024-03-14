@@ -15,6 +15,10 @@ function df_mean_err_fn( df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, freq_hz
 
     df_mean_err = DataFrame( fill( [], 8 ), header )
     push!( df_mean_err, data )  
+    
+    # report mean error for testing 
+    println( "mean_err_sindy_test   = ", mean_err_sindy_test) 
+    println( "mean_err_gpsindy_test = ", mean_err_gpsindy_test )
 
     return df_mean_err 
 end 
