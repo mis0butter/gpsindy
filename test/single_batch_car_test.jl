@@ -10,58 +10,39 @@ using CSV, DataFrames
 ## ============================================ ##
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
-freq_hz = 25 
-noise   = 0
+freq_hz = 50 
+noise   = 0 
 
-# optimize GPs with GPs 
-σn      = 0.1 
-opt_σn  = false  
+# σn      = 0.1 
 
-# csv_num = 18 
+for σn = [ 0.01, 0.02, 0.1, 0.2 ]
+    
+    opt_σn  = false  
+    df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
 
-# ----------------------- #
-# run cross-validation for a single FOLDER (noise level) 
+    opt_σn  = true   
+    df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
 
-df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
-
-
-
-## ============================================ ##
+end 
 
 
+## ============================================ ## 
 
+freq_hz = 50 
 
+for noise = 0.01 : 0.01 : 0.1 
 
+    for σn = [ 0.01, 0.02, 0.1, 0.2 ]
+        
+        opt_σn  = false  
+        df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
+    
+        opt_σn  = true   
+        df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
+    
+    end 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+end 
 
 
 

@@ -61,7 +61,7 @@ function mkdir_save_path_σn( csv_path, σn, opt_σn )
 
     save_path   = replace( csv_path, "/data/" => "/results/" ) 
     csv_dir     = split( save_path, "/" )[end-1] 
-    csv_dir_new = string( csv_dir, "_σn_", σn, "_opt_σn_", opt_σn )  
+    csv_dir_new = string( csv_dir, "_σn_", σn, "_opt_", opt_σn )  
     save_path   = replace( save_path, csv_dir => csv_dir_new ) 
     if !isdir( save_path ) 
         mkdir( save_path ) 
