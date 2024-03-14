@@ -35,7 +35,7 @@ function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, plot_option = fa
     
         csv_path_file = csv_files_vec[i_csv] 
     
-        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, save_path_dfs, σn, opt_σn, freq_hz, noise ) 
         if plot_option == true 
             display(f_train) ; display(f_test) 
         end 
@@ -51,8 +51,8 @@ function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, plot_option = fa
     end 
     
     # save df_min_err for gpsindy and sindy 
-    CSV.write( string( save_path_dfs, "df_min_err_csvs_sindy.csv" ), df_min_err_csvs_sindy ) 
-    CSV.write( string( save_path_dfs, "df_min_err_csvs_gpsindy.csv" ), df_min_err_csvs_gpsindy ) 
+    CSV.write( string( save_path, "df_min_err_csvs_sindy.csv" ), df_min_err_csvs_sindy ) 
+    CSV.write( string( save_path, "df_min_err_csvs_gpsindy.csv" ), df_min_err_csvs_gpsindy ) 
 
     return df_min_err_csvs_sindy, df_min_err_csvs_gpsindy 
 end 
@@ -62,7 +62,7 @@ end
 
 export cross_validate_csv_path_file 
 
-function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+function cross_validate_csv_path_file( csv_path_file, save_path_dfs, σn, opt_σn, freq_hz, noise ) 
 
     # extract data 
     data_train, data_test = car_data_struct( csv_path_file ) 
@@ -88,13 +88,17 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
 
     end 
 
+    # save df_sindy and df_gpsindy 
+    csv_string = split( csv_path_file, "/" )
+    csv_file   = replace( csv_string[end], ".csv" => "" )   
+    CSV.write( string( save_path_dfs, csv_file, "_df_sindy.csv" ), df_sindy ) 
+    CSV.write( string( save_path_dfs, csv_file, "_df_gpsindy.csv" ), df_gpsindy ) 
+
     # save gpsindy min err stats 
     df_min_err_sindy   = df_min_err_fn( df_sindy, csv_path_file ) 
     df_min_err_gpsindy = df_min_err_fn( df_gpsindy, csv_path_file ) 
 
     # plot 
-    csv_string = split( csv_path_file, "/" )
-    csv_file   = csv_string[end]  
     f_train = plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file ) 
     f_test  = plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file )  
 
@@ -135,10 +139,6 @@ function cross_validate_csv_path( csv_path, freq_hz, plot_option = false )
             save( fig_save, f ) 
 
         end 
-
-        # save df_λ_vec as CSV 
-        df_save = replace( csv_file, ".csv" => "_df_λ_vec.csv" ) 
-        CSV.write( string( save_path_dfs, df_save ), df_λ_vec ) 
         
         data_sindy = Matrix( df_sindy ) ; data_gpsindy = Matrix( df_gpsindy ) 
         push!( df_min_err_hist, [ data_sindy data_gpsindy[:,2:end] ] )  

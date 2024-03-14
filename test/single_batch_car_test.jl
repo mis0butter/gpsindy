@@ -11,7 +11,7 @@ using CSV, DataFrames
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
 freq_hz = 50 
-noise   = 0.02 
+noise   = 0.01 
 
 # optimize GPs with GPs 
 σn      = 0.2 
