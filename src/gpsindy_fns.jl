@@ -17,9 +17,52 @@ end
 
 ## ============================================ ##
 
-export cross_validate_dfs 
+export cross_validate_csv_path 
 
-function cross_validate_dfs( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, plot_option = false )  
+
+    csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
+
+    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path( csv_path ) 
+    
+    # create dataframe to store results 
+    header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
+    df_min_err_csvs_sindy   = DataFrame( fill( [], 6 ), header ) 
+    df_min_err_csvs_gpsindy = DataFrame( fill( [], 6 ), header ) 
+    
+    # loop 
+    for i_csv in eachindex( csv_files_vec ) 
+    
+        csv_path_file = csv_files_vec[i_csv] 
+    
+        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+        if plot_option == true 
+            display(f_train) ; display(f_test) 
+        end 
+    
+        # save figs 
+        csv_file = replace( split( csv_path_file, "/" )[end], ".csv" => "" )  
+        save( string( save_path_fig, csv_file, "_train.png" ), f_train )  
+        save( string( save_path_fig, csv_file, "_test.png" ), f_test )  
+    
+        push!( df_min_err_csvs_sindy, df_min_err_sindy[1,:] ) 
+        push!( df_min_err_csvs_gpsindy, df_min_err_gpsindy[1,:] ) 
+    
+    end 
+    
+    # save df_min_err for gpsindy and sindy 
+    CSV.write( string( save_path_dfs, "df_min_err_csvs_sindy.csv" ), df_min_err_csvs_sindy ) 
+    CSV.write( string( save_path_dfs, "df_min_err_csvs_gpsindy.csv" ), df_min_err_csvs_gpsindy ) 
+
+    return df_min_err_csvs_sindy, df_min_err_csvs_gpsindy 
+end 
+
+
+## ============================================ ##
+
+export cross_validate_csv_path_file 
+
+function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise ) 
 
     # extract data 
     data_train, data_test = car_data_struct( csv_path_file ) 

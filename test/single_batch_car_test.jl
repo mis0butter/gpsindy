@@ -3,7 +3,7 @@ using LinearAlgebra
 using Statistics 
 using CairoMakie 
 using Printf 
-using DataFrames 
+using CSV, DataFrames 
 
 
 ## ============================================ ##
@@ -20,24 +20,9 @@ opt_σn  = false
 # csv_num = 18 
 
 # ----------------------- #
-# run cross-validation 
+# run cross-validation for a single FOLDER (noise level) 
 
-header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
-df_min_err_csvs_sindy   = DataFrame( fill( [], 6 ), header ) 
-df_min_err_csvs_gpsindy = DataFrame( fill( [], 6 ), header ) 
-for csv_num = 1:45 
-
-    csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
-    csv_file = string( "rollout_", csv_num, ".csv" )   
-    csv_path_file = string(csv_path, csv_file ) 
-
-    df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_dfs( csv_path_file, σn, opt_σn, freq_hz, noise ) 
-    display(f_train) ; display(f_test) 
-
-    push!( df_min_err_csvs_sindy, df_min_err_sindy[1,:] ) 
-    push!( df_min_err_csvs_gpsindy, df_min_err_gpsindy[1,:] ) 
-
-end 
+df_min_err_csvs_sindy, df_min_err_csvs_gpsindy = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
 
 # report mean error for testing 
 mean_err_sindy   = mean( df_min_err_csvs_sindy.test_err ) 
@@ -47,7 +32,7 @@ println( "mean_err_gpsindy = ", mean_err_gpsindy )
 
 
 
-
+## ============================================ ##
 
 
 
