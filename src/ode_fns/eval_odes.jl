@@ -1,4 +1,30 @@
 
+
+export gpsindy_lasso_int 
+
+function gpsindy_lasso_int( x_train_in, dx_train_in, u_train_in, λ, data_train, data_test )  
+    
+    # get x0 from noisy and smoothed data 
+    x0_train = data_train.x_noise[1,:]  
+    x0_test  = data_test.x_noise[1,:]  
+    
+    # get sizes 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+
+    # ----------------------- #
+    # sindy-lasso ! 
+    Ξ_sindy  = sindy_lasso( x_train_in, dx_train_in, λ, u_train_in ) 
+    
+    # integrate discovered dynamics 
+    dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
+    x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
+    x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
+
+    return x_sindy_train, x_sindy_test 
+end 
+
+## ============================================ ##
+
 export sindy_lasso_int 
 
 function sindy_lasso_int( x_train_in, dx_train_in, λ, data_train, data_test )  

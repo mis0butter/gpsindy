@@ -11,11 +11,11 @@ using CSV, DataFrames
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
 freq_hz = 5 
-noise   = 0 
+noise   = 0  
 
-# σn      = 0.1 
+# σn      = 0.02 
 
-for σn = [ 0.01, 0.02, 0.1, 0.2 ]
+for σn = [ 0.01, 0.02, 0.1, 0.2 ] 
     
     opt_σn  = false  
     df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
