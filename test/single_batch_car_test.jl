@@ -10,7 +10,7 @@ using CSV, DataFrames
 ## ============================================ ##
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
-freq_hz = 50 
+freq_hz = 5 
 noise   = 0 
 
 # σn      = 0.1 
@@ -28,7 +28,7 @@ end
 
 ## ============================================ ## 
 
-freq_hz = 50 
+freq_hz = 5 
 
 for noise = 0.01 : 0.01 : 0.02 
 
