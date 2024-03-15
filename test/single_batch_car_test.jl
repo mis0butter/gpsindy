@@ -10,20 +10,14 @@ using CSV, DataFrames
 ## ============================================ ##
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
-freq_hz = 5 
-noise   = 0  
-
-for σn = [ 0.01, 0.02, 0.1, 0.2 ] 
-
-    println( "σn = ", σn ) 
+freq_hz = 25 
+noise   = 0 
+σn      = 0.01 
+opt_σn  = false 
     
-    opt_σn  = false  
+
     df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
 
-    opt_σn  = true   
-    df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
-
-end 
 
 
 ## ============================================ ## 
