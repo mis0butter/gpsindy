@@ -44,7 +44,8 @@ function factor(A, ρ)
         # C = cholesky( A'*A + ρ*I ) 
         C = cholesky( Hermitian( A'*A + ρ*I ) ) 
     else
-        C = cholesky( I + 1/ρ*(A*A') )  
+        # C = cholesky( I + 1/ρ*(A*A') )  
+        C = cholesky( Hermitian( I + 1/ρ*(A*A') ) ) 
     end 
     L = C.L  
     U = C.U 
