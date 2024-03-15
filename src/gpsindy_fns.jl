@@ -574,49 +574,6 @@ function cross_validate_λ( t_train, x_train, dx_train, u_train, λ_vec )
 end 
 
 
-## ============================================ ##
-# smooth training and test data with GPs 
-
-export gp_train_double_test 
-function gp_train_double_test( data_train, data_test ) 
-
-    # let's double the points 
-    t_train = data_train.t 
-    dt = t_train[2] - t_train[1] 
-
-    t_train_double = Float64[ ] 
-    for i in eachindex(t_train) 
-        push!( t_train_double, t_train[i] ) 
-        push!( t_train_double, t_train[i] + dt/2 ) 
-    end 
-
-    x_col, x_row = size( data_train.x_noise ) 
-    u_col, u_row = size( data_train.u ) 
-
-    # first - smooth training data with Gaussian processes 
-    x_train_GP  = gp_post( t_train_double, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
-    dx_train_GP = gp_post( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise ) 
-    # u_train_GP  = gp_post( t_train_double, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u ) 
-
-    # linearly interpolate u 
-    u_train_GP = [ ]
-    for i = 1 : size(data_train.u, 1) - 1 
-        du = ( data_train.u[i+1,:] - data_train.u[i,:] ) / 2 
-        push!( u_train_GP, data_train.u[i,:] ) 
-        push!( u_train_GP, data_train.u[i,:] + du ) 
-    end 
-    push!( u_train_GP, data_train.u[end,:] )  
-    push!( u_train_GP, data_train.u[end,:] )  
-    u_train_GP = vv2m( u_train_GP )
-
-    # smooth testing data 
-    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
-    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
-
-    return t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
-end 
-
-
 
 
 
