@@ -21,7 +21,7 @@ opt_σn  = false
 
 ## ============================================ ## 
 
-for freq_hz = 5 
+for freq_hz = 25 
 
     for noise = 0.02 
 
