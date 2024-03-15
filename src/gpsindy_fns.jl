@@ -114,7 +114,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     data_train, data_test = car_data_struct( csv_path_file ) 
 
     # x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
-    t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
+    t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
     
     # cross-validate gpsindy 
     λ_vec      = λ_vec_fn() 

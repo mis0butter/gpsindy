@@ -13,9 +13,9 @@ using CSV, DataFrames
 freq_hz = 5 
 noise   = 0  
 
-# σn      = 0.02 
-
 for σn = [ 0.01, 0.02, 0.1, 0.2 ] 
+
+    println( "σn = ", σn ) 
     
     opt_σn  = false  
     df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
@@ -72,4 +72,54 @@ end
 CSV.write( "df_mean_err_all.csv", df_mean_err_all) 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## ============================================ ##
+ 
+# let's break it out 
+
+freq_hz = 5 
+noise   = 0  
+σn      = 0.02 
+opt_σn  = false  
+
+csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
+
+csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn ) 
+
+i_csv = 1 
+
+csv_path_file = csv_files_vec[i_csv] 
+
+# extract data 
+data_train, data_test = car_data_struct( csv_path_file ) 
+
+# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
+t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
+
+# cross-validate gpsindy 
+λ_vec      = λ_vec_fn() 
+
+i_λ = 1 
+λ = λ_vec[i_λ] 
+
+# sindy!!! 
+x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
+
+# gpsindy!!! 
+# x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
+x_gpsindy_train, x_gpsindy_test = gpsindy_lasso_int( x_train_GP, dx_train_GP, u_train_GP, λ, data_train, data_test )  
 
