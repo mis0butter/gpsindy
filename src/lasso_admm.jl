@@ -41,7 +41,8 @@ function factor(A, ρ)
 
     m, n =  size(A) ; 
     if m >= n 
-        C = cholesky( A'*A + ρ*I ) 
+        # C = cholesky( A'*A + ρ*I ) 
+        C = cholesky( Hermitian( A'*A + ρ*I ) ) 
     else
         C = cholesky( I + 1/ρ*(A*A') )  
     end 

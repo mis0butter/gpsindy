@@ -12,24 +12,23 @@ using CSV, DataFrames
 
 freq_hz = 25 
 noise   = 0 
-σn      = 0.01 
+σn      = 0.02 
 opt_σn  = false 
     
 
     df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
 
 
-
 ## ============================================ ## 
 
 freq_hz = 5 
 
-for noise = 0.01 : 0.01 : 0.02 
+for noise = 0  
 
-    for σn = [ 0.01, 0.02, 0.1, 0.2 ] 
+    for σn = [ 0.01, 0.02, 0.1 ] 
         
-        opt_σn  = false  
-        df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
+        # opt_σn  = false  
+        # df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
     
         opt_σn  = true   
         df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
