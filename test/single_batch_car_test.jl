@@ -21,11 +21,16 @@ opt_σn  = false
 
 ## ============================================ ## 
 
-for freq_hz = 25 
+for freq_hz = 5 
 
-    for noise = 0.02 
+    noise_vec = [] 
+    push!( noise_vec, 0 ) 
+    push!( noise_vec, 0.01 ) 
+    push!( noise_vec, 0.02 ) 
 
-        for σn = [ 0.01, 0.02, 0.1, 0.2 ] 
+    for noise = noise_vec 
+
+        for σn = [ 0.001, 0.002, 0.003, 0.01, 0.02, 0.03, 0.1, 0.2, 0.3 ] 
             
             opt_σn  = false  
             df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn ) 
