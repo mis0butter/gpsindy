@@ -104,15 +104,16 @@ function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_dbl = false )
         csv_files_vec[i] = string( csv_path, csv_files_vec[i] ) 
     end 
 
-    save_path   = replace( csv_path, "/data/" => "/results/" ) 
+    save_path  = replace( csv_path, "/data/" => "/results/" ) 
+    GP_no_intp = split( save_path, "/" )[3]  
+    if GP_dbl == true 
+        replace( save_path, GP_no_intp => string( GP_no_intp, "/GP_intp" ) ) 
+    else 
+        replace( save_path, GP_no_intp => string( GP_no_intp, "/no_intp" ) ) 
+    end 
     csv_dir     = split( save_path, "/" )[end-1] 
     csv_dir_new = string( csv_dir, "_σn_", σn, "_opt_", opt_σn )  
     save_path   = replace( save_path, csv_dir => csv_dir_new ) 
-    if GP_dbl == true 
-        dir       = split( save_path, "/" )[end-1] 
-        new_dir   = string( dir, "_GPintp" )  
-        save_path = replace( save_path, dir => new_dir ) 
-    end 
     if !isdir( save_path ) 
         mkdir( save_path ) 
     end  
@@ -252,7 +253,7 @@ function downsample( t, t_double, x_double )
     if t == t_double 
 
         return t_double, x_double 
-        
+
     else 
 
         t_dbl_dwnsmpl = Float64[] 

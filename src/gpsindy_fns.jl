@@ -30,7 +30,7 @@ function gp_train_double_test( data_train, data_test, σ_n = 0.1, opt_σn = true
     # first - smooth training data with Gaussian processes 
     x_train_GP  = gp_post( t_train_dbl, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
     dx_train_GP = gp_post( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn  ) 
-    # u_train_GP  = gp_post( t_train_double, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
+    # u_train_dbl  = gp_post( t_train_dbl, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
     u_train_dbl = interp_dbl_fn( data_train.u ) 
 
     # smooth testing data 
@@ -110,8 +110,6 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     for i_λ = eachindex( λ_vec ) 
 
         λ = λ_vec[i_λ] 
-
-        println( "λ = ", λ ) 
         
         # sindy!!! 
         x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
