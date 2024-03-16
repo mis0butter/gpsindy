@@ -22,39 +22,22 @@ export gp_train_double_test
 function gp_train_double_test( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # let's double the points 
-    t_train = data_train.t 
-    dt = t_train[2] - t_train[1] 
-
-    t_train_double = Float64[ ] 
-    for i in eachindex(t_train) 
-        push!( t_train_double, t_train[i] ) 
-        push!( t_train_double, t_train[i] + dt/2 ) 
-    end 
+    t_train_dbl = t_double_fn( data_train.t ) 
 
     x_col, x_row = size( data_train.x_noise ) 
     u_col, u_row = size( data_train.u ) 
 
     # first - smooth training data with Gaussian processes 
-    x_train_GP  = gp_post( t_train_double, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
+    x_train_GP  = gp_post( t_train_dbl, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
     dx_train_GP = gp_post( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn  ) 
-    u_train_GP  = gp_post( t_train_double, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
-
-    # # linearly interpolate u 
-    # u_train_GP = [ ]
-    # for i = 1 : size(data_train.u, 1) - 1 
-    #     du = ( data_train.u[i+1,:] - data_train.u[i,:] ) / 2 
-    #     push!( u_train_GP, data_train.u[i,:] ) 
-    #     push!( u_train_GP, data_train.u[i,:] + du ) 
-    # end 
-    # push!( u_train_GP, data_train.u[end,:] )  
-    # push!( u_train_GP, data_train.u[end,:] )  
-    # u_train_GP = vv2m( u_train_GP )
+    # u_train_GP  = gp_post( t_train_double, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
+    u_train_dbl = interp_dbl_fn( data_train.u ) 
 
     # smooth testing data 
     x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
     dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
-    return t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+    return t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
 
 
@@ -62,11 +45,11 @@ end
 
 export cross_validate_csv_path 
 
-function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, plot_option = false )  
+function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp = false, plot_option = false )  
 
     csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
 
-    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn ) 
+    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp ) 
 
     # create dataframe to store results 
     header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
@@ -78,7 +61,7 @@ function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, plot_option = fa
     
         csv_path_file = csv_files_vec[i_csv] 
     
-        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, GP_intp ) 
         if plot_option == true 
             display(f_train) ; display(f_test) 
         end 
@@ -108,13 +91,16 @@ end
 
 export cross_validate_csv_path_file 
 
-function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise ) 
+function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, GP_intp = false ) 
 
     # extract data 
     data_train, data_test = car_data_struct( csv_path_file ) 
 
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
-    # t_train_double, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
+    if GP_intp == true 
+        x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
+    else 
+        t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
+    end 
     
     # cross-validate gpsindy 
     λ_vec      = λ_vec_fn() 
@@ -130,8 +116,11 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
 
         # gpsindy!!! 
-        x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
-        # x_gpsindy_train, x_gpsindy_test = gpsindy_lasso_int( x_train_GP, dx_train_GP, u_train_GP, λ, data_train, data_test )  
+        if GP_intp == true 
+            x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
+        else 
+            x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_dbl, u_train_dbl, λ, data_train, data_test )  
+        end 
         push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
 
     end 

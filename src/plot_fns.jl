@@ -303,7 +303,6 @@ end
 
 ## ============================================ ##
 
-
 export plot_noise_GP_sindy_gpsindy_traindouble 
 
 function plot_noise_GP_sindy_gpsindy_traindouble( t, x_noise, t_double, x_GP, x_sindy, x_gpsindy, csv_string ) 

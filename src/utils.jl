@@ -1,4 +1,49 @@
 
+export interp_dbl_fn 
+
+function interp_dbl_fn( u ) 
+
+    u_col = size(u, 1) 
+
+    u_interp = [] ; du = 0 
+    for i = 1 : u_col - 1 
+    
+        du = ( u[i+1,:] - u[i,:] ) ./ 2 
+    
+        push!( u_interp, u[i,:] ) 
+        push!( u_interp, u[i,:] .+ du ) 
+    
+    end 
+    push!( u_interp, u[u_col,:] ) 
+    push!( u_interp, u[u_col,:] .+ du )
+    
+    u_interp = vv2m( u_interp )     
+
+    return u_interp 
+end 
+
+
+## ============================================ ##
+
+export t_double_fn 
+
+function t_double_fn( t ) 
+
+    t_double = Float64[ ] ; dt = 0 ; 
+    for i in 1 : length(t) - 1 
+        dt = ( t[i+1] - t[i] ) / 2 
+        push!( t_double, t[i] ) 
+        push!( t_double, t[i] + dt ) 
+    end 
+    push!( t_double, t[end] ) 
+    push!( t_double, t[end] + dt ) 
+
+    return t_double 
+end 
+
+
+## ============================================ ##
+
 export df_mean_err_fn 
 
 function df_mean_err_fn( df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, freq_hz, noise, σn, opt_σn ) 
@@ -50,7 +95,7 @@ end
 
 export mkdir_save_path_σn 
 
-function mkdir_save_path_σn( csv_path, σn, opt_σn ) 
+function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_dbl = false ) 
 
     csv_files_vec = readdir( csv_path ) 
     deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
@@ -63,6 +108,11 @@ function mkdir_save_path_σn( csv_path, σn, opt_σn )
     csv_dir     = split( save_path, "/" )[end-1] 
     csv_dir_new = string( csv_dir, "_σn_", σn, "_opt_", opt_σn )  
     save_path   = replace( save_path, csv_dir => csv_dir_new ) 
+    if GP_dbl == true 
+        dir       = split( save_path, "/" )[end-1] 
+        new_dir   = string( dir, "_GPintp" )  
+        save_path = replace( save_path, dir => new_dir ) 
+    end 
     if !isdir( save_path ) 
         mkdir( save_path ) 
     end  
