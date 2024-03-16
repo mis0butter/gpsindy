@@ -95,7 +95,7 @@ end
 
 export mkdir_save_path_σn 
 
-function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_dbl = false ) 
+function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp = false ) 
 
     csv_files_vec = readdir( csv_path ) 
     deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
@@ -106,10 +106,10 @@ function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_dbl = false )
 
     save_path  = replace( csv_path, "/data/" => "/results/" ) 
     GP_no_intp = split( save_path, "/" )[3]  
-    if GP_dbl == true 
-        replace( save_path, GP_no_intp => string( GP_no_intp, "/GP_intp" ) ) 
+    if GP_intp == true 
+        save_path = replace( save_path, GP_no_intp => string( GP_no_intp, "/GP_intp" ) ) 
     else 
-        replace( save_path, GP_no_intp => string( GP_no_intp, "/no_intp" ) ) 
+        save_path = replace( save_path, GP_no_intp => string( GP_no_intp, "/no_intp" ) ) 
     end 
     csv_dir     = split( save_path, "/" )[end-1] 
     csv_dir_new = string( csv_dir, "_σn_", σn, "_opt_", opt_σn )  

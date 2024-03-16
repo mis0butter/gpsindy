@@ -10,18 +10,21 @@ using CSV, DataFrames
 ## ============================================ ##
 # let's look at 50 hz noise = 0.02 rollout_8.csv 
 
-freq_hz = 5 
+freq_hz = 10 
 noise   = 0 
 σn      = 0.02 
 opt_σn  = false 
 GP_intp = true 
 
-for noise = [ 0.01, 0.02 ] 
+noise_vec = [] 
+push!( noise_vec, 0 ) 
+push!( noise_vec, 0.01 ) 
+push!( noise_vec, 0.02 ) 
+for noise = noise_vec  
     for σn = [ 0.001, 0.002, 0.003, 0.01, 0.02, 0.03, 0.1, 0.2, 0.3 ] 
         df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp ) 
     end 
 end 
-
 
 
 ## ============================================ ## 
@@ -74,7 +77,7 @@ for i = eachindex(csv_path_vec)
 end 
 
 # save the dataframe 
-CSV.write( "df_mean_err_all.csv", df_mean_err_all) 
+CSV.write( "df_mean_err_all_GP_intp.csv", df_mean_err_all) 
 
 
 
