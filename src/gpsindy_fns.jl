@@ -96,7 +96,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     # extract data 
     data_train, data_test = car_data_struct( csv_path_file ) 
 
-    if GP_intp == true 
+    if GP_intp == false 
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
     else 
         t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
@@ -110,19 +110,26 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     for i_λ = eachindex( λ_vec ) 
 
         λ = λ_vec[i_λ] 
+
+        println( "λ = ", λ ) 
         
         # sindy!!! 
         x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
         push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
 
         # gpsindy!!! 
-        if GP_intp == true 
+        if GP_intp == false 
             x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
         else 
             x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_dbl, u_train_dbl, λ, data_train, data_test )  
         end 
         push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
 
+    end 
+
+    if GP_intp == true 
+        _, x_train_GP  = downsample( data_train.t, t_train_dbl, x_train_GP ) 
+        _, dx_train_GP = downsample( data_train.t, t_train_dbl, dx_train_GP ) 
     end 
 
     # save gpsindy min err stats 

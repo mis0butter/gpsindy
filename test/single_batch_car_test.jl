@@ -12,7 +12,7 @@ using CSV, DataFrames
 
 freq_hz = 5 
 noise   = 0 
-σn      = 0.03 
+σn      = 0.01 
 opt_σn  = false 
 GP_intp = true 
 
@@ -93,8 +93,8 @@ CSV.write( "df_mean_err_all.csv", df_mean_err_all)
 # let's break it out 
 
 freq_hz = 5 
-noise   = 0.02   
-σ_n     = 0.05 
+noise   = 0 
+σ_n     = 0.02  
 opt_σn  = false 
 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
