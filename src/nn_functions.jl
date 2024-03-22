@@ -12,12 +12,12 @@ function train_nn_predict(x_train, y_train, n_epochs, n_in_features)
     data = [(x_train[i, :], y_train[i, 1]) for i in 1:size(x_train, 1)]
 
     # Training loop
-    optim = Flux.setup(Adam(), model)
+    optim = Flux.setup(Flux.Adam(), model)
     for epoch in 1:n_epochs
         Flux.train!((m, x, y) -> (m(x) - y)^2, model, data, optim)
         # Print the avergae loss for the epoch
-        avg_loss = sum([loss(x, y) for (x, y) in data]) / length(data)
-        println("Epoch $epoch. Average Loss: $avg_loss")
+        # avg_loss = sum([loss(x, y) for (x, y) in data]) / length(data)
+        # println("Epoch $epoch. Average Loss: $avg_loss")
     end
 
     # Make predictions
