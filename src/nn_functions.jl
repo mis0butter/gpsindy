@@ -1,4 +1,4 @@
-
+using Flux 
 
 export train_nn_predict
 function train_nn_predict(x_train, y_train, n_epochs, n_in_features)

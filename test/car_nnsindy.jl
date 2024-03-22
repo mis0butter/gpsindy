@@ -43,6 +43,9 @@ for i_csv in eachindex( csv_files_vec )
     x0_train = data_train.x_noise[1,:] 
     x0_test  = data_test.x_noise[1,:]
     
+    # get sizes 
+    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    
     # cross-validate nnsindy 
     λ_vec      = λ_vec_fn() 
     header     = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
@@ -62,7 +65,7 @@ for i_csv in eachindex( csv_files_vec )
         x_nn_train = integrate_euler( dx_fn_nn, x0_train, data_train.t, data_train.u ) 
         x_nn_test = integrate_euler( dx_fn_nn, x0_test, data_test.t, data_test.u ) 
 
-        push!( df_nnsindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
+        push!( df_nnsindy, [ λ, norm( data_train.x_noise - x_nn_train ),  norm( data_test.x_noise - x_nn_test ), x_nn_train, x_nn_test ] ) 
 
     end 
 
