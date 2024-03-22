@@ -12,7 +12,7 @@ using CSV, DataFrames
 
 freq_hz = 5 
 noise   = 0 
-σn      = 0.02 
+σn      = 10 
 opt_σn  = false 
 GP_intp = false 
 
