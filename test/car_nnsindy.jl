@@ -17,6 +17,9 @@ opt_σn  = false
 GP_intp = false 
 
 
+# df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
+
+
 ## ============================================ ##
 
 noise_vec = [] 
@@ -24,7 +27,7 @@ push!( noise_vec, 0 )
 push!( noise_vec, 0.01 ) 
 push!( noise_vec, 0.02 ) 
 
-for freq_hz = [ 5, 10, 25, 50 ]
+for freq_hz = [ 50 ]
     
     for noise = noise_vec 
 
@@ -33,8 +36,6 @@ for freq_hz = [ 5, 10, 25, 50 ]
     end 
 
 end 
-
-df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
 
 
 
@@ -109,17 +110,31 @@ end
 
 
 
-
-## ============================================ ##
 ## ============================================ ##
 
-noise_vec = [] 
-push!( noise_vec, 0 ) 
-push!( noise_vec, 0.01 ) 
-push!( noise_vec, 0.02 ) 
+header = [ "freq_hz", "noise", "csv_file", "λ_min", "train_err", "test_err" ]
+df_nnsindy_all = DataFrame( fill( [], 6 ), header ) 
 
-for noise = noise_vec  
-    for σn = [ 0.001, 0.002, 0.003, 0.01, 0.02, 0.03, 0.1, 0.2, 0.3 ] 
-        df_min_err_csvs_nnsindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp ) 
+for freq_hz = [ 5, 10, 25, 50 ]
+    
+    for noise = noise_vec 
+
+        csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
+        
+        csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp ) 
+
+        df_nnsindy = CSV.read( string(save_path_dfs, "df_min_err_csvs_nnsindy.csv" ), DataFrame ) 
+
+        rows_df = size( df_nnsindy, 1 ) 
+        freq_hz_vec = fill( freq_hz, rows_df ) 
+        noise_vec   = fill( noise, rows_df ) 
+
+        data = [ freq_hz_vec noise_vec Matrix( df_nnsindy )[:,1:4] ]
+        for i_row = 1 : size( df_nnsindy, 1 ) 
+            push!( df_nnsindy_all, data[i_row,:] ) 
+        end          
+
     end 
+
 end 
+
