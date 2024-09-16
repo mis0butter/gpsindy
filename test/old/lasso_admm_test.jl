@@ -36,7 +36,7 @@ b  = A*x0 + sqrt(0.001) * b_rand
 x  = rand(n,1) 
 z  = rand(n,1) 
 
-p = objective(A, b, λ, x, z) 
+p  = objective(A, b, λ, x, z) 
 println("objective p = ", p)
 
 
@@ -79,43 +79,38 @@ p_opt_test = plot(p_boyd, p_opt, p_test, layout = (1,3), size = [1200 1000])
     display(p_opt_test) 
 
 
-
-
-
-
-
 # ## ============================================ ##
 # ## ============================================ ##
 # # sandbox 
 
-#     # define constants 
-#     max_iter = 1000  
-#     abstol   = 1e-4 
-#     reltol   = 1e-2 
+    # define constants 
+    max_iter = 1000  
+    abstol   = 1e-4 
+    reltol   = 1e-2 
 
-#     # data pre-processing 
-#     m, n = size(A) 
-#     Atb = A'*b                          # save matrix-vector multiply 
+    # data pre-processing 
+    m, n = size(A) 
+    Atb = A'*b                          # save matrix-vector multiply 
 
-#     # ADMM solver 
-#     x = 0*Atb ; x0 = x 
-#     z = 0*Atb 
-#     u = 0*Atb 
+    # ADMM solver 
+    x = 0*Atb ; x0 = x 
+    z = 0*Atb 
+    u = 0*Atb 
 
-#     # Optim stuff 
-#     upper = Inf * ones(size(Atb)) 
-#     lower = -upper 
-#     f_test(x) = 1/2 * norm(A*x - b)^2 + ρ/2 .* norm(x - z + u)^2 
+    # Optim stuff 
+    upper = Inf * ones(size(Atb)) 
+    lower = -upper 
+    f_test(x) = 1/2 * norm(A*x - b)^2 + ρ/2 .* norm(x - z + u)^2 
 
 #     # cache factorization 
 #     L, U = factor(A, ρ) 
 
-#     k = 0 
+    k = 0 
     
 # ## ============================================ ##
 #     # for k = 1:max_iter 
 
-#         k += 1 
+        k += 1 
 
 #         # ----------------------- # 
 #         # x-update 
@@ -130,11 +125,11 @@ p_opt_test = plot(p_boyd, p_opt, p_test, layout = (1,3), size = [1200 1000])
 #         # inelegant way 
 #         x_inv = inv( A'*A + ρ*I ) * ( Atb + ρ * ( z - u ) )
 
-#         # optimization 
-#         od     = OnceDifferentiable( f_test, x0 ; autodiff = :forward ) 
-#         # result    = optimize( od, lower, upper, x0, Fminbox(LBFGS()) ) 
-#         result = optimize( od, x0, LBFGS() ) 
-#         x_opt  = result.minimizer 
+        # optimization 
+        od     = OnceDifferentiable( f_test, x0 ; autodiff = :forward ) 
+        result    = optimize( od, lower, upper, x0, Fminbox(LBFGS()) ) 
+        # result = optimize( od, x0, LBFGS() ) 
+        x_opt  = result.minimizer 
 
 #         println("norm(x_lu - x_inv) = ", norm(x_lu - x_inv))
 #         println("norm(x_lu - x_opt) = ", norm(x_lu - x_opt)) 

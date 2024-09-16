@@ -20,7 +20,7 @@ dx_noise = fdiff(t, x_noise, 2)
 
 # truth coeffs 
 n_vars = size(x_true, 2) ; poly_order = n_vars 
-Ξ_true = SINDy_test( x_true, dx_true, λ ) 
+Ξ_true = sindy_stls( x_true, dx_true, λ ) 
 
 # standardize true data 
 x_stand_true  = stand_data( t, x_true )    
@@ -34,8 +34,8 @@ dx_stand_noise = dx_stand_true + noise*randn( size(x_true, 1), size(x_true, 2) )
 ## ============================================ ##
 # STANDARDIZED: try various SINDy's 
 
-Ξ_stand_true  = SINDy_test( x_stand_true, dx_stand_true, λ ) 
-Ξ_stand_sindy = SINDy_test( x_stand_noise, dx_stand_noise, λ ) 
+Ξ_stand_true  = sindy_stls( x_stand_true, dx_stand_true, λ ) 
+Ξ_stand_sindy = sindy_stls( x_stand_noise, dx_stand_noise, λ ) 
 
 # ----------------------- #
 # using GPSINDy 
@@ -59,13 +59,13 @@ println( "(stand) true - GPSINDy_GP err  = ", norm( Ξ_stand_true - Ξ_gpsindy_G
 ## ============================================ ##
 # NON-STANDARDIZED: try various SINDy's 
 
-Ξ_true  = SINDy_test( x_true, dx_true, λ ) 
-Ξ_sindy = SINDy_test( x_noise, dx_noise, λ ) 
+Ξ_true  = sindy_stls( x_true, dx_true, λ ) 
+Ξ_sindy = sindy_stls( x_noise, dx_noise, λ ) 
 
 # x_GP = post_dist_SE( t, x_noise, t )
 # dx_GP  = fdiff( t, x_GP, 2 ) 
 
-# Ξ_sindy_GP = SINDy_test( x_GP, dx_GP, λ ) 
+# Ξ_sindy_GP = sindy_stls( x_GP, dx_GP, λ ) 
 
 # ----------------------- #
 # using GPSINDy 

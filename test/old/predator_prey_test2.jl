@@ -18,7 +18,7 @@ fd_method      = 2 # 1 = forward, 2 = central, 3 = backward
 x0, dt, t, x, dx_true, dx_fd = ode_states(fn, plot_option, fd_method) 
 
 # truth coeffs 
-Ξ_true = SINDy_test( x, dx_true, 0.1 ) 
+Ξ_true = sindy_stls( x, dx_true, 0.1 ) 
 Ξ_true = Ξ_true[:,1] 
 
 # dx_noise_vec = collect(0 : 0.1 : 1.0)

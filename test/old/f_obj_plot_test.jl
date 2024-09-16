@@ -23,7 +23,7 @@ x0, dt, t, x, dx_true, dx_fd = ode_states(fn, plot_option, fd_method)
     Θx = pool_data_test(x, n_vars, poly_order) 
 
     # first cut - SINDy 
-    Ξ = sparsify_dynamics_test(Θx, dx_fd, λ, n_vars) 
+    Ξ = sparsify_dynamics_stls(Θx, dx_fd, λ, n_vars) 
 
     # ----------------------- #
     # objective function 

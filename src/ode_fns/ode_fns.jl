@@ -1,100 +1,41 @@
-using DifferentialEquations
+# using DifferentialEquations
 
 
 ## ============================================ ##
 # ODEs 
 
 include("odes.jl")
-export lorenz, ode_sine 
-export predator_prey, predator_prey_forcing  
-export pendulum, double_pendulum 
-export unicycle, dyn_car 
 
 
 ## ============================================ ##
 # solve ODE problem 
 
 include("eval_odes.jl")
-export solve_ode, ode_states, validate_data
-export dx_true_fn, build_dx_fn 
-
-
-## ============================================ ##
-# derivatives: finite difference  
-
-export fdiff 
-function fdiff(t, x, fd_method) 
-
-    # forward finite difference 
-    if fd_method == 1 
-
-        dx_fd = 0*x 
-        for i = 1 : length(t)-1
-            dx_fd[i,:] = ( x[i+1,:] - x[i,:] ) / ( t[i+1] - t[i] )
-        end 
-
-        # deal with last index 
-        dx_fd[end,:] = ( x[end,:] - x[end-1,:] ) / ( t[end] - t[end-1] )
-
-    # central finite difference 
-    elseif fd_method == 2 
-
-        dx_fd = 0*x 
-        for i = 2 : length(t)-1
-            dx_fd[i,:] = ( x[i+1,:] - x[i-1,:] ) / ( t[i+1] - t[i-1] )
-        end 
-
-        # deal with 1st index 
-        i = 1 
-        dx_fd[i,:] = ( x[i+1,:] - x[i,:] ) / ( t[i+1] - t[i] )
-
-        # deal with last index 
-        dx_fd[end,:] = ( x[end,:] - x[end-1,:] ) / ( t[end] - t[end-1] )
-
-    # backward finite difference 
-    else 
-
-        dx_fd = 0*x 
-        for i = 2 : length(t)
-            dx_fd[i,:] = ( x[i,:] - x[i-1,:] ) / ( t[i] - t[i-1] )
-        end 
-
-        # deal with 1st index 
-        i = 1 
-        dx_fd[i,:] = ( x[i+1,:] - x[i,:] ) / ( t[i+1] - t[i] )
-
-    end 
-
-    return dx_fd 
-
-end 
 
 
 ## ============================================ ##
 # derivatives: variational 
 
-using NoiseRobustDifferentiation
+# using NoiseRobustDifferentiation
 
-export dx_tv_fn 
-function dx_tv_fn(x) 
+# export dx_tv_fn 
+# function dx_tv_fn(x) 
 
-    dx_tv  = 0*x 
-    n_vars = size(x, 2)
+#     dx_tv  = 0*x 
+#     n_vars = size(x, 2)
 
-    for i = 1:n_vars 
-        dx = x[2,i] - x[1,i] 
-        dx_tv[:,i] = tvdiff(x[:,i], 100, 0.2, dx=dx)
-    end 
+#     for i = 1:n_vars 
+#         dx = x[2,i] - x[1,i] 
+#         dx_tv[:,i] = tvdiff(x[:,i], 100, 0.2, dx=dx)
+#     end 
 
-    return dx_tv 
+#     return dx_tv 
 
-end 
+# end 
 
 
 ## ============================================ ##
 # derivatives: gaussian process (smoothing) 
-
-using Optim 
 
 export dx_gp_fn 
 function dx_gp_fn(t, dx) 
