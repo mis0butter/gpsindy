@@ -29,7 +29,7 @@ end
 
 ## ============================================ ##
 # gp_post function: 
-# gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
+# smooth_gp_posterior( x_prior, μ_prior, x_train, μ_train, y_train ) 
 
 using GaussianProcesses 
 using LineSearches 
@@ -57,7 +57,7 @@ y_post = zeros( prior_row, n_vars )
 ## ============================================ ##
 # make sure the changes I'm making to gp_post are correct 
 
-y_post = gp_post( x_prior, μ_prior, x_train, μ_train, y_train ) 
+y_post = smooth_gp_posterior( x_prior, μ_prior, x_train, μ_train, y_train ) 
 
 ## ============================================ ##
 

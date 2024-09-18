@@ -80,11 +80,11 @@ dx_train = dx_stand_noise
 
 # step -1 : smooth x measurements with t (temporal)  
 # x_train_GP, Σ_xsmooth, hp   = post_dist_SE( t_train, x_train, t_train )  
-x_train_GP  = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+x_train_GP  = smooth_gp_posterior( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
 
 # step 0 : smooth dx measurements with x_GP (non-temporal) 
 # dx_train_GP, Σ_dxsmooth, hp = post_dist_SE( x_train_GP, dx_train, x_train_GP )  
-dx_train_GP = gp_post( x_train_GP, 0*dx_train, x_train_GP, 0*dx_train, dx_train ) 
+dx_train_GP = smooth_gp_posterior( x_train_GP, 0*dx_train, x_train_GP, 0*dx_train, dx_train ) 
 
 # SINDy 
 Θx_gpsindy = pool_data_test(x_train_GP, n_vars, poly_order) 
@@ -101,7 +101,7 @@ dx_mean = Θx_gpsindy * Ξ_gpsindy
 # x_train_GP, Σ_xsmooth, hp   = post_dist_SE( t_train, x_train, t_train )  
 dx_stand_noise = dx_stand_true + noise * randn( size(dx_stand_true, 1), size(dx_stand_true, 2) )  
 dx_train = dx_stand_noise  
-dx_post  = gp_post( x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train ) 
+dx_post  = smooth_gp_posterior( x_train_GP, dx_mean, x_train_GP, dx_mean, dx_train ) 
 
 # step 3: SINDy 
 Θx_gpsindy   = pool_data_test( x_train_GP, n_vars, poly_order ) 

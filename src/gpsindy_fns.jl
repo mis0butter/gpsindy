@@ -6,10 +6,10 @@ export smooth_data_gp
 function smooth_data_gp( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # first - smooth measurements with Gaussian processes 
-    x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
-    dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn ) 
-    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σ_n, opt_σn ) 
-    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σ_n, opt_σn ) 
+    x_train_GP  = smooth_gp_posterior( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
+    dx_train_GP = smooth_gp_posterior( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn ) 
+    x_test_GP   = smooth_gp_posterior( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σ_n, opt_σn ) 
+    dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σ_n, opt_σn ) 
 
     return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
@@ -18,26 +18,26 @@ end
 ## ============================================ ##
 # smooth training and test data with GPs 
 
-export gp_train_double_test 
-function gp_train_double_test( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
+export smooth_data_gp_x2 
+function smooth_data_gp_x2( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # let's double the points 
-    t_train_dbl = t_double_fn( data_train.t ) 
+    t_train_x2 = t_double_fn( data_train.t ) 
 
     x_col, x_row = size( data_train.x_noise ) 
     u_col, u_row = size( data_train.u ) 
 
     # first - smooth training data with Gaussian processes 
-    x_train_GP  = gp_post( t_train_dbl, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
-    dx_train_GP = gp_post( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn  ) 
-    # u_train_dbl  = gp_post( t_train_dbl, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
-    u_train_dbl = interp_dbl_fn( data_train.u ) 
+    x_train_GP  = smooth_gp_posterior( t_train_x2, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
+    dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn  ) 
+    # u_train_x2  = smooth_gp_posterior( t_train_x2, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
+    u_train_x2 = interp_dbl_fn( data_train.u ) 
 
     # smooth testing data 
-    x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
-    dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+    x_test_GP   = smooth_gp_posterior( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+    dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
-    return t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+    return t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
 
 
@@ -99,7 +99,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     if interpolate_gp == false 
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
     else 
-        t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
+        t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = smooth_data_gp_x2( data_train, data_test, σn, opt_σn ) 
     end 
     
     # cross-validate gpsindy 
@@ -119,15 +119,15 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         if interpolate_gp == false 
             x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
         else 
-            x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_dbl, u_train_dbl, λ, data_train, data_test )  
+            x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_x2, u_train_x2, λ, data_train, data_test )  
         end 
         push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
 
     end 
 
     if interpolate_gp == true 
-        _, x_train_GP  = downsample( data_train.t, t_train_dbl, x_train_GP ) 
-        _, dx_train_GP = downsample( data_train.t, t_train_dbl, dx_train_GP ) 
+        _, x_train_GP  = downsample( data_train.t, t_train_x2, x_train_GP ) 
+        _, dx_train_GP = downsample( data_train.t, t_train_x2, dx_train_GP ) 
     end 
 
     # save gpsindy min err stats 
@@ -396,7 +396,7 @@ function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false
     data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
-    t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test ) 
+    t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp_x2( data_train, data_test ) 
     
     # get x0 from smoothed data 
     x0_train = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
@@ -646,8 +646,8 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     Ξ_sindy_lasso = sindy_lasso(x_train, dx_train, λ, u_train)
 
     # GPSINDy (first) 
-    x_train_GP  = gp_post(t_train, 0 * x_train, t_train, 0 * x_train, x_train)
-    dx_train_GP = gp_post(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_train)
+    x_train_GP  = smooth_gp_posterior(t_train, 0 * x_train, t_train, 0 * x_train, x_train)
+    dx_train_GP = smooth_gp_posterior(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_train)
     Ξ_gpsindy   = sindy_lasso(x_train_GP, dx_train_GP, λ, u_train)
 
     # Train NN on the data
@@ -983,8 +983,8 @@ function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train )
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train, u_train ) 
 
     # GP smooth data 
-    x_GP_train  = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
-    dx_GP_train = gp_post( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
+    x_GP_train  = smooth_gp_posterior( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+    dx_GP_train = smooth_gp_posterior( x_GP_train, 0*dx_train, x_GP_train, 0*dx_train, dx_train ) 
 
     # run SINDy (STLS) 
     Ξ_sindy_stls       = sindy_lasso( x_train, dx_train, λ, u_train ) 
@@ -1385,9 +1385,9 @@ function monte_carlo_gpsindy( fn, noise_vec, λ, abstol, reltol, case )
             
             # smooth measurements 
             # x_GP, Σ_xGP, hp   = post_dist_SE( t, x_noise, t )           # step -1 
-            x_GP  = gp_post( t, 0*x_noise, t, 0*x_noise, x_noise ) 
+            x_GP  = smooth_gp_posterior( t, 0*x_noise, t, 0*x_noise, x_noise ) 
             # dx_GP, Σ_dxGP, hp = post_dist_SE( x_GP, dx_noise, x_GP )    # step 0 
-            dx_GP = gp_post( x_GP, 0*dx_noise, x_GP, 0*dx_noise, dx_noise ) 
+            dx_GP = smooth_gp_posterior( x_GP, 0*dx_noise, x_GP, 0*dx_noise, dx_noise ) 
             
             Θx_gpsindy = pool_data_test(x_GP, n_vars, poly_order) 
             Ξ_gpsindy  = sindy_stls( x_GP, dx_GP, λ )                   # step 1 
@@ -1397,7 +1397,7 @@ function monte_carlo_gpsindy( fn, noise_vec, λ, abstol, reltol, case )
 
             # step 2: GP 
             dx_mean = Θx_gpsindy * Ξ_gpsindy 
-            dx_post = gp_post( x_train_GP, dx_mean, x_train_GP, dx_train, dx_mean ) 
+            dx_post = smooth_gp_posterior( x_train_GP, dx_mean, x_train_GP, dx_train, dx_mean ) 
 
             # step 3: SINDy 
             Θx_gpsindy   = pool_data_test( x_train_GP, n_vars, poly_order ) 

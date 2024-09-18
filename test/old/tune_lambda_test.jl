@@ -37,10 +37,10 @@ poly_order = 4
 # smooth with GPs 
 
 # first - smooth measurements with Gaussian processes 
-x_train_GP  = gp_post( t_train, 0*x_train_noise, t_train, 0*x_train_noise, x_train_noise ) 
-dx_train_GP = gp_post( x_train_GP, 0*dx_train_noise, x_train_GP, 0*dx_train_noise, dx_train_noise ) 
-x_test_GP   = gp_post( t_test, 0*x_test_noise, t_test, 0*x_test_noise, x_test_noise ) 
-dx_test_GP  = gp_post( x_test_GP, 0*dx_test_noise, x_test_GP, 0*dx_test_noise, dx_test_noise ) 
+x_train_GP  = smooth_gp_posterior( t_train, 0*x_train_noise, t_train, 0*x_train_noise, x_train_noise ) 
+dx_train_GP = smooth_gp_posterior( x_train_GP, 0*dx_train_noise, x_train_GP, 0*dx_train_noise, dx_train_noise ) 
+x_test_GP   = smooth_gp_posterior( t_test, 0*x_test_noise, t_test, 0*x_test_noise, x_test_noise ) 
+dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*dx_test_noise, x_test_GP, 0*dx_test_noise, dx_test_noise ) 
 
 # build function library from smoothed data 
 Θx_gp  = pool_data_test( [ x_train_GP u_train ], n_vars, poly_order ) 

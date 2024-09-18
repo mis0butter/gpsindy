@@ -85,8 +85,8 @@ dx_train = dx_train_noise
 Ξ_sindy_lasso = sindy_lasso(x_train, dx_train, λ, u_train)
 
 # GPSINDy (first) 
-x_train_GP  = gp_post(t_train, 0 * x_train, t_train, 0 * x_train, x_train)
-dx_train_GP = gp_post(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_train)
+x_train_GP  = smooth_gp_posterior(t_train, 0 * x_train, t_train, 0 * x_train, x_train)
+dx_train_GP = smooth_gp_posterior(x_train_GP, 0 * dx_train, x_train_GP, 0 * dx_train, dx_train)
 Ξ_gpsindy   = sindy_lasso(x_train_GP, dx_train_GP, λ, u_train)
 
 # Train NN on the data

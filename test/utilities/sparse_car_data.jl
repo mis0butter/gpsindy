@@ -95,8 +95,8 @@ x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
 
 λ = 0.1 
 
-x_GP  = gp_post( t, 0 * x, t, 0 * x, x )
-dx_GP = gp_post( x, 0 * dx, x, 0 * dx, dx )
+x_GP  = smooth_gp_posterior( t, 0 * x, t, 0 * x, x )
+dx_GP = smooth_gp_posterior( x, 0 * dx, x, 0 * dx, dx )
 
 # learn coefficients 
 Ξ_sindy   = sindy_lasso( x, dx, λ, u )

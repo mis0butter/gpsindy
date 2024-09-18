@@ -1,8 +1,8 @@
 ## ============================================ ##
 # posterior GP and optimize hps 
 
-export gp_post 
-function gp_post( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true ) 
+export smooth_gp_posterior 
+function smooth_gp_posterior( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true ) 
 # ----------------------- #
 # PURPOSE: 
 #       Compute posterior of Gaussian process and optimize hyperparameters 

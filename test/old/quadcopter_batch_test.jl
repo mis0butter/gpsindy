@@ -72,8 +72,8 @@ fig_train_test = plot_train_test( x_train, x_test, N_train, fig_train_test )
 Ξ_lasso    = sindy_lasso( x_train, dx_train, λ, u_train ) 
 
 # GPSINDy 
-x_train_GP  = gp_post( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
-dx_train_GP = gp_post( x_train_GP, 0*dx_train, x_train_GP, 0*dx_train, dx_train ) 
+x_train_GP  = smooth_gp_posterior( t_train, 0*x_train, t_train, 0*x_train, x_train ) 
+dx_train_GP = smooth_gp_posterior( x_train_GP, 0*dx_train, x_train_GP, 0*dx_train, dx_train ) 
 Ξ_GP_lasso  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train ) 
 
 # ----------------------- # 
@@ -95,7 +95,7 @@ fig_train_pred  = plot_train_pred( x_train, x_train_gpsindy, N_train, fig_train_
 # okay ... debug why the GP stuff is not working for q1, w1, w2, w3, and wdot3 
 
 q1_train = x_train[:,7] 
-q1_train_GP  = gp_post( t_train, 0*q1_train, t_train, 0*q1_train, q1_train ) 
+q1_train_GP  = smooth_gp_posterior( t_train, 0*q1_train, t_train, 0*q1_train, q1_train ) 
 
 
 ## ============================================ ##

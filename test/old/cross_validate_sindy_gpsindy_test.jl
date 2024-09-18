@@ -141,7 +141,7 @@ end
 x_col, x_row = size( data_train.x_noise ) 
 
 # first - smooth measurements with Gaussian processes 
-x_train_GP  = gp_post( t_train_double, zeros(2 * x_col, x_row), data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
+x_train_GP  = smooth_gp_posterior( t_train_double, zeros(2 * x_col, x_row), data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
 
 x_test = t_train_double 
 μ_prior = zeros(2 * x_col, x_row) 
@@ -158,9 +158,9 @@ f2 = Figure()
 
 ## ============================================ ##
 
-dx_train_GP = gp_post( x_train_GP, zeros(x_col, x_row), x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
-x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
-dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+dx_train_GP = smooth_gp_posterior( x_train_GP, zeros(x_col, x_row), x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
+x_test_GP   = smooth_gp_posterior( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
 
 
@@ -172,10 +172,10 @@ dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.d
 # ----------------------- #
 # function smooth_data_gp 
 # first - smooth measurements with Gaussian processes 
-x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
-dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
-x_test_GP   = gp_post( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
-dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+x_train_GP  = smooth_gp_posterior( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
+dx_train_GP = smooth_gp_posterior( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 
+x_test_GP   = smooth_gp_posterior( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
 
 # get x0 from smoothed data 
 x0_train_GP = x_train_GP[1,:] 

@@ -118,7 +118,7 @@ csv_path_file = csv_files_vec[i_csv]
 data_train, data_test = make_data_structs( csv_path_file ) 
 
 # x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
-t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test, σ_n, opt_σn ) 
+t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp_x2( data_train, data_test, σ_n, opt_σn ) 
 
 
 
@@ -132,15 +132,15 @@ for i_x = 1 : 4
     ax = Axis( f[i_x,1], xlabel="t", ylabel="x$i_x" ) 
     scatter!( ax, data_train.t, data_train.x_noise[:,i_x], color = :black, label="x$i_x" ) 
     lines!( ax, data_train.t, data_train.x_noise[:,i_x], color = :black ) 
-    scatter!( ax, t_train_dbl, x_train_GP[:,i_x], color = :red, markersize = 5, label="x$i_x GP" ) 
-    # lines!( ax, t_train_dbl, x_train_GP[:,i_x], linestyle = :dash, color = :red ) 
+    scatter!( ax, t_train_x2, x_train_GP[:,i_x], color = :red, markersize = 5, label="x$i_x GP" ) 
+    # lines!( ax, t_train_x2, x_train_GP[:,i_x], linestyle = :dash, color = :red ) 
     axislegend() 
 
     ax = Axis( f[i_x,2], xlabel="t", ylabel="dx$i_x" ) 
     scatter!( ax, data_train.t, data_train.dx_noise[:,i_x], color = :black, label="x$i_x" ) 
     lines!( ax, data_train.t, data_train.dx_noise[:,i_x], color = :black ) 
-    scatter!( ax, t_train_dbl, dx_train_GP[:,i_x], color = :red, markersize = 5, label="x$i_x GP" ) 
-    # lines!( ax, t_train_dbl, dx_train_GP[:,i_x], color = :red ) 
+    scatter!( ax, t_train_x2, dx_train_GP[:,i_x], color = :red, markersize = 5, label="x$i_x GP" ) 
+    # lines!( ax, t_train_x2, dx_train_GP[:,i_x], color = :red ) 
     axislegend() 
     
 end 
@@ -167,12 +167,12 @@ x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx
 
 # ----------------------- #
 # gpsindy!!! 
-Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train_dbl ) 
+Ξ_gpsindy  = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train_x2 ) 
 
 # integrate discovered dynamics 
 dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
 # x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
-x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, t_train_dbl, u_train_dbl ) 
+x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, t_train_x2, u_train_x2 ) 
 x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u )
 
 ## ============================================ ##
@@ -183,9 +183,9 @@ f = Figure( size = ( 800,800 ) )
 for i_x = 1 : 4 
     ax = Axis( f[i_x,1], xlabel="t", ylabel="x$i_x" ) 
         scatter!( ax, data_train.t, data_train.x_noise[:,i_x], color = :black, label="x1" ) 
-        scatter!( ax, t_train_dbl, x_train_GP[:,i_x], color = :red, label="GP" ) 
+        scatter!( ax, t_train_x2, x_train_GP[:,i_x], color = :red, label="GP" ) 
         lines!( ax, data_train.t, x_sindy_train[:,i_x], label="sindy" ) 
-        lines!( ax, t_train_dbl, x_gpsindy_train[:,i_x], label="gpsindy" ) 
+        lines!( ax, t_train_x2, x_gpsindy_train[:,i_x], label="gpsindy" ) 
         axislegend() 
 end 
 
@@ -196,7 +196,7 @@ f = Figure( size = ( 800,800 ) )
 for i_x = 1 : 4 
     ax = Axis( f[i_x,1], xlabel="t", ylabel="x$i_x" ) 
         scatter!( ax, data_test.t, data_test.x_noise[:,i_x], color = :black, label="x1" ) 
-        # scatter!( ax, t_train_dbl, dx_train_GP[:,i_x], color = :red, label="GP" ) 
+        # scatter!( ax, t_train_x2, dx_train_GP[:,i_x], color = :red, label="GP" ) 
         lines!( ax, data_test.t, x_sindy_test[:,i_x], label="sindy" ) 
         lines!( ax, data_test.t, x_gpsindy_test[:,i_x], label="gpsindy" ) 
         axislegend() 
