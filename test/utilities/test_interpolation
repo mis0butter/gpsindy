@@ -27,8 +27,8 @@ fig = plot_car_x_dx( data_train.t, data_train.x_noise, data_train.dx_noise )
 ## ============================================ ## 
 
 # optimize noise hyperparameter 
-σn     = 0.1 
-opt_σn = false  
+σn     = 0.02 
+opt_σn = true   
 
 x_col, x_row = size( data_train.x_noise ) 
 u_col, u_row = size( data_train.u ) 
@@ -45,25 +45,39 @@ x_train_gp_interp  = smooth_gp_posterior( t_train_interp, zeros( interp_factor *
 dx_train_gp_interp = smooth_gp_posterior( x_train_gp_interp, zeros( interp_factor * x_col, x_row ), data_train.x_noise, 0 * data_train.dx_noise, data_train.dx_noise, σn, opt_σn ) 
 
 
-
-
 ## ============================================ ## 
 ## plot the data 
 ## ============================================ ##  
 
 # plot x 
 fig = Figure() 
-fig = Figure( size = (1000, 800) )  
+fig = Figure( size = (1000, 1000) )  
 for i in 1:size(data_train.x_noise, 2)
 
-    ax = Axis(fig[i, 1], title = "x")
+    ax = Axis(fig[i, 1], title = "x$i")
     scatter!(ax, data_train.t, data_train.x_noise[:, i], label = "x$i (train)")
     scatter!(ax, data_test.t, data_test.x_noise[:, i], label = "x$i (test)")
     scatter!(ax, data_train.t, x_train_GP[:, i], label = "x$i (GP)", color = :red)
-    scatter!(ax, t_train_interp, x_train_gp_interp[:, i], label = "x$i (GP)", color = :green, markersize = 4)
+    scatter!(ax, t_train_interp, x_train_gp_interp[:, i], label = "x$i (GP interp)", color = :green, markersize = 4)
 
     axislegend(ax)
 end 
+
+# plot control inputs
+for i in 1:size(data_train.u, 2)
+    ax = Axis(fig[i, 2], title = "u$i")
+    scatter!(ax, data_train.t, data_train.u[:, i], label = "u$i (original)")
+    scatter!(ax, t_train_interp, u_train_interp[:, i], label = "u$i (interpolated)", color = :orange, markersize = 4)
+    axislegend(ax)
+end
+
+# Adjust the layout
+for i in 1:4
+    rowsize!(fig.layout, i, Relative(0.25))
+end
+colsize!(fig.layout, 1, Relative(0.5))
+colsize!(fig.layout, 2, Relative(0.5))
+
 
 fig 
 
