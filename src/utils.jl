@@ -4,7 +4,8 @@ export interpolate_time
 function interpolate_time( time, interp_factor ) 
 
     # initialize empty vector 
-    time_interp = Vector{Float64}(undef, interp_factor * length(time) - 1) 
+    size_interp = interp_factor * length(time) - ( interp_factor - 1 ) 
+    time_interp = Vector{Float64}(undef, size_interp ) 
 
     # length of vector to be interpolated 
     n = length(time)  
@@ -28,9 +29,12 @@ function interpolate_time( time, interp_factor )
             # add the time to the interpolated time  
             time_interp[i_interp] = time[i_time] + dt_add 
 
+            println( "i_interp = ", i_interp, " time_interp[i_interp] = ", time_interp[i_interp] )
+
         end 
 
-    end
+    end 
+
     time_interp[end] = time[end]
 
     return time_interp  

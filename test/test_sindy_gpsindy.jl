@@ -103,42 +103,8 @@ data_train = ( t = t_train, x_true = x_train_true, dx_true = dx_train_true, x_no
 data_test  = ( t = t_test, x_true = x_test_true, dx_true = dx_test_true, x_noise = x_test_noise, dx_noise = dx_test_noise, u = u_test )      
        
 # interpolation factor 
-interp_factor = 2
-
-function interpolate_time( time, interp_factor ) 
-
-    # initialize empty vector 
-    time_interp = Vector{Float64}(undef, interp_factor * length(time) - 1) 
-
-    # length of vector to be interpolated 
-    n = length(time)  
-
-    # get the time step and interpolated time step 
-    dt   = (time[2] - time[1]) 
-    dt_n = dt / interp_factor  
-
-    # original time loop  
-    for i_time in 1:length(time) - 1
-
-        # interpolation loop 
-        for j_interp in 1:interp_factor 
-
-            # get the overall index of the interpolated time  
-            i_interp = interp_factor * (i_time - 1) + j_interp  
-
-            # get the time to add  
-            dt_add = (j_interp - 1) * dt_n  
-
-            # add the time to the interpolated time  
-            time_interp[i_interp] = time[i_time] + dt_add 
-
-        end 
-
-    end
-    time_interp[end] = time[end]
-
-    return time_interp  
-end 
+interp_factor = 4 
+t_interp = interpolate_time( data_train.t, interp_factor )  
 
 
 
