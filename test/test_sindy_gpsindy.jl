@@ -14,7 +14,7 @@ csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz_noise_0/rollout
 # Read the CSV file
 data_frame = CSV.read(csv_path_file, DataFrame)
 
-data_train, data_test = car_data_struct( csv_path_file ) 
+data_train, data_test = make_data_structs( csv_path_file ) 
 
 
 
@@ -35,7 +35,7 @@ df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv
 ## ============================================ ## 
 
 # Extract training and testing data from CSV file
-data_train, data_test = car_data_struct(csv_path_file)
+data_train, data_test = make_data_structs(csv_path_file)
 
 # Apply Gaussian Process smoothing to the data
 if GP_intp == false

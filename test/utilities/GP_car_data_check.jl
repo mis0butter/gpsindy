@@ -21,7 +21,7 @@ norm_err_vec = [  ]
     println( "i_csv = ", i, ". csv_file = ", csv_file ) 
 
     # get x and dx training data 
-    data_train, data_test = car_data_struct( csv_file ) 
+    data_train, data_test = make_data_structs( csv_file ) 
     t_train  = data_train.t[:,1]
     x_train  = data_train.x_noise 
     dx_train = data_train.dx_noise 
@@ -50,7 +50,7 @@ i = 40
 csv_file = csv_files_vec[i] 
 
 # get x and dx training data 
-data_train, data_test = car_data_struct( csv_file ) 
+data_train, data_test = make_data_structs( csv_file ) 
 t_train  = data_train.t[:,1] 
 x_train  = data_train.x_noise 
 dx_train = data_train.dx_noise 

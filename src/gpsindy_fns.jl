@@ -94,7 +94,7 @@ export cross_validate_csv_path_file
 function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, GP_intp = false ) 
 
     # extract data 
-    data_train, data_test = car_data_struct( csv_path_file ) 
+    data_train, data_test = make_data_structs( csv_path_file ) 
 
     if GP_intp == false 
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
@@ -221,7 +221,7 @@ export cross_validate
 function cross_validate( csv_path, csv_path_file, freq_hz, plot_option = false ) 
 
     # extract data 
-    data_train, data_test = car_data_struct( csv_path_file ) 
+    data_train, data_test = make_data_structs( csv_path_file ) 
 
     # smooth with GPs 
     x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
@@ -393,7 +393,7 @@ export cross_validate_sindy_gpsindy_traindouble
 
 function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false ) 
 
-    data_train, data_test = car_data_struct( csv_file ) 
+    data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
     t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test ) 
@@ -450,7 +450,7 @@ export cross_validate_sindy_gpsindy
 
 function cross_validate_sindy_gpsindy( csv_file, plot_option = false ) 
 
-    data_train, data_test = car_data_struct( csv_file ) 
+    data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
     x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
@@ -734,7 +734,7 @@ end
 export cross_validate_gpsindy
 function cross_validate_gpsindy( csv_file, plot_option = false ) 
 
-    data_train, data_test = car_data_struct( csv_file ) 
+    data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
     x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 

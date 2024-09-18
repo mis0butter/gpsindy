@@ -123,7 +123,7 @@ gpsindy_3sigma_mean = mean( reject_outliers( x_err_hist.gpsindy ) )
 
 csv_file = "test/data/jake_car_csvs_control_adjust_5hz/rollout_shift_5hz_1.csv" 
 
-data_train, data_test = car_data_struct( csv_file ) 
+data_train, data_test = make_data_structs( csv_file ) 
 
 # let's double the points 
 t_train = data_train.t 

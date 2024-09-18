@@ -61,7 +61,7 @@ function cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp )
         # cross_valiate_csv_path 
 
         # extract data 
-        data_train, data_test = car_data_struct( csv_path_file ) 
+        data_train, data_test = make_data_structs( csv_path_file ) 
 
         x0_train = data_train.x_noise[1,:] 
         x0_test  = data_test.x_noise[1,:]

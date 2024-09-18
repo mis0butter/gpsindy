@@ -431,8 +431,8 @@ end
 ## ============================================ ##
 # extract Jake's car data, export as structs 
 
-export car_data_struct 
-function car_data_struct( csv_file ) 
+export make_data_structs 
+function make_data_structs( csv_file ) 
 
     t, x, u = extract_car_data( csv_file ) 
     x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
