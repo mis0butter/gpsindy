@@ -119,7 +119,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         if interpolate_gp == false 
             x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
         else 
-            x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_x2, u_train_x2, λ, data_train, data_test )  
+            x_gpsindy_train, x_gpsindy_test = integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_x2, u_train_x2, λ, data_train, data_test )  
         end 
         push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
 

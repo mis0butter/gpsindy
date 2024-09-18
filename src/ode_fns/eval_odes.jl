@@ -1,8 +1,8 @@
 
 
-export gpsindy_dbl_lasso_int 
+export integrate_gpsindy_interp 
 
-function gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
+function integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
     
     # get x0 from noisy and smoothed data 
     x0_train = data_train.x_noise[1,:]  
