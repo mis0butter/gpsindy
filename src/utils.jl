@@ -9,27 +9,29 @@ function interpolate_array(x_orig::Union{Vector{Float64}, Matrix{Float64}}, inte
 end
 
 function interpolate_vector(x_orig::Vector{Float64}, interp_factor::Int)
-    size_interp = interp_factor * length(x_orig)
+
+    size_interp = interp_factor * length(x_orig) - ( interp_factor - 1 )
     x_interp    = Vector{Float64}(undef, size_interp)
 
     dt        = x_orig[2] - x_orig[1]
     dt_interp = dt / interp_factor
 
-    for i in 1:length(x_orig)
+    for i in 1:length(x_orig) - 1 
         for j in 1:interp_factor
             i_interp = interp_factor * (i - 1) + j
             dt_add   = (j - 1) * dt_interp
             x_interp[i_interp] = x_orig[i] + dt_add
         end
-    end
+    end 
+    x_interp[end] = x_orig[end] 
 
     return x_interp
 end
 
 function interpolate_matrix(x_orig::Matrix{Float64}, interp_factor::Int)
     rows, cols  = size(x_orig)
-    size_interp = interp_factor * rows
-    x_interp    = Matrix{Float64}(undef, size_interp, cols)
+    rows_interp = interp_factor * rows - ( interp_factor - 1 ) 
+    x_interp    = Matrix{Float64}(undef, rows_interp, cols)
 
     for col in 1:cols
         x_interp[:, col] = interpolate_vector(x_orig[:, col], interp_factor)
