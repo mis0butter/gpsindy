@@ -22,7 +22,8 @@ function gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_interp, u_train
     x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
 
     # now downsample x_gpsindy_train to match the size of normal t_train  
-    t_train, x_gpsindy_train = downsample( data_train.t, t_train_interp, x_gpsindy_train ) 
+    # t_train, x_gpsindy_train = downsample( data_train.t, t_train_interp, x_gpsindy_train ) 
+    t_train, x_gpsindy_train = downsample_to_original(data_train.t, t_train_interp, x_gpsindy_train) 
 
     return x_gpsindy_train, x_gpsindy_test 
 end 

@@ -121,6 +121,7 @@ x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_tes
 
 
 ## ============================================ ## 
+# check downsampling 
 
 # Example usage:
 t_downsampled, x_train_gp_downsampled = downsample_to_original(data_train.t, t_train_interp, x_train_gp_interp)
