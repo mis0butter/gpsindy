@@ -294,13 +294,39 @@ end
 export min_max_y 
 
 
+## ============================================ ## 
+
+function downsample_to_original(t_orig, t_interp, x_interp)
+    
+    # Initialize arrays to store downsampled data
+    t_downsampled = similar(t_orig)
+    x_downsampled = similar(x_interp, size(t_orig, 1), size(x_interp, 2))
+    
+    # Iterate through original time points
+    for (i, t) in enumerate(t_orig)
+        
+        # Find the index in t_interp that is closest to t
+        _, idx = findmin(abs.(t_interp .- t))
+        
+        # Store the corresponding time and state values
+        t_downsampled[i] = t_interp[idx]
+        x_downsampled[i, :] = x_interp[idx, :]
+    end
+    
+    return t_downsampled, x_downsampled 
+end 
+
+export downsample_to_original  
+
+
 ## ============================================ ##
+# SHOULD DEPRECATE THIS  
 
-function downsample( t, t_double, x_double ) 
+function downsample( t, t_interp, x_interp, interp_factor ) 
 
-    if t == t_double 
+    if t == t_interp 
 
-        return t_double, x_double 
+        return t_interp, x_interp 
 
     else 
 
@@ -308,8 +334,8 @@ function downsample( t, t_double, x_double )
         x_dbl_dwnsmpl = []
         for i in eachindex(t) 
             # println(i) 
-            push!( t_dbl_dwnsmpl, t_double[2*i-1] ) 
-            push!( x_dbl_dwnsmpl, x_double[2*i-1,:] ) 
+            push!( t_dbl_dwnsmpl, t_interp[interp_factor * i - 1] ) 
+            push!( x_dbl_dwnsmpl, x_interp[interp_factor * i - 1, :] ) 
         end 
 
         x_dbl_dwnsmpl = vv2m( x_dbl_dwnsmpl ) 

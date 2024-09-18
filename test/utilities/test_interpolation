@@ -34,7 +34,7 @@ x_col, x_row = size( data_train.x_noise )
 u_col, u_row = size( data_train.u ) 
 
 # interpolation factor 
-interp_factor  = 5 
+interp_factor  = 10 
 t_train_interp = interpolate_array( data_train.t, interp_factor ) 
 u_train_interp = interpolate_array( data_train.u, interp_factor )  
 
@@ -43,6 +43,22 @@ dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( x_col, x_row ), data_train
 
 x_train_gp_interp  = smooth_gp_posterior( t_train_interp, zeros( interp_factor * x_col, x_row ), data_train.t, 0 * data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
 dx_train_gp_interp = smooth_gp_posterior( x_train_gp_interp, zeros( interp_factor * x_col, x_row ), data_train.x_noise, 0 * data_train.dx_noise, data_train.dx_noise, σn, opt_σn ) 
+
+data_train_gp_interp = data_struct( t_train_interp, u_train_interp, [], [], x_train_gp_interp, dx_train_gp_interp ) 
+data_train_gp = data_struct( data_train.t, data_train.u, [], [], x_train_GP, dx_train_GP )  
+
+data_train_gp_interp = ( 
+    t  = t_train_interp, 
+    u  = u_train_interp, 
+    x  = x_train_gp_interp, 
+    dx = dx_train_gp_interp 
+) 
+data_train_gp = ( 
+    t  = data_train.t, 
+    u  = data_train.u, 
+    x  = x_train_GP, 
+    dx = dx_train_GP 
+)  
 
 
 ## ============================================ ## 
@@ -78,17 +94,60 @@ end
 colsize!(fig.layout, 1, Relative(0.5))
 colsize!(fig.layout, 2, Relative(0.5))
 
-
 fig 
 
 
 ## ============================================ ## 
 ## ============================================ ## 
 
+# x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
+    
+# get x0 from noisy and smoothed data 
+x0_train = data_train.x_noise[1,:]  
+x0_test  = data_test.x_noise[1,:]  
 
-x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_x2, u_train_x2, λ, data_train, data_test )  
+# get sizes 
+x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+
+# ----------------------- #
+# sindy-lasso ! 
+Ξ_gpsindy = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train_x2 ) 
+
+# integrate discovered dynamics 
+dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+# x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
+x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, t_interp, u_interp ) 
+x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u )
 
 
+## ============================================ ## 
+
+function downsample_to_original(t_orig, t_interp, x_interp)
+    # Initialize arrays to store downsampled data
+    t_downsampled = similar(t_orig)
+    x_downsampled = similar(x_interp, size(t_orig, 1), size(x_interp, 2))
+    
+    # Iterate through original time points
+    for (i, t) in enumerate(t_orig)
+        # Find the index in t_interp that is closest to t
+        _, idx = findmin(abs.(t_interp .- t))
+        
+        # Store the corresponding time and state values
+        t_downsampled[i] = t_interp[idx]
+        x_downsampled[i, :] = x_interp[idx, :]
+    end
+    
+    return t_downsampled, x_downsampled 
+end
+
+# Example usage:
+t_downsampled, x_gpsindy_train_downsampled = downsample_to_original(data_train.t, t_interp, t_train_interp)
+
+# Verify the shapes
+println("Shape of original t: ", size(data_train.t))
+println("Shape of downsampled t: ", size(t_downsampled))
+println("Shape of original x: ", size(data_train.x_noise))
+println("Shape of downsampled x: ", size(x_gpsindy_train_downsampled)) 
 
 
 
