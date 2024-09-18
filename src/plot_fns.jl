@@ -4,7 +4,7 @@ using CairoMakie
 
 export plot_train 
 
-function plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file ) 
+function plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, interpolate_gp, csv_file ) 
 
     # ----------------------- #
     # plot training 
@@ -39,20 +39,21 @@ function plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsind
     end 
 
     # legend 
-    Legend( f_train[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
+    Legend( f_train[1, 5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
 
     ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
-    Textbox( f_train[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+    Textbox( f_train[5, 1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
-    ax_text = "$freq_hz Hz \n noise = $noise " 
-    Textbox( f_train[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
+    # print freq and noise level 
+    ax_text = "$freq_hz Hz \t noise = $noise \n interpolate GP = $interpolate_gp" 
+    Textbox( f_train[5, 2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
 
     # print total error 
     ax_text = string("total err: GP = ", round( norm( data_train.x_noise - x_train_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.train_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.train_err[1], digits = 2 ) ) 
-    Textbox( f_train[5,3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+    Textbox( f_train[5, 3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     ax_text = "training \n $csv_file" 
-    Textbox( f_train[5,5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+    Textbox( f_train[5, 5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     return f_train 
 end 
@@ -61,7 +62,7 @@ end
 
 export plot_test 
 
-function plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file )  
+function plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, interpolate_gp, csv_file )  
 
     # ----------------------- #
     # plot testing 
@@ -98,10 +99,12 @@ function plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, 
     # legend 
     Legend( f_test[1,5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
 
+    # print noise optimization 
     ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
     Textbox( f_test[5,1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
 
-    ax_text = "$freq_hz Hz \n noise = $noise " 
+    # print freq and noise level 
+    ax_text = "$freq_hz Hz \t noise = $noise \n interpolate GP = $interpolate_gp" 
     Textbox( f_test[5,2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
 
     # print total error 

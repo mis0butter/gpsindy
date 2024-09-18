@@ -6,10 +6,10 @@ export smooth_data_gp
 function smooth_data_gp( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # first - smooth measurements with Gaussian processes 
-    x_train_GP  = smooth_gp_posterior( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
-    dx_train_GP = smooth_gp_posterior( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn ) 
-    x_test_GP   = smooth_gp_posterior( data_test.t, 0*data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σ_n, opt_σn ) 
-    dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σ_n, opt_σn ) 
+    x_train_GP  = smooth_gp_posterior( data_train.t, 0 * data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
+    dx_train_GP = smooth_gp_posterior( x_train_GP, 0 * data_train.dx_noise, x_train_GP, 0 * data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn ) 
+    x_test_GP   = smooth_gp_posterior( data_test.t, 0 * data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σ_n, opt_σn ) 
+    dx_test_GP  = smooth_gp_posterior( x_test_GP, 0 * data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σ_n, opt_σn ) 
 
     return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
@@ -136,28 +136,11 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
 
     # plot 
     csv_file = replace( split( csv_path_file, "/" )[end], ".csv" => "" ) 
-    f_train  = plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file ) 
-    f_test   = plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, csv_file )  
+    f_train  = plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, interpolate_gp, csv_file ) 
+    f_test   = plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, interpolate_gp, csv_file )  
 
     return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test 
 end 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
