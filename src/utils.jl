@@ -29,8 +29,6 @@ function interpolate_time( time, interp_factor )
             # add the time to the interpolated time  
             time_interp[i_interp] = time[i_time] + dt_add 
 
-            println( "i_interp = ", i_interp, " time_interp[i_interp] = ", time_interp[i_interp] )
-
         end 
 
     end 

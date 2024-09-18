@@ -44,7 +44,7 @@ end
 
 # Set up parameters 
 tspan   = (0.0, 10.0) 
-x0      = [0.0, 0.0, 0.0] 
+x0      = [1.0, 0.0, 0.0] 
 p       = [10.0, 28.0, 8/3] 
 dt      = 0.02 
 
@@ -52,17 +52,20 @@ dt      = 0.02
 prob = ODEProblem(lorenz!, x0, tspan, p)
 sol  = solve(prob, Tsit5(), saveat = dt) 
 
-# Extract time and state variables
+# Extract time and state variables 
 t = sol.t
-x = Array(sol) 
+x = Array(sol)' 
 
 # Calculate derivatives
 dx = similar(x) 
-for i in 1:size(x, 2) 
-    du = similar(u0) 
-    lorenz!(du, x[:, i], p, t[i]) 
-    dx[:, i] = du 
+for i in 1:size(x, 1) 
+    du = similar(x0) 
+    lorenz!(du, x[i, :], p, t[i]) 
+    dx[i, :] = du 
 end 
+
+## ============================================ ## 
+
 
 # Add noise to create noisy data
 noise_level = 0.1
@@ -101,12 +104,17 @@ dx_train_noise, dx_test_noise = split_train_test( dx_noise, test_fraction, porti
 data_train = ( t = t_train, x_true = x_train_true, dx_true = dx_train_true, x_noise = x_train_noise, dx_noise = dx_train_noise, u = u_train ) 
 
 data_test  = ( t = t_test, x_true = x_test_true, dx_true = dx_test_true, x_noise = x_test_noise, dx_noise = dx_test_noise, u = u_test )      
-       
+
+## ============================================ ## 
+
 # interpolation factor 
-interp_factor = 4 
+interp_factor = 2 
 t_interp = interpolate_time( data_train.t, interp_factor )  
 
+x_col, x_row = size( data_train.x_noise ) 
+u_col, u_row = size( data_train.u ) 
 
+x_train_GP  = smooth_gp_posterior( t_interp, zeros( interp_factor * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
 
 
 
