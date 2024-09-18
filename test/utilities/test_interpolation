@@ -122,32 +122,14 @@ x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_tes
 
 ## ============================================ ## 
 
-function downsample_to_original(t_orig, t_interp, x_interp)
-    # Initialize arrays to store downsampled data
-    t_downsampled = similar(t_orig)
-    x_downsampled = similar(x_interp, size(t_orig, 1), size(x_interp, 2))
-    
-    # Iterate through original time points
-    for (i, t) in enumerate(t_orig)
-        # Find the index in t_interp that is closest to t
-        _, idx = findmin(abs.(t_interp .- t))
-        
-        # Store the corresponding time and state values
-        t_downsampled[i] = t_interp[idx]
-        x_downsampled[i, :] = x_interp[idx, :]
-    end
-    
-    return t_downsampled, x_downsampled 
-end
-
 # Example usage:
-t_downsampled, x_gpsindy_train_downsampled = downsample_to_original(data_train.t, t_interp, t_train_interp)
+t_downsampled, x_train_gp_downsampled = downsample_to_original(data_train.t, t_train_interp, x_train_gp_interp)
 
 # Verify the shapes
 println("Shape of original t: ", size(data_train.t))
 println("Shape of downsampled t: ", size(t_downsampled))
-println("Shape of original x: ", size(data_train.x_noise))
-println("Shape of downsampled x: ", size(x_gpsindy_train_downsampled)) 
+println("Shape of original x: ", size(x_train_gp_interp))
+println("Shape of downsampled x: ", size(x_train_gp_downsampled)) 
 
 
 
