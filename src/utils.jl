@@ -1,42 +1,42 @@
 
-export interpolate_time  
+export interpolate_array  
+function interpolate_array(x_orig::Union{Vector{Float64}, Matrix{Float64}}, interp_factor::Int)
+    if x_orig isa Vector
+        return interpolate_vector(x_orig, interp_factor)
+    elseif x_orig isa Matrix
+        return interpolate_matrix(x_orig, interp_factor)
+    end
+end
 
-function interpolate_time( time, interp_factor ) 
+function interpolate_vector(x_orig::Vector{Float64}, interp_factor::Int)
+    size_interp = interp_factor * length(x_orig)
+    x_interp    = Vector{Float64}(undef, size_interp)
 
-    # initialize empty vector 
-    size_interp = interp_factor * length(time) - ( interp_factor - 1 ) 
-    time_interp = Vector{Float64}(undef, size_interp ) 
+    dt        = x_orig[2] - x_orig[1]
+    dt_interp = dt / interp_factor
 
-    # length of vector to be interpolated 
-    n = length(time)  
+    for i in 1:length(x_orig)
+        for j in 1:interp_factor
+            i_interp = interp_factor * (i - 1) + j
+            dt_add   = (j - 1) * dt_interp
+            x_interp[i_interp] = x_orig[i] + dt_add
+        end
+    end
 
-    # get the time step and interpolated time step 
-    dt   = (time[2] - time[1]) 
-    dt_n = dt / interp_factor  
+    return x_interp
+end
 
-    # original time loop  
-    for i_time in 1:length(time) - 1
+function interpolate_matrix(x_orig::Matrix{Float64}, interp_factor::Int)
+    rows, cols  = size(x_orig)
+    size_interp = interp_factor * rows
+    x_interp    = Matrix{Float64}(undef, size_interp, cols)
 
-        # interpolation loop 
-        for j_interp in 1:interp_factor 
+    for col in 1:cols
+        x_interp[:, col] = interpolate_vector(x_orig[:, col], interp_factor)
+    end
 
-            # get the overall index of the interpolated time  
-            i_interp = interp_factor * (i_time - 1) + j_interp  
-
-            # get the time to add  
-            dt_add = (j_interp - 1) * dt_n  
-
-            # add the time to the interpolated time  
-            time_interp[i_interp] = time[i_time] + dt_add 
-
-        end 
-
-    end 
-
-    time_interp[end] = time[end]
-
-    return time_interp  
-end 
+    return x_interp
+end
 
 
 ## ============================================ ## 

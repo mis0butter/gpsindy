@@ -1,0 +1,179 @@
+
+using GaussianSINDy
+using LinearAlgebra
+using Statistics
+using CairoMakie
+using Printf
+using CSV, DataFrames 
+
+using DifferentialEquations
+
+
+## ============================================ ## 
+## set-up ODE and generate data  
+## ============================================ ## 
+
+# generate data from an ode 
+# Define the ODE system (Lorenz system as an example)
+function lorenz!(du, u, p, t)
+    σ, ρ, β = p
+    du[1] = σ * (u[2] - u[1])
+    du[2] = u[1] * (ρ - u[3]) - u[2]
+    du[3] = u[1] * u[2] - β * u[3]
+end
+
+# Set up parameters 
+tspan   = (0.0, 10.0) 
+x0      = [-1.0, -1.0, 0.0] 
+p       = [ 1.1, 0.4, 1, 0.4 ] 
+dt      = 0.02 
+
+# Generate clean data
+prob = ODEProblem(lorenz!, x0, tspan, p)
+sol  = solve(prob, Tsit5(), saveat = dt) 
+
+# Extract time and state variables 
+t = sol.t
+x = Array(sol)' 
+
+# Calculate derivatives
+dx = similar(x) 
+for i in 1:size(x, 1) x
+    du = similar(x0) 
+    lorenz!(du, x[i, :], p, t[i]) 
+    dx[i, :] = du 
+end 
+
+# create zero control input 
+u = zeros(size(x)) 
+
+
+## ============================================ ## 
+## corrupt data with noise 
+## ============================================ ## 
+
+# Add noise to create noisy data
+noise_level = 0.05
+x_noise     = x  .+ noise_level * randn(size(x)) 
+dx_noise    = dx .+ noise_level * randn(size(dx)) 
+
+# split into training and test data 
+test_fraction = 0.3 
+portion       = "last" 
+
+# split t and u 
+t_train,  t_test  = split_train_test( t, test_fraction, portion ) 
+u_train,  u_test  = split_train_test( u, test_fraction, portion ) 
+t_train = t_train[:] ; t_test = t_test[:] 
+
+# split x and dx (true) 
+x_train_true, x_test_true   = split_train_test( x, test_fraction, portion ) 
+dx_train_true, dx_test_true = split_train_test( dx, test_fraction, portion )     
+
+# split x and dx (noise)
+x_train_noise,  x_test_noise  = split_train_test( x_noise, test_fraction, portion ) 
+dx_train_noise, dx_test_noise = split_train_test( dx_noise, test_fraction, portion ) 
+
+# Create data structures
+data_train = ( 
+    t        = t_train, 
+    x_true   = x_train_true, 
+    dx_true  = dx_train_true, 
+    x_noise  = x_train_noise, 
+    dx_noise = dx_train_noise, 
+    u        = u_train 
+) 
+
+data_test  = ( 
+    t        = t_test, 
+    x_true   = x_test_true, 
+    dx_true  = dx_test_true, 
+    x_noise  = x_test_noise, 
+    dx_noise = dx_test_noise, 
+    u        = u_test 
+)     
+
+# plot the noisy and true data
+fig = Figure(size = (800, 800))
+
+for i in 1:size(data_train.x_noise, 2)
+    ax = Axis(fig[i, 1], title = "State Variable $i")
+    
+    # Plot training data
+    scatter!(ax, data_train.t, data_train.x_true[:, i], label = "True (train)", color = :blue, markersize = 4)
+    scatter!(ax, data_train.t, data_train.x_noise[:, i], label = "Noisy (train)", color = :red, markersize = 4)
+    
+    # Plot test data
+    scatter!(ax, data_test.t, data_test.x_true[:, i], label = "True (test)", color = :green, markersize = 4)
+    scatter!(ax, data_test.t, data_test.x_noise[:, i], label = "Noisy (test)", color = :orange, markersize = 4)
+    
+    axislegend(ax, position = :rb)
+    ax.xlabel = "Time"
+    ax.ylabel = "Amplitude"
+end
+
+fig
+
+
+## ============================================ ## 
+## smooth and interpolate the data using GPs 
+## ============================================ ## 
+
+# optimize noise hyperparameter 
+σn     = 0.1 
+opt_σn = false  
+
+# interpolation factor 
+interp_factor = 5 
+t_interp = interpolate_array( data_train.t, interp_factor ) 
+
+x_col, x_row = size( data_train.x_noise ) 
+u_col, u_row = size( data_train.u ) 
+
+x_train_GP  = smooth_gp_posterior( data_train.t, zeros( x_col, x_row ), data_train.t, 0 * data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
+
+x_train_gp_interp  = smooth_gp_posterior( t_interp, zeros( interp_factor * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
+
+
+## ============================================ ## 
+## plot the data 
+## ============================================ ##  
+
+# plot x 
+fig = Figure() 
+fig = Figure( size = (1000, 800) )  
+for i in 1:size(data_train.x_noise, 2)
+
+    ax = Axis(fig[i, 1], title = "x")
+    scatter!(ax, data_train.t, data_train.x_noise[:, i], label = "x$i (train)")
+    scatter!(ax, data_test.t, data_test.x_noise[:, i], label = "x$i (test)")
+    scatter!(ax, data_train.t, x_train_GP[:, i], label = "x$i (GP)", color = :red)
+    scatter!(ax, t_interp, x_train_gp_interp[:, i], label = "x$i (GP)", color = :green, markersize = 4)
+
+    axislegend(ax)
+end 
+
+fig 
+
+
+## ============================================ ## 
+## old interpolation 
+## ============================================ ## 
+
+# let's double the points 
+t_train_x2 = t_double_fn( data_train.t ) 
+
+x_col, x_row = size( data_train.x_noise ) 
+u_col, u_row = size( data_train.u ) 
+
+# first - smooth training data with Gaussian processes 
+x_train_GP  = smooth_gp_posterior( t_train_x2, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
+dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise, σn, opt_σn  ) 
+# u_train_x2  = smooth_gp_posterior( t_train_x2, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σn, opt_σn  ) 
+u_train_x2 = interp_dbl_fn( data_train.u ) 
+
+# smooth testing data 
+x_test_GP   = smooth_gp_posterior( data_test.t, 0*data_test.x_noise, data_test.t, 0*data_test.x_noise, data_test.x_noise ) 
+dx_test_GP  = smooth_gp_posterior( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.dx_noise, data_test.dx_noise ) 
+
+
