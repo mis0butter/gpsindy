@@ -14,7 +14,7 @@ freq_hz = 50
 noise   = 0 
 σn      = 0.02 
 opt_σn  = false 
-GP_intp = true 
+interpolate_gp = true 
 
 noise_vec = [] 
 push!( noise_vec, 0 ) 
@@ -23,7 +23,7 @@ push!( noise_vec, 0.02 )
 
 for noise = noise_vec  
     for σn = [ 0.001, 0.002, 0.003, 0.01, 0.02, 0.03, 0.1, 0.2, 0.3 ] 
-        df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp ) 
+        df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn, interpolate_gp ) 
     end 
 end 
 
@@ -58,7 +58,7 @@ end
 ## ============================================ ##
 # let's compile all the stats of the files that I just made 
 
-csv_path_up = string( "test/results/jake_car_csvs_ctrlshift_no_trans/GP_intp/" ) 
+csv_path_up = string( "test/results/jake_car_csvs_ctrlshift_no_trans/interpolate_gp/" ) 
 csv_path_vec = readdir( csv_path_up ) 
 
 header = [ "freq_hz", "noise", "σn", "opt_σn", "mean_err_sindy_train", "mean_err_gpsindy_train", "mean_err_sindy_test", "mean_err_gpsindy_test" ]
@@ -78,7 +78,7 @@ for i = eachindex(csv_path_vec)
 end 
 
 # save the dataframe 
-CSV.write( "df_mean_err_all_GP_intp.csv", df_mean_err_all) 
+CSV.write( "df_mean_err_all_interpolate_gp.csv", df_mean_err_all) 
 
 
 

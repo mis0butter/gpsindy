@@ -14,10 +14,10 @@ freq_hz = 5
 noise   = 0 
 σn      = 10 
 opt_σn  = false 
-GP_intp = false 
+interpolate_gp = false 
 
 
-# df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
+# df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, interpolate_gp ) 
 
 
 ## ============================================ ##
@@ -31,7 +31,7 @@ for freq_hz = [ 50 ]
     
     for noise = noise_vec 
 
-        df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
+        df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, interpolate_gp ) 
 
     end 
 
@@ -42,11 +42,11 @@ end
 ## ============================================ ##
 # cross_validate_csv_path 
 
-function cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
+function cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, interpolate_gp ) 
 
     csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
 
-    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp ) 
+    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, interpolate_gp ) 
 
     # create dataframe to store results 
     header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
@@ -121,7 +121,7 @@ for freq_hz = [ 5, 10, 25, 50 ]
 
         csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
         
-        csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp ) 
+        csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, interpolate_gp ) 
 
         df_nnsindy = CSV.read( string(save_path_dfs, "df_min_err_csvs_nnsindy.csv" ), DataFrame ) 
 

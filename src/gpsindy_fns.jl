@@ -45,11 +45,11 @@ end
 
 export cross_validate_csv_path 
 
-function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp = false, plot_option = false )  
+function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, interpolate_gp = false, plot_option = false )  
 
     csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
 
-    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp ) 
+    csv_files_vec, save_path, save_path_fig, save_path_dfs = mkdir_save_path_σn( csv_path, σn, opt_σn, interpolate_gp ) 
 
     # create dataframe to store results 
     header = [ "csv_file", "λ_min", "train_err", "test_err", "train_traj", "test_traj" ] 
@@ -61,7 +61,7 @@ function cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp = false,
     
         csv_path_file = csv_files_vec[i_csv] 
     
-        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, GP_intp ) 
+        df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, interpolate_gp ) 
         if plot_option == true 
             display(f_train) ; display(f_test) 
         end 
@@ -91,12 +91,12 @@ end
 
 export cross_validate_csv_path_file 
 
-function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, GP_intp = false ) 
+function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, interpolate_gp = false ) 
 
     # extract data 
     data_train, data_test = make_data_structs( csv_path_file ) 
 
-    if GP_intp == false 
+    if interpolate_gp == false 
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
     else 
         t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
@@ -116,7 +116,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
 
         # gpsindy!!! 
-        if GP_intp == false 
+        if interpolate_gp == false 
             x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
         else 
             x_gpsindy_train, x_gpsindy_test = gpsindy_dbl_lasso_int( x_train_GP, dx_train_GP, t_train_dbl, u_train_dbl, λ, data_train, data_test )  
@@ -125,7 +125,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
 
     end 
 
-    if GP_intp == true 
+    if interpolate_gp == true 
         _, x_train_GP  = downsample( data_train.t, t_train_dbl, x_train_GP ) 
         _, dx_train_GP = downsample( data_train.t, t_train_dbl, dx_train_GP ) 
     end 

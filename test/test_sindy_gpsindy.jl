@@ -5,6 +5,13 @@ using CairoMakie
 using Printf
 using CSV, DataFrames
 
+
+## ============================================ ## 
+# some tuning parameters for the tests 
+
+interpolate_gp = true  
+
+
 ## ============================================ ## 
 # let's look at rollout_1.csv 
 
@@ -15,19 +22,19 @@ csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz_noise_0/rollout
 data_frame = CSV.read(csv_path_file, DataFrame)
 
 data_train, data_test = make_data_structs( csv_path_file ) 
+# data_train and data_test fields: 
+#   t 
+#   u 
+#   x_true 
+#   dx_true  
+#   x_noise 
+#   dx_noise 
+
+
+ 
 
 
 
-## ============================================ ## 
-
-
-freq_hz = 50 
-noise   = 0 
-σn      = 0.02 
-opt_σn  = false 
-GP_intp = true 
-
-df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv_path( freq_hz, noise, σn, opt_σn, GP_intp ) 
 
 
 ## ============================================ ## 
@@ -38,7 +45,7 @@ df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = cross_validate_csv
 data_train, data_test = make_data_structs(csv_path_file)
 
 # Apply Gaussian Process smoothing to the data
-if GP_intp == false
+if interpolate_gp == false
     # Standard GP smoothing on original data
     x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test(data_train, data_test, σn, opt_σn)
 else
@@ -65,7 +72,7 @@ for i_λ = eachindex(λ_vec)
                      x_sindy_train, x_sindy_test])
 
     # Apply GP-SINDy
-    if GP_intp == false
+    if interpolate_gp == false
         # Standard GP-SINDy
         x_gpsindy_train, x_gpsindy_test = sindy_lasso_int(x_train_GP, dx_train_GP, λ, data_train, data_test)
     else

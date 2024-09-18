@@ -14,9 +14,9 @@ noise   = 0.02
 σn      = 0.2   
 opt_σn  = false 
 
-GP_intp = false  
+interpolate_gp = false  
 
-save_best_results( freq_hz, noise, σn, opt_σn, GP_intp ) 
+save_best_results( freq_hz, noise, σn, opt_σn, interpolate_gp ) 
 
 
 ## ============================================ ##
@@ -88,10 +88,10 @@ function push_somi_df( somi_df, final_results_path, folder, freq_hz, noise, meth
 end 
 
 
-function save_best_results( freq_hz, noise, σn, opt_σn, GP_intp ) 
+function save_best_results( freq_hz, noise, σn, opt_σn, interpolate_gp ) 
 
-    if GP_intp == true 
-        csv_path      = "test/results/jake_car_csvs_ctrlshift_no_trans/GP_intp/" 
+    if interpolate_gp == true 
+        csv_path      = "test/results/jake_car_csvs_ctrlshift_no_trans/interpolate_gp/" 
     else 
         csv_path      = "test/results/jake_car_csvs_ctrlshift_no_trans/no_intp/" 
     end 

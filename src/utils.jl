@@ -95,7 +95,7 @@ end
 
 export mkdir_save_path_σn 
 
-function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp = false ) 
+function mkdir_save_path_σn( csv_path, σn, opt_σn, interpolate_gp = false ) 
 
     csv_files_vec = readdir( csv_path ) 
     deleteat!( csv_files_vec, findall( csv_files_vec .== "figs" ) ) 
@@ -106,8 +106,8 @@ function mkdir_save_path_σn( csv_path, σn, opt_σn, GP_intp = false )
 
     save_path  = replace( csv_path, "/data/" => "/results/" ) 
     GP_no_intp = split( save_path, "/" )[3]  
-    if GP_intp == true 
-        save_path = replace( save_path, GP_no_intp => string( GP_no_intp, "/GP_intp" ) ) 
+    if interpolate_gp == true 
+        save_path = replace( save_path, GP_no_intp => string( GP_no_intp, "/interpolate_gp" ) ) 
     else 
         save_path = replace( save_path, GP_no_intp => string( GP_no_intp, "/no_intp" ) ) 
     end 
