@@ -2,8 +2,8 @@
 ## ============================================ ##
 # smooth training and test data with GPs 
 
-export gp_train_test 
-function gp_train_test( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
+export smooth_data_gp 
+function smooth_data_gp( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # first - smooth measurements with Gaussian processes 
     x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0 * data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
@@ -97,7 +97,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     data_train, data_test = make_data_structs( csv_path_file ) 
 
     if interpolate_gp == false 
-        x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
+        x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
     else 
         t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = gp_train_double_test( data_train, data_test, σn, opt_σn ) 
     end 
@@ -224,7 +224,7 @@ function cross_validate( csv_path, csv_path_file, freq_hz, plot_option = false )
     data_train, data_test = make_data_structs( csv_path_file ) 
 
     # smooth with GPs 
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
 
     λ_vec = λ_vec_fn() 
 
@@ -453,7 +453,7 @@ function cross_validate_sindy_gpsindy( csv_file, plot_option = false )
     data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
     
     # get x0 from smoothed data 
     x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
@@ -737,7 +737,7 @@ function cross_validate_gpsindy( csv_file, plot_option = false )
     data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
     
     # get x0 from smoothed data 
     x0_train_GP = x_train_GP[1,:] 

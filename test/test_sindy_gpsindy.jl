@@ -45,12 +45,16 @@ data_train, data_test = make_data_structs( csv_path_file )
 data_train, data_test = make_data_structs(csv_path_file)
 
 # Apply Gaussian Process smoothing to the data
-if interpolate_gp == false
-    # Standard GP smoothing on original data
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test(data_train, data_test, σn, opt_σn)
-else
+if interpolate_gp == true 
+
     # Enhanced GP smoothing with doubled data points
     t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test(data_train, data_test, σn, opt_σn)
+
+else
+
+    # Standard GP smoothing on original data
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp(data_train, data_test, σn, opt_σn)
+
 end
 
 # Prepare for cross-validation of SINDy and GP-SINDy

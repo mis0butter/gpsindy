@@ -168,9 +168,9 @@ dx_test_GP  = gp_post( x_test_GP, 0*data_test.dx_noise, x_test_GP, 0*data_test.d
 
 
 # smooth with GPs 
-# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
 # ----------------------- #
-# function gp_train_test 
+# function smooth_data_gp 
 # first - smooth measurements with Gaussian processes 
 x_train_GP  = gp_post( data_train.t, 0*data_train.x_noise, data_train.t, 0*data_train.x_noise, data_train.x_noise ) 
 dx_train_GP = gp_post( x_train_GP, 0*data_train.dx_noise, x_train_GP, 0*data_train.dx_noise, data_train.dx_noise ) 

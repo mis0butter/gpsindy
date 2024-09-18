@@ -117,7 +117,7 @@ csv_path_file = csv_files_vec[i_csv]
 # extract data 
 data_train, data_test = make_data_structs( csv_path_file ) 
 
-# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test, σn, opt_σn ) 
+# x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
 t_train_dbl, u_train_dbl, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_double_test( data_train, data_test, σ_n, opt_σn ) 
 
 

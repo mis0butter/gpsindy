@@ -27,7 +27,7 @@ norm_err_vec = [  ]
     dx_train = data_train.dx_noise 
 
     # smooth with GPs 
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
 
     # make fig 
     fig = plot_car_raw_GP( t_train, x_train, dx_train, x_train_GP, dx_train_GP) 
@@ -59,7 +59,7 @@ dx_train = data_train.dx_noise
 # ----------------------- #
 # smooth with GPs 
 
-x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = gp_train_test( data_train, data_test ) 
+x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
 
 
 ## ============================================ ## 
