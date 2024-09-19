@@ -6,7 +6,6 @@ using Printf
 using CSV, DataFrames 
 
 
-
 ## ============================================ ## 
 # # rollout_1.csv  
 
@@ -20,8 +19,7 @@ csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/5hz_noise_0/rollout_
 interpolate_gp = true 
 
 σn      = 0.02 
-opt_σn  = false 
-
+opt_σn  = true 
 
 df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, interpolate_gp ) 
 

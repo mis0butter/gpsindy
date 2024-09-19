@@ -105,8 +105,23 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
 
     if interpolate_gp == false 
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
-    else 
-        t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = smooth_data_gp_x2( data_train, data_test, σn, opt_σn ) 
+    elseif interpolate_gp == true 
+
+        # t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = smooth_data_gp_x2( data_train, data_test, σn, opt_σn ) 
+
+        interp_factor  = 2 
+        t_train_x2 = interpolate_array( data_train.t, interp_factor ) 
+        u_train_x2 = interpolate_array( data_train.u, interp_factor )  
+
+        x_col, x_row = size( data_train.x_noise ) 
+        u_col, u_row = size( data_train.u ) 
+
+        x_train_GP  = smooth_gp_posterior( t_train_x2, zeros( interp_factor * x_col, x_row ), data_train.t, 0 * data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
+        dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( interp_factor * x_col, x_row ), data_train.x_noise, 0 * data_train.dx_noise, data_train.dx_noise, σn, opt_σn ) 
+
+        x_test_GP   = smooth_gp_posterior( data_test.t, 0 * data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σn, opt_σn ) 
+        dx_test_GP  = smooth_gp_posterior( x_test_GP, 0 * data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σn, opt_σn ) 
+
     end 
     
     # cross-validate gpsindy 
