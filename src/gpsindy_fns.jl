@@ -18,8 +18,8 @@ end
 ## ============================================ ##
 # smooth training and test data with GPs 
 
-export smooth_data_gp_x2 
-function smooth_data_gp_x2( data_train, data_test, σn = 0.1, opt_σn = true, interp_factor = 2 ) 
+export interpolate_data_gp 
+function interpolate_data_gp( data_train, data_test, σn = 0.1, opt_σn = true, interp_factor = 2 ) 
 
     # let's double the points 
     t_train_interp = t_double_fn( data_train.t ) 
@@ -107,16 +107,16 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
     elseif interpolate_gp == true 
 
-        # t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = smooth_data_gp_x2( data_train, data_test, σn, opt_σn ) 
+        # t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = interpolate_data_gp( data_train, data_test, σn, opt_σn ) 
 
         interp_factor  = 2 
-        t_train_x2 = interpolate_array( data_train.t, interp_factor ) 
-        u_train_x2 = interpolate_array( data_train.u, interp_factor )  
+        t_train_interp = interpolate_array( data_train.t, interp_factor ) 
+        u_train_interp = interpolate_array( data_train.u, interp_factor )  
 
         x_col, x_row = size( data_train.x_noise ) 
         u_col, u_row = size( data_train.u ) 
 
-        x_train_GP  = smooth_gp_posterior( t_train_x2, zeros( interp_factor * x_col, x_row ), data_train.t, 0 * data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
+        x_train_GP  = smooth_gp_posterior( t_train_interp, zeros( interp_factor * x_col, x_row ), data_train.t, 0 * data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
         dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( interp_factor * x_col, x_row ), data_train.x_noise, 0 * data_train.dx_noise, data_train.dx_noise, σn, opt_σn ) 
 
         x_test_GP   = smooth_gp_posterior( data_test.t, 0 * data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σn, opt_σn ) 
@@ -141,7 +141,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         if interpolate_gp == false 
             x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
         else 
-            x_gpsindy_train, x_gpsindy_test = integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_x2, u_train_x2, λ, data_train, data_test )  
+            x_gpsindy_train, x_gpsindy_test = integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
         end 
         push!( df_gpsindy, [ λ, norm( data_train.x_noise - x_gpsindy_train ),  norm( data_test.x_noise - x_gpsindy_test ), x_gpsindy_train, x_gpsindy_test ] ) 
 
@@ -150,8 +150,8 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     if interpolate_gp == true 
         # _, x_train_GP  = downsample( data_train.t, t_train_x2, x_train_GP ) 
         # _, dx_train_GP = downsample( data_train.t, t_train_x2, dx_train_GP ) 
-        _, x_train_GP  = downsample_to_original(data_train.t, t_train_x2, x_train_GP) 
-        _, dx_train_GP = downsample_to_original(data_train.t, t_train_x2, dx_train_GP) 
+        _, x_train_GP  = downsample_to_original(data_train.t, t_train_interp, x_train_GP) 
+        _, dx_train_GP = downsample_to_original(data_train.t, t_train_interp, dx_train_GP) 
     end 
 
     # save gpsindy min err stats 
@@ -403,7 +403,7 @@ function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false
     data_train, data_test = make_data_structs( csv_file ) 
 
     # smooth with GPs 
-    t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp_x2( data_train, data_test ) 
+    t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = interpolate_data_gp( data_train, data_test ) 
     
     # get x0 from smoothed data 
     x0_train = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
