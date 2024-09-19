@@ -105,13 +105,13 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
 
     if interpolate_gp == false 
         x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test, σn, opt_σn ) 
-    elseif interpolate_gp == true 
+    else 
 
-        # t_train_x2, u_train_x2, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP  = interpolate_data_gp( data_train, data_test, σn, opt_σn ) 
-
-        interp_factor  = 2 
+        interp_factor  = Int( interpolate_gp )  
         t_train_interp = interpolate_array( data_train.t, interp_factor ) 
         u_train_interp = interpolate_array( data_train.u, interp_factor )  
+
+        println("t_train_interp") 
 
         x_col, x_row = size( data_train.x_noise ) 
         u_col, u_row = size( data_train.u ) 
@@ -129,7 +129,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     header     = [ "λ", "train_err", "test_err", "train_traj", "test_traj" ] 
     df_gpsindy = DataFrame( fill( [], 5 ), header ) 
     df_sindy   = DataFrame( fill( [], 5 ), header ) 
-    for i_λ = eachindex( λ_vec ) 
+    for i_λ = eachindex(λ_vec) 
 
         λ = λ_vec[i_λ] 
         
@@ -147,7 +147,7 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
 
     end 
 
-    if interpolate_gp == true 
+    if !isequal( interpolate_gp, false )  
         _, x_train_GP  = downsample_to_original(data_train.t, t_train_interp, x_train_GP) 
         _, dx_train_GP = downsample_to_original(data_train.t, t_train_interp, dx_train_GP) 
     end 
