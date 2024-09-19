@@ -163,7 +163,7 @@ x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_tra
 
 # ----------------------- #
 # sindy!!! 
-x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
+x_sindy_train, x_sindy_test = integrate_sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
 
 # ----------------------- #
 # gpsindy!!! 
@@ -206,7 +206,7 @@ display(f)
 
 # ----------------------- #
 # gpsindy!!! 
-# x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
+# x_gpsindy_train, x_gpsindy_test = integrate_sindy_lasso( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
 
 # ----------------------- #
 # metrics 

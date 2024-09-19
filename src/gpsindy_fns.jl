@@ -134,12 +134,12 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         λ = λ_vec[i_λ] 
         
         # sindy!!! 
-        x_sindy_train, x_sindy_test = sindy_lasso_int( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
+        x_sindy_train, x_sindy_test = integrate_sindy_lasso( data_train.x_noise, data_train.dx_noise, λ, data_train, data_test ) 
         push!( df_sindy, [ λ, norm( data_train.x_noise - x_sindy_train ),  norm( data_test.x_noise - x_sindy_test ), x_sindy_train, x_sindy_test ] ) 
 
         # gpsindy!!! 
         if interpolate_gp == false 
-            x_gpsindy_train, x_gpsindy_test = sindy_lasso_int( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
+            x_gpsindy_train, x_gpsindy_test = integrate_sindy_lasso( x_train_GP, dx_train_GP, λ, data_train, data_test ) 
         else 
             x_gpsindy_train, x_gpsindy_test = integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
         end 
@@ -148,8 +148,6 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     end 
 
     if interpolate_gp == true 
-        # _, x_train_GP  = downsample( data_train.t, t_train_x2, x_train_GP ) 
-        # _, dx_train_GP = downsample( data_train.t, t_train_x2, dx_train_GP ) 
         _, x_train_GP  = downsample_to_original(data_train.t, t_train_interp, x_train_GP) 
         _, dx_train_GP = downsample_to_original(data_train.t, t_train_interp, dx_train_GP) 
     end 
