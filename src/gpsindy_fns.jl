@@ -19,7 +19,7 @@ end
 # smooth training and test data with GPs 
 
 export smooth_data_gp_x2 
-function smooth_data_gp_x2( data_train, data_test, σ_n = 0.1, opt_σn = true, interp_factor = 2 ) 
+function smooth_data_gp_x2( data_train, data_test, σn = 0.1, opt_σn = true, interp_factor = 2 ) 
 
     # let's double the points 
     t_train_interp = t_double_fn( data_train.t ) 
@@ -133,8 +133,10 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
     end 
 
     if interpolate_gp == true 
-        _, x_train_GP  = downsample( data_train.t, t_train_x2, x_train_GP ) 
-        _, dx_train_GP = downsample( data_train.t, t_train_x2, dx_train_GP ) 
+        # _, x_train_GP  = downsample( data_train.t, t_train_x2, x_train_GP ) 
+        # _, dx_train_GP = downsample( data_train.t, t_train_x2, dx_train_GP ) 
+        _, x_train_GP  = downsample_to_original(data_train.t, t_train_x2, x_train_GP) 
+        _, dx_train_GP = downsample_to_original(data_train.t, t_train_x2, dx_train_GP) 
     end 
 
     # save gpsindy min err stats 

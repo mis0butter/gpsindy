@@ -98,6 +98,7 @@ fig
 
 
 ## ============================================ ## 
+## discover ODEs 
 ## ============================================ ## 
 
 # x_gpsindy_train, x_gpsindy_test = integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
