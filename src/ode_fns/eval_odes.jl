@@ -2,7 +2,7 @@
 
 export integrate_gpsindy_interp 
 
-function integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_train_interp, λ, data_train, data_test )  
+function integrate_gpsindy_interp( x_train_gp_interp, dx_train_gp_interp, t_train_interp, u_train_interp, λ, data_train, data_test )  
     
     # get x0 from noisy and smoothed data 
     x0_train = data_train.x_noise[1,:]  
@@ -12,15 +12,16 @@ function integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_tr
     x_vars, u_vars, poly_order, _ = size_vars( data_train.x_noise, data_train.u ) 
 
     # discover dynamics  
-    Ξ_gpsindy       = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train_interp ) 
+    Ξ_gpsindy       = sindy_lasso( x_train_gp_interp, dx_train_gp_interp, λ, u_train_interp ) 
     dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
     
     # integrate discovered dynamics 
-    x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, t_train_interp, u_train_interp ) 
+    # x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, t_train_interp, u_train_interp ) 
+    x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train, data_train.t, data_train.u ) 
     x_gpsindy_test  = integrate_euler( dx_fn_gpsindy, x0_test, data_test.t, data_test.u ) 
 
     # now downsample x_gpsindy_train to match the size of normal t_train  
-    t_train, x_gpsindy_train = downsample_to_original(data_train.t, t_train_interp, x_gpsindy_train) 
+    # t_train, x_gpsindy_train = downsample_to_original(data_train.t, t_train_interp, x_gpsindy_train) 
 
     return x_gpsindy_train, x_gpsindy_test 
 end 

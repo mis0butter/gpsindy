@@ -111,8 +111,6 @@ function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noi
         t_train_interp = interpolate_array( data_train.t, interp_factor ) 
         u_train_interp = interpolate_array( data_train.u, interp_factor )  
 
-        println("t_train_interp") 
-
         x_col, x_row = size( data_train.x_noise ) 
         u_col, u_row = size( data_train.u ) 
 
