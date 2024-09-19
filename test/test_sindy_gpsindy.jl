@@ -16,7 +16,7 @@ noise   = 0
 csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/5hz_noise_0/rollout_1.csv"
 
 # tuning parameters  
-interpolate_gp = 2 
+interpolate_gp = 5 
 
 σn      = 0.02 
 opt_σn  = false 

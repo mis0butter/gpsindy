@@ -38,22 +38,35 @@ function plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsind
         
     end 
 
-    # legend 
-    Legend( f_train[1, 5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
+    # Add the main title: freq, noise level, csv file 
+    # label_text = "$freq_hz Hz \n noise = $noise" 
+    # Label(f_train[0, 1], label_text, fontsize = 24, font = :bold) 
 
-    ax_text = "σ_n = $σn \n σ_n opt = $opt_σn " 
-    Textbox( f_train[5, 1], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+    # # training and csv file  
+    # label_text = "training \n $csv_file"
+    # Label(f_train[0, 2], label_text, fontsize = 24, font = :bold) 
 
-    # print freq and noise level 
-    ax_text = "$freq_hz Hz \t noise = $noise \n interpolate GP = $interpolate_gp" 
-    Textbox( f_train[5, 2], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false, tellheight = false ) 
+    label_text = "Training: $freq_hz Hz \n noise = $noise" 
+    Label(f_train[0, 1:2], label_text, fontsize = 24, font = :bold, halign = :left) 
+
+    label_text = "σ_n = $σn \n σ_n opt = $opt_σn \n interp GP = $interpolate_gp"  
+    Label(f_train[0, 2:3], label_text, halign = :center) 
+
+    # noise optimization? interpolation? 
+    label_text = "$csv_file"
+    Label(f_train[0, 5], label_text) 
+    # Textbox( f_train[2, 5], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false ) 
 
     # print total error 
-    ax_text = string("total err: GP = ", round( norm( data_train.x_noise - x_train_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.train_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.train_err[1], digits = 2 ) ) 
-    Textbox( f_train[5, 3:4], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+    label_text = string("total err: GP = ", round( norm( data_train.x_noise - x_train_GP ), digits = 2 ), "\n sindy = ", round( df_min_err_sindy.train_err[1], digits = 2 ), ", gpsindy = ", round( df_min_err_gpsindy.train_err[1], digits = 2 ) ) 
+    Textbox( f_train[0, 3:4], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :right ) 
+    # Label(f_train[0, 3:4], label_text) 
 
-    ax_text = "training \n $csv_file" 
-    Textbox( f_train[5, 5], placeholder = ax_text, textcolor_placeholder = :black, tellwidth = false ) 
+    # Adjust the layout to make room for the title
+    rowsize!(f_train.layout, 0, 60)
+
+    # legend 
+    Legend( f_train[1, 5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, )
 
     return f_train 
 end 
