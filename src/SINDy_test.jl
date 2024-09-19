@@ -4,7 +4,7 @@
 export sindy_stls 
 function sindy_stls( x, dx, λ, u = false )
 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( dx, u ) 
     poly_order = 1 
 
     
@@ -30,7 +30,7 @@ end
 export sindy_lasso 
 function sindy_lasso( x, dx, λ, u = false )
 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx, u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( dx, u ) 
     
     if isequal(u, false)      # if u_data = false 
         data = x 

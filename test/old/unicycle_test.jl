@@ -17,12 +17,12 @@ end
 
 # truth coeffs 
 λ = 0.1 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_true, u ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( x_true, u ) 
 Ξ_true = sindy_stls(x_true, dx_true, λ, u)
 
 # ----------------------- #
 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( dx_true, u ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( dx_true, u ) 
     
 if isequal(u, false)      # if u_data = false 
     data   = x_true 

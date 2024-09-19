@@ -55,7 +55,7 @@ N_train = 100
 t_train, t_test, x_train, x_test, dx_train, dx_test, u_train, u_test = split_train_test_Npoints( t, x, dx_fd, u, N_train ) 
 
 # get sizes 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u )
+x_vars, u_vars, poly_order, n_vars = size_vars( x, u )
 
 # plot training and testing data 
 fig_train_test = plot_axes3d( ) 

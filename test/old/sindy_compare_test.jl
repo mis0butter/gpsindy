@@ -6,7 +6,7 @@ using GaussianSINDy
 fn = unicycle 
 data_train, data_test = ode_train_test( fn ) 
 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_true, data_train.u ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( data_train.x_true, data_train.u ) 
 
 if isequal(data_train.u, false)     # if u_data = false 
     data   = data_train.x_true 

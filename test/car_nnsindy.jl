@@ -67,7 +67,7 @@ function cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, interpolate_gp )
         x0_test  = data_test.x_noise[1,:]
         
         # get sizes 
-        x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+        x_vars, u_vars, poly_order, n_vars = size_vars( data_train.x_noise, data_train.u ) 
         
         # cross-validate nnsindy 
         λ_vec      = λ_vec_fn() 

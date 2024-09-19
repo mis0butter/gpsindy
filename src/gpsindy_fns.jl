@@ -264,7 +264,7 @@ export sindy_gpsindy_λ
 function sindy_gpsindy_λ( data_train, data_test, x_train_GP, dx_train_GP, x_test_GP, λ ) 
 
     # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( data_train.x_noise, data_train.u ) 
     
     # get x0 from noisy and smoothed data 
     x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
@@ -514,7 +514,7 @@ export cross_validate_λ
 function cross_validate_λ( t_train, x_train, dx_train, u_train, λ_vec ) 
 
     # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train, u_train ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( x_train, u_train ) 
     
     # build function library from smoothed data 
     Θx_gp  = pool_data_test( [ x_train u_train ], n_vars, poly_order ) 
@@ -609,7 +609,7 @@ function sindy_nn_gpsindy( fn, noise, λ, Ξ_hist, Ξ_err_hist, x_hist, x_err_hi
     end 
 
     # truth coeffs 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_true, u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( x_true, u ) 
 
     poly_order = 1 
     Ξ_true = sindy_stls(x_true, dx_true, λ, u)
@@ -808,7 +808,7 @@ function x_Ξ_fn( data_train, data_test, data_train_stand )
     # ----------------------- # 
     # validate 
     
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( data_train.x_noise, data_train.u ) 
     
     dx_fn_nn          = build_dx_fn( poly_order, x_vars, u_vars, Ξ_nn_lasso ) 
     dx_fn_true        = build_dx_fn( poly_order, x_vars, u_vars, Ξ_true_stls ) 
@@ -985,7 +985,7 @@ export gpsindy_Ξ_fn
 function gpsindy_Ξ_fn( t_train, x_train, dx_train, λ, u_train ) 
 
     # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train, u_train ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( x_train, u_train ) 
 
     # GP smooth data 
     x_GP_train  = smooth_gp_posterior( t_train, 0*x_train, t_train, 0*x_train, x_train ) 

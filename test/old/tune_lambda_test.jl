@@ -26,7 +26,7 @@ x_test_true    = data_test.x_true
 dx_test_true   = data_test.dx_true 
 
 # get sizes 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x_train_noise, u_train ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( x_train_noise, u_train ) 
 poly_order = 4 
 
 Ξ_true       = sindy_stls( x_train_true, dx_train_true, λ, poly_order, u_train ) 

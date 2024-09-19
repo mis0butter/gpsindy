@@ -6,7 +6,7 @@ using GaussianSINDy
 
 # load data 
 t, x, u = extract_car_data() 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( x, u ) 
 x, dx_fd = unroll( t, x ) 
 
 # split into training and test data 

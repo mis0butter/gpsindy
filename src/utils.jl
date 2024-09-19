@@ -296,7 +296,7 @@ export min_max_y
 
 ## ============================================ ## 
 
-function downsample_to_original(t_orig, t_interp, x_interp)
+function downsample_to_original(t_orig, t_interp, x_interp) 
     
     # Initialize arrays to store downsampled data
     t_downsampled = similar(t_orig)
@@ -509,7 +509,7 @@ export make_data_structs
 function make_data_structs( csv_file ) 
 
     t, x, u = extract_car_data( csv_file ) 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( x, u ) 
     x, dx_fd = unroll( t, x ) 
     
     # split into training and test data 
@@ -550,8 +550,8 @@ end
 ## ============================================ ##
 # get sizes of things 
 
-export size_x_n_vars 
-function size_x_n_vars( x, u = false ) 
+export size_vars 
+function size_vars( x, u = false ) 
 
     x_vars = size(x, 2)
         

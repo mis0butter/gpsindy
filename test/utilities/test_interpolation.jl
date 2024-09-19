@@ -108,7 +108,7 @@ x0_train = data_train.x_noise[1,:]
 x0_test  = data_test.x_noise[1,:]  
 
 # get sizes 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( data_train.x_noise, data_train.u ) 
 
 # ----------------------- #
 # sindy-lasso ! 

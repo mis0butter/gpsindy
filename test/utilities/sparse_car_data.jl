@@ -91,7 +91,7 @@ u = data[:,6:7]
 x, dx = unroll( t, x ) 
 
 # truth coeffs 
-x_vars, u_vars, poly_order, n_vars = size_x_n_vars( x, u ) 
+x_vars, u_vars, poly_order, n_vars = size_vars( x, u ) 
 
 λ = 0.1 
 

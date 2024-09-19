@@ -9,7 +9,7 @@ function integrate_gpsindy_interp( x_train_GP, dx_train_GP, t_train_interp, u_tr
     x0_test  = data_test.x_noise[1,:]  
     
     # get sizes 
-    x_vars, u_vars, poly_order, _ = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    x_vars, u_vars, poly_order, _ = size_vars( data_train.x_noise, data_train.u ) 
 
     # discover dynamics  
     Ξ_gpsindy       = sindy_lasso( x_train_GP, dx_train_GP, λ, u_train_interp ) 
@@ -36,14 +36,13 @@ function integrate_sindy_lasso( x_train_in, dx_train_in, λ, data_train, data_te
     x0_test  = data_test.x_noise[1,:]  
     
     # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    x_vars, u_vars, poly_order, _ = size_vars( data_train.x_noise, data_train.u ) 
 
-    # ----------------------- #
-    # sindy-lasso ! 
-    Ξ_sindy  = sindy_lasso( x_train_in, dx_train_in, λ, data_train.u ) 
+    # discover dynamics   
+    Ξ_sindy     = sindy_lasso( x_train_in, dx_train_in, λ, data_train.u ) 
+    dx_fn_sindy = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
     
     # integrate discovered dynamics 
-    dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_sindy ) 
     x_sindy_train = integrate_euler( dx_fn_sindy, x0_train, data_train.t, data_train.u ) 
     x_sindy_test  = integrate_euler( dx_fn_sindy, x0_test, data_test.t, data_test.u ) 
 
@@ -57,7 +56,7 @@ export dx_Ξ_integrate
 function dx_Ξ_integrate( data_train, data_test, Ξ, x0_train, x0_test ) 
     
     # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_x_n_vars( data_train.x_noise, data_train.u ) 
+    x_vars, u_vars, poly_order, n_vars = size_vars( data_train.x_noise, data_train.u ) 
 
     # build dx_fn from Ξ and integrate 
     dx_fn_sindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ ) 
