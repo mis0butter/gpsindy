@@ -55,7 +55,7 @@ end
 function add_labels_and_adjust_layout( fig, freq_hz, noise, σn, opt_σn, interpolate_gp, csv_file, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train" )
     
     # training, frequency, and noise level 
-    label_text = "Training: $freq_hz Hz \n noise = $noise" 
+    label_text = "$(type)ing: $freq_hz Hz \n noise = $noise" 
     Label(fig[0, 1:2], label_text, fontsize = 24, font = :bold, halign = :left) 
 
     # noise optimization? interpolation?  

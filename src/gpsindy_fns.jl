@@ -21,28 +21,18 @@ end
 export interpolate_data_gp 
 function interpolate_data_gp( data_train, data_test, σn = 0.1, opt_σn = true, interp_factor = 2 ) 
 
-    # let's double the points 
-    t_train_interp = t_double_fn( data_train.t ) 
+    interp_factor  = Int( interpolate_gp )  
+    t_train_interp = interpolate_array( data_train.t, interp_factor ) 
+    u_train_interp = interpolate_array( data_train.u, interp_factor )  
 
     x_col, x_row = size( data_train.x_noise ) 
     u_col, u_row = size( data_train.u ) 
 
-    # # first - smooth training data with Gaussian processes 
-    # x_train_GP  = smooth_gp_posterior( t_train_interp, zeros( 2 * x_col, x_row ), data_train.t, 0*data_train.x_noise, data_train.x_noise, σ_n, opt_σn ) 
-    # dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( 2 * x_col, x_row ), data_train.x_noise, 0*data_train.dx_noise, data_train.dx_noise, σ_n, opt_σn  ) 
-    # # u_train_x2  = smooth_gp_posterior( t_train_x2, zeros( 2 * u_col, u_row ), data_train.t, 0*data_train.u, data_train.u, σ_n, opt_σn  ) 
-    # u_train_interp = interp_dbl_fn( data_train.u ) 
-
-    # smooth testing data 
-    x_test_GP   = smooth_gp_posterior( data_test.t, 0 * data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise ) 
-    dx_test_GP  = smooth_gp_posterior( x_test_GP, 0 * data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise ) 
-
-    # smooth training data 
-    t_train_interp = interpolate_array( data_train.t, interp_factor ) 
-    u_train_interp = interpolate_array( data_train.u, interp_factor )  
-
     x_train_GP  = smooth_gp_posterior( t_train_interp, zeros( interp_factor * x_col, x_row ), data_train.t, 0 * data_train.x_noise, data_train.x_noise, σn, opt_σn ) 
     dx_train_GP = smooth_gp_posterior( x_train_GP, zeros( interp_factor * x_col, x_row ), data_train.x_noise, 0 * data_train.dx_noise, data_train.dx_noise, σn, opt_σn ) 
+
+    x_test_GP   = smooth_gp_posterior( data_test.t, 0 * data_test.x_noise, data_test.t, 0 * data_test.x_noise, data_test.x_noise, σn, opt_σn ) 
+    dx_test_GP  = smooth_gp_posterior( x_test_GP, 0 * data_test.dx_noise, x_test_GP, 0 * data_test.dx_noise, data_test.dx_noise, σn, opt_σn ) 
 
     return t_train_interp, u_train_interp, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
