@@ -1,23 +1,67 @@
 ## ============================================ ##
 # posterior GP and optimize hps 
 
-export smooth_gp_posterior 
-function smooth_gp_posterior( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true ) 
-# ----------------------- #
-# PURPOSE: 
-#       Compute posterior of Gaussian process and optimize hyperparameters 
-# INPUTS: 
-#       x_prior : input points for the PRIOR model (TEST points) 
-#       μ_prior : mean function m(x) of the PRIOR model 
-#       x_train : input points for the TRAINING (meas) data 
-#       μ_train : mean function m(x) for the TRAINING (meas) data 
-#       y_train : output points for the TRAINING (meas) data 
-#       σ_n     : noise std dev 
-#       σ_n_opt : optimize σ_n flag, true = optimize, false = use fixed value  
-# OUTPUTS: 
-#       y_post  : posterior output based on TRAINING (meas) data 
-# ----------------------- # 
+# export smooth_gp_posterior 
+# function smooth_gp_posterior( x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true ) 
+# # ----------------------- #
+# # PURPOSE: 
+# #       Compute posterior of Gaussian process and optimize hyperparameters 
+# # INPUTS: 
+# #       x_prior : input points for the PRIOR model (TEST points) 
+# #       μ_prior : mean function m(x) of the PRIOR model 
+# #       x_train : input points for the TRAINING (meas) data 
+# #       μ_train : mean function m(x) for the TRAINING (meas) data 
+# #       y_train : output points for the TRAINING (meas) data 
+# #       σ_n     : noise std dev 
+# #       σ_n_opt : optimize σ_n flag, true = optimize, false = use fixed value  
+# # OUTPUTS: 
+# #       y_post  : posterior output based on TRAINING (meas) data 
+# # ----------------------- # 
 
+#     # set up posterior 
+#     x_rows = size( x_prior, 1 ) ; n_vars = size(y_train, 2) 
+#     y_post = zeros( x_rows, n_vars ) 
+    
+#     # optimize hyperparameters, compute posterior y_post for each state 
+#     for i = 1 : n_vars 
+    
+#         # kernel  
+#         mZero     = MeanZero()              # zero mean function 
+#         # kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
+
+#         # Use matern kernel
+#         # kern      = Mat12Iso( 0.0, 0.0 ) 
+
+#                 # Periodic kernel with initial hyperparameters
+#         l = 1.0  # initial length scale
+#         p = 1.0  # initial period
+#         σ = 1.0  # initial signal variance
+#         kern = Periodic(log(l), log(p), log(σ))
+        
+#         # log_noise = log( σ_n )              # (optional) log std dev of obs 
+#         log_noise = log( σ_n )              # (optional) log std dev of obs 
+        
+#         # y_train = dx_noise[:,i] - dx_mean[:,i]
+#         gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
+#         optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = σ_n_opt ) 
+
+#         # # report hyperparameter 
+#         # σ_n = exp( gp.logNoise.value )  
+#         # println( "opt σ_n = ", σ_n ) 
+
+        # y_post[:,i] = predict_y( gp, x_prior' )[1]  
+    
+#     end 
+
+#     return y_post 
+
+# end 
+
+## ============================================ ## 
+
+export smooth_gp_posterior 
+function smooth_gp_posterior(x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true) 
+    
     # set up posterior 
     x_rows = size( x_prior, 1 ) ; n_vars = size(y_train, 2) 
     y_post = zeros( x_rows, n_vars ) 
@@ -26,83 +70,56 @@ function smooth_gp_posterior( x_prior, μ_prior, x_train, μ_train, y_train, σ_
     for i = 1 : n_vars 
     
         # kernel  
-        mZero     = MeanZero()              # zero mean function 
-        # kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
-
-        # Use matern kernel
-        kern      = Mat12Iso( 0.0, 0.0 ) 
+        mZero = MeanZero()              # zero mean function 
         
-        # log_noise = log( σ_n )              # (optional) log std dev of obs 
-        log_noise = log( σ_n )              # (optional) log std dev of obs 
+        # Periodic kernel with initial hyperparameters
+        l = median(diff(x_train, dims = 1))  # initial length scale: median distance between points
+        p = (maximum(x_train) - minimum(x_train)) / 2  # initial period: half the data range
+        σ = std(y_train[:,i])  # initial signal variance: standard deviation of the data
+
+        # kern = Periodic( l, p, σ )
+        nugget = 1e-5  # small value to ensure positive definiteness
+        kern = Periodic(l, p, σ) + SE(nugget, nugget)
         
-        # y_train = dx_noise[:,i] - dx_mean[:,i]
-        gp      = GP( x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise ) 
-        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = σ_n_opt ) 
+        log_noise = log(max(σ_n, 1e-6))  # Ensure non-zero noise for stability
+        
+        gp = GP(x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise) 
+        
+        # Optimization with bounds and multiple restarts
+        best_nlml = Inf
+        best_gp = gp
+        
+        for _ in 1:5  # Try 5 different initial conditions
+            try
+                optimize!(gp, method = LBFGS(linesearch = LineSearches.BackTracking()), 
+                          noise = σ_n_opt,
+                          domean = false,  # Don't optimize mean parameters
+                          kern = true,     # Do optimize kernel parameters
+                          iterations = 100,
+                          lower = [-10.0, -10.0, -10.0, -10.0],  # Lower bounds for log(l), log(p), log(σ), log(σ_n)
+                          upper = [10.0, 10.0, 10.0, 0.0])      # Upper bounds
 
-        # # report hyperparameter 
-        # σ_n = exp( gp.logNoise.value ) ; println( "opt σ_n = ", σ_n ) ; println( "σ_n_opt = ", σ_n_opt ) 
+                if gp.logNoise.value < best_nlml
+                    best_nlml = gp.logNoise.value
+                    best_gp = gp
+                end
+            catch e
+                println("Optimization failed, trying again with different initial conditions")
+                println("Error: ", e)
+            end
+        end
+        
+        gp = best_gp  # Use the best GP found
 
-        y_post[:,i] = predict_y( gp, x_prior' )[1]  
+        # Add small jitter to improve numerical stability
+        jitter = 1e-6
+        # y_post[:,i], _ = predict_y(gp, x_prior', jitter)
+        y_post[:,i] = predict_y( gp, x_prior' )[1]
     
     end 
 
     return y_post 
-
 end 
-
-## ============================================ ## 
-
-
-# export smooth_gp_posterior 
-# function smooth_gp_posterior(x_prior, μ_prior, x_train, μ_train, y_train, σ_n = 1e-1, σ_n_opt = true) 
-#     # ... existing code ...
-
-#     for i = 1 : n_vars 
-    
-#         # kernel  
-#         mZero = MeanZero()              # zero mean function 
-        
-#         # Periodic kernel with initial hyperparameters
-#         l = 1.0  # initial length scale
-#         p = 1.0  # initial period
-#         σ = 1.0  # initial signal variance
-#         kern = Periodic(log(l), log(p), log(σ))
-
-#         log_noise = log(σ_n)                # log std dev of obs 
-        
-#         gp = GP(x_train', y_train[:,i] - μ_train[:,i], mZero, kern, log_noise) 
-        
-#         # Optimization with bounds and multiple restarts
-#         best_nlml = Inf
-#         best_gp = gp
-        
-#         for _ in 1:5  # Try 5 different initial conditions
-#             try
-#                 optimize!(gp, method = LBFGS(linesearch = LineSearches.BackTracking()), 
-#                           noise = σ_n_opt,
-#                           domean = false,  # Don't optimize mean parameters
-#                           kern = true,     # Do optimize kernel parameters
-#                           noise = σ_n_opt, # Optimize noise if σ_n_opt is true
-#                           iterations = 100,
-#                           lower = [-5.0, -5.0, -5.0, -5.0],  # Lower bounds for log(l), log(p), log(σ), log(σ_n)
-#                           upper = [5.0, 5.0, 5.0, 0.0])      # Upper bounds
-                
-#                 if gp.logNoise.value[1] < best_nlml
-#                     best_nlml = gp.logNoise.value[1]
-#                     best_gp = gp
-#                 end
-#             catch e
-#                 println("Optimization failed, trying again with different initial conditions")
-#             end
-#         end
-        
-#         gp = best_gp  # Use the best GP found
-#         y_post[:,i] = predict_y(gp, x_prior')[1]  
-    
-#     end 
-
-#     # ... rest of the function ...
-# end 
 
 ## ============================================ ##
 # sample from given mean and covariance 
