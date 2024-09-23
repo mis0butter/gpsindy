@@ -16,6 +16,9 @@ n = 50
 x = sort(rand(n)) * 4  # Input points between 0 and 4
 y = true_f.(x) + 0.1 * randn(n)  # Add some noise
 
+# Create prediction points
+x_pred = range(0, 5, length=200)
+
 ## ============================================ ## 
 
 # ... existing code ...
@@ -47,7 +50,18 @@ for (i, kernel) in enumerate(kernels)
 end
 
 # Find the best kernel
-best_kernel = max(results, by = x -> x[3])
+best_kernel = nothing
+best_score = -Inf
+for result in results
+    if result[3] > best_score
+        best_kernel = result
+        best_score = result[3]
+    end
+end
+
+if best_kernel === nothing
+    error("No valid kernel found")
+end
 println("Best kernel: ", best_kernel[2], " with score ", best_kernel[3])
 
 # Use the best kernel for final GP
