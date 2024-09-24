@@ -1,4 +1,54 @@
 
+
+## ============================================ ## 
+
+function extract_kernel_components(temp_string)
+    temp_string = split(temp_string, "\n")[1] 
+    temp_string = split(temp_string, "{Float64}") 
+    kernel_1 = temp_string[1] 
+    kernel_2 = temp_string[2] 
+    kernel_1 = replace(kernel_1, r"[,\s]" => "")
+    kernel_2 = replace(kernel_2, r"[,\s]" => "")
+    return kernel_1, kernel_2
+end
+
+export print_kernel  
+function print_kernel(gp)
+
+    # Extract the kernel type as a string and get the portion after the type name
+    full_kernel_string = string(gp.kernel)
+
+    # Extract the kernel type and handle composite kernels
+    if occursin("Sum", full_kernel_string) 
+
+        temp_string = split(full_kernel_string, "SumKernel{")[2] 
+        kernel_1, kernel_2 = extract_kernel_components(temp_string)
+
+        println("Kernel type = ", "Sum" ) 
+        println("Kernel 1: ", kernel_1) 
+        println("Kernel 2: ", kernel_2)  
+
+    elseif occursin("Prod", full_kernel_string) 
+
+        temp_string = split(full_kernel_string, "ProdKernel{")[2] 
+        kernel_1, kernel_2 = extract_kernel_components(temp_string)
+        
+        println("Kernel type = ", "Product" ) 
+        println("Kernel 1: ", kernel_1) 
+        println("Kernel 2: ", kernel_2)  
+
+    else # single kernel 
+
+        temp_string = split(full_kernel_string, "Type: ")[2] 
+        kernel = split(temp_string, "{Float64}")[1] 
+
+        println("Kernel type = ", kernel )  
+
+    end
+end 
+
+## ============================================ ## 
+
 export interpolate_array  
 function interpolate_array(x_orig::Union{Vector{Float64}, Matrix{Float64}}, interp_factor::Int)
 

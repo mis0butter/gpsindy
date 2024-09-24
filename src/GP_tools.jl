@@ -1,3 +1,77 @@
+
+# Define a function to evaluate kernel performance
+function evaluate_kernel(kernel, x, y)
+
+    m        = MeanZero()
+    logNoise = log(0.1)
+    gp       = GP(x, y, m, kernel, logNoise)
+    optimize!(gp)
+
+    return gp.target  # Return log marginal likelihood 
+end 
+
+function define_kernels() 
+
+    # Define a list of kernels to try
+    kernels = [
+        Periodic(0.5, 1.0, 1.0) + SE(0.1, 0.1),
+        Periodic(0.5, 1.0, 1.0) * SE(0.1, 0.1),
+        SE(1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
+        RQ(1.0, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
+        Matern(1/2, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0), 
+        Matern(3/2, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0)
+    ] 
+
+    return kernels  
+end 
+
+function find_best_kernel(results)
+
+    # Find the best kernel
+    best_kernel = nothing
+    best_score  = -Inf
+    for result in results
+        if result[3] > best_score
+            best_kernel = result
+            best_score  = result[3]
+        end
+    end
+
+    return best_kernel
+end 
+
+function evaluate_kernels(kernels, x, y)
+    results = []
+    for (i, kernel) in enumerate(kernels)
+        score = evaluate_kernel(kernel, x, y)
+        push!(results, (i, kernel, score))
+        println("Kernel $i: Log marginal likelihood = $score")
+    end
+    return results
+end 
+
+export discover_best_kernel  
+function discover_best_kernel(x, y, x_pred)
+
+    kernels     = define_kernels() 
+    results     = evaluate_kernels(kernels, x, y) 
+    best_kernel = find_best_kernel(results) 
+
+    if best_kernel === nothing
+        error("No valid kernel found")
+    end
+    println("Best kernel: ", best_kernel[2], " with score ", best_kernel[3])
+
+    # Use the best kernel for final GP 
+    best_gp = GP(x, y, MeanZero(), best_kernel[2], log(0.1))
+    optimize!(best_gp)
+
+    # Make predictions with the best kernel 
+    μ_best, σ²_best = predict_y(best_gp, x_pred)
+
+    return μ_best, σ²_best, best_gp 
+end 
+
 ## ============================================ ##
 # posterior GP and optimize hps 
 
