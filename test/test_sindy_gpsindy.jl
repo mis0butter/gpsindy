@@ -5,6 +5,10 @@ using CairoMakie
 using Printf
 using CSV, DataFrames 
 
+using Optim 
+using LineSearches  
+using GaussianProcesses 
+
 
 ## ============================================ 
 
@@ -27,14 +31,63 @@ f_train
 
 
 
+## ============================================ ## 
+
+
+## ============================================ ##
+# posterior GP and optimize hps 
+
+function test_gp( x_data, y_data, x_pred ) 
+
+    # set up posterior 
+    x_rows = size( x_pred, 1 ) ; n_vars = size(y_data, 2) 
+    y_post = zeros( x_rows, n_vars ) 
+    
+    # optimize hyperparameters, compute posterior y_post for each state 
+    for i = 1 : n_vars 
+    
+        # kernel  
+        mZero     = MeanZero()              # zero mean function 
+        kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
+        
+        log_noise = log(0.1)              # (optional) log std dev of obs 
+        
+        # y_train = dx_noise[:,i] - dx_mean[:,i]
+        gp      = GP( x_data', y_data[:,i], mZero, kern, log_noise ) 
+        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
+
+        y_post[:,i] = predict_y( gp, x_pred' )[1]  
+    
+    end 
+
+    return y_post 
+
+end 
+
 
 ## ============================================ ## 
 
-x_data = data_train.t 
-y_data = data_train.x_noise[:, 1] 
-x_pred = data_train.t  
+kernel = SE(1.0, 1.0) 
 
-μ_best, σ²_best, best_gp = smooth_column_gp(x_data, y_data, x_pred) 
+m = MeanZero()
+logNoise = log(0.1)
+
+gp = GP(x_data', y_data, m, kernel, logNoise)
+# y_post = test_gp( x_data, y_data, x_pred )  
+   
+optimize!(gp, 
+    method = LBFGS(linesearch = LineSearches.BackTracking()), 
+    # iterations = 100 
+)
+
+## ============================================ ## 
+# smooth one column of the data 
+
+x_data = x_train_GP 
+y_data = data_train.dx_noise[:, 1] 
+x_pred = x_train_GP 
+
+μ_best, σ²_best, best_gp = smooth_column_gp(x_data, y_data, x_pred)
 
 # Plot results
 fig = Figure()

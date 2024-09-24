@@ -7,13 +7,13 @@ function evaluate_kernel(kernel, x, y)
     
     # Create the GP with a try-catch block
     try
-        gp = GP(x, y, m, kernel, logNoise)
+        gp = GP(x', y, m, kernel, logNoise)
         
         # Optimize with bounds and error handling
         try
             optimize!(gp, 
                 method = LBFGS(linesearch = LineSearches.BackTracking()), 
-                iterations = 100 
+                # iterations = 100 
             )
             return gp.target  # Return log marginal likelihood
         catch opt_error
@@ -30,7 +30,7 @@ end
 function define_kernels(x, y) 
 
     # Estimate some data characteristics
-    l = log(median(diff(x, dims = 1)))  # Estimate of length scale
+    l = log(abs(median(diff(x, dims = 1))))  # Estimate of length scale
     σ = log(std(y))  # Estimate of signal variance 
     p = log((maximum(x) - minimum(x)) / 2)  # Estimate of period
 
@@ -40,9 +40,9 @@ function define_kernels(x, y)
         Periodic(l, σ, p) * SE(l/10, σ/10),
         SE(l/10, σ/10) + Periodic(l, σ/2, p),
         Matern(1/2, l, σ) + Periodic(l, σ, p), 
-        SE(l, σ),  # Simple SE kernel
-        Matern(1/2, l, σ),  # Simple Matern kernel
-        RQ(l, σ, 1.0)  # Rational Quadratic kernel
+        SE(l, σ),  
+        Matern(1/2, l, σ),  
+        RQ(l, σ, 1.0)  
     ] 
 
     return kernels  
@@ -88,14 +88,16 @@ function smooth_column_gp(x_data, y_data, x_pred)
     println("Best kernel: ", best_kernel[2], " with score ", best_kernel[3]) 
 
     # Use the best kernel for final GP 
-    best_gp = GP(x_data, y_data, MeanZero(), best_kernel[2], log(0.1))
+    best_gp = GP(x_data', y_data, MeanZero(), best_kernel[2], log(0.1))
     optimize!(best_gp) 
 
     # Make predictions with the best kernel 
-    μ_best, σ²_best = predict_y(best_gp, x_pred)
+    # y_post[:,i] = predict_y( gp, x_pred' )[1]  
+    μ_best, σ²_best = predict_y(best_gp, x_pred')
 
     return μ_best, σ²_best, best_gp 
 end 
+
 
 export smooth_array_gp  
 function smooth_array_gp(x_data, y_data, x_pred) 
