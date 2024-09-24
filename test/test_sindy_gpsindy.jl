@@ -27,7 +27,29 @@ f_train
 
 
 
+
 ## ============================================ ## 
+
+x_data = data_train.t 
+y_data = data_train.x_noise[:, 1] 
+x_pred = data_train.t  
+
+μ_best, σ²_best, best_gp = smooth_column_gp(x_data, y_data, x_pred) 
+
+# Plot results
+fig = Figure()
+ax = Axis(fig[1, 1], xlabel="x", ylabel="y", title="Best Gaussian Process Kernel")
+
+scatter!(ax, x_data, y_data, label = "Observations", markersize = 10)
+lines!(ax, x_pred, μ_best, label = "GP prediction", linewidth = 2)
+band!(ax, x_pred, μ_best .- 2*sqrt.(σ²_best), μ_best .+ 2*sqrt.(σ²_best), color=(:blue, 0.3))
+
+axislegend(ax)
+
+print_kernel(best_gp) 
+fig 
+
+
 ## ============================================ ## 
 
 # export smooth_train_test_data 

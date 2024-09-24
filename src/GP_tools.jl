@@ -13,9 +13,7 @@ function evaluate_kernel(kernel, x, y)
         try
             optimize!(gp, 
                 method = LBFGS(linesearch = LineSearches.BackTracking()), 
-                iterations = 100,
-                # lower = fill(-10.0, length(gp.dim)), # Lower bounds for all parameters
-                # upper = fill(10.0, length(gp.dim))   # Upper bounds for all parameters
+                iterations = 100 
             )
             return gp.target  # Return log marginal likelihood
         catch opt_error
@@ -42,7 +40,6 @@ function define_kernels(x, y)
         Periodic(l, σ, p) * SE(l/10, σ/10),
         SE(l/10, σ/10) + Periodic(l, σ/2, p),
         Matern(1/2, l, σ) + Periodic(l, σ, p), 
-        Matern(3/2, l, σ) + Periodic(l, σ, p),
         SE(l, σ),  # Simple SE kernel
         Matern(1/2, l, σ),  # Simple Matern kernel
         RQ(l, σ, 1.0)  # Rational Quadratic kernel

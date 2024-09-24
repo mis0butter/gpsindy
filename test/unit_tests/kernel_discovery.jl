@@ -48,7 +48,7 @@ y_data = [y z]
 
 # Plot results
 fig = Figure()
-ax = [Axis(fig[i, 1], xlabel="x", ylabel="y", title="Best Gaussian Process Kernel - Column $i") for i in 1:size(μ_best, 2)]
+ax  = [Axis(fig[i, 1], xlabel="x", ylabel="y", title="Best Gaussian Process Kernel - Column $i") for i in 1:size(μ_best, 2)]
 
 for i in 1:size(μ_best, 2) 
 
@@ -59,7 +59,7 @@ for i in 1:size(μ_best, 2)
     axislegend(ax[i])
 
     if ax == 1 
-        axislegend(ax)
+        axislegend(ax) 
     end 
 end 
 
