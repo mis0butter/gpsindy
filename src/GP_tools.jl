@@ -2,26 +2,50 @@
 # Define a function to evaluate kernel performance
 function evaluate_kernel(kernel, x, y)
 
-    m        = MeanZero()
+    m = MeanZero()
     logNoise = log(0.1)
-    gp       = GP(x, y, m, kernel, logNoise)
-    # optimize!(gp)
-    optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
+    
+    # Create the GP with a try-catch block
+    try
+        gp = GP(x, y, m, kernel, logNoise)
+        
+        # Optimize with bounds and error handling
+        try
+            optimize!(gp, 
+                method = LBFGS(linesearch = LineSearches.BackTracking()), 
+                iterations = 100,
+                # lower = fill(-10.0, length(gp.dim)), # Lower bounds for all parameters
+                # upper = fill(10.0, length(gp.dim))   # Upper bounds for all parameters
+            )
+            return gp.target  # Return log marginal likelihood
+        catch opt_error
+            println("Optimization error: ", opt_error)
+            return -Inf  # Return a very low score for failed optimizations
+        end
+    catch gp_error
+        println("GP creation error: ", gp_error)
+        return -Inf  # Return a very low score if GP creation fails
 
+    end
+end
 
-    return gp.target  # Return log marginal likelihood 
-end 
+function define_kernels(x, y) 
 
-function define_kernels() 
+    # Estimate some data characteristics
+    l = log(median(diff(x, dims = 1)))  # Estimate of length scale
+    σ = log(std(y))  # Estimate of signal variance 
+    p = log((maximum(x) - minimum(x)) / 2)  # Estimate of period
 
-    # Define a list of kernels to try
+    # Define a list of kernels to try with more conservative initial parameters
     kernels = [
-        Periodic(0.5, 1.0, 1.0) + SE(0.1, 0.1),
-        Periodic(0.5, 1.0, 1.0) * SE(0.1, 0.1),
-        SE(1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
-        # RQ(1.0, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
-        Matern(1/2, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0), 
-        Matern(3/2, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0)
+        Periodic(l, σ, p) + SE(l/10, σ/10),
+        Periodic(l, σ, p) * SE(l/10, σ/10),
+        SE(l/10, σ/10) + Periodic(l, σ/2, p),
+        Matern(1/2, l, σ) + Periodic(l, σ, p), 
+        Matern(3/2, l, σ) + Periodic(l, σ, p),
+        SE(l, σ),  # Simple SE kernel
+        Matern(1/2, l, σ),  # Simple Matern kernel
+        RQ(l, σ, 1.0)  # Rational Quadratic kernel
     ] 
 
     return kernels  
@@ -57,7 +81,7 @@ end
 export smooth_column_gp  
 function smooth_column_gp(x_data, y_data, x_pred) 
 
-    kernels     = define_kernels() 
+    kernels     = define_kernels(x_data, y_data) 
     results     = evaluate_kernels(kernels, x_data, y_data) 
     best_kernel = find_best_kernel(results) 
 
@@ -68,8 +92,7 @@ function smooth_column_gp(x_data, y_data, x_pred)
 
     # Use the best kernel for final GP 
     best_gp = GP(x_data, y_data, MeanZero(), best_kernel[2], log(0.1))
-    # optimize!(best_gp) 
-    optimize!( best_gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
+    optimize!(best_gp) 
 
     # Make predictions with the best kernel 
     μ_best, σ²_best = predict_y(best_gp, x_pred)
@@ -92,7 +115,6 @@ function smooth_array_gp(x_data, y_data, x_pred)
 
     return μ_best, σ²_best, best_gps 
 end 
-
 
 
 ## ============================================ ##

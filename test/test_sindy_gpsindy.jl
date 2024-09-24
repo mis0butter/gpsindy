@@ -30,54 +30,8 @@ f_train
 ## ============================================ ## 
 ## ============================================ ## 
 
-μ_best, σ²_best, best_gp = smooth_column_gp(x, y, x_pred) 
-
-## ============================================ ##
-# posterior GP and optimize hps 
-
-# function smooth_gp( x_pred, x_data, y_data ) 
-function smooth_gp( x_prior, x_train, y_train ) 
-    
-    σ_n     = 1e-1 
-    σ_n_opt = true 
-
-    # set up posterior 
-    x_rows = size( x_prior, 1 ) ; n_vars = size(y_train, 2) 
-    y_post = zeros( x_rows, n_vars ) 
-    
-    # optimize hyperparameters, compute posterior y_post for each state 
-    for i = 1 : n_vars 
-    
-        # kernel  
-        mZero     = MeanZero()              # zero mean function 
-        kern      = SE( 0.0, 0.0 )          # squared eponential kernel (hyperparams on log scale) 
-        
-        # log_noise = log( σ_n )              # (optional) log std dev of obs 
-        log_noise = log( σ_n )              # (optional) log std dev of obs 
-        
-        # y_train = dx_noise[:,i] - dx_mean[:,i]
-        gp      = GP( x_train', y_train[:,i], mZero, kern, log_noise ) 
-        optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ), noise = σ_n_opt ) 
-
-        y_post[:,i] = predict_y( gp, x_prior' )[1]  
-    
-    end 
-
-    return y_post 
-
-end 
-
-## ============================================ ##
-# smooth training and test data with GPs 
-
 # export smooth_train_test_data 
-function smooth_train_test_data( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
-
-    # # first - smooth measurements with Gaussian processes 
-    # x_train_GP  = smooth_gp( data_train.t, data_train.t, data_train.x_noise ) 
-    # dx_train_GP = smooth_gp( x_train_GP, x_train_GP, data_train.dx_noise ) 
-    # x_test_GP   = smooth_gp( data_test.t, data_test.t, data_test.x_noise ) 
-    # dx_test_GP  = smooth_gp( x_test_GP, x_test_GP, data_test.dx_noise ) 
+function smooth_train_test_data( data_train, data_test ) 
 
     # first - smooth measurements with Gaussian processes 
     x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, data_train.t)
@@ -94,7 +48,9 @@ end
 # extract data 
 data_train, data_test = make_data_structs( csv_path_file ) 
 
-x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_train_test_data( data_train, data_test, σn, opt_σn ) 
+x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_train_test_data( data_train, data_test ) 
+
+## ============================================ ## 
 
 # cross-validate gpsindy 
 λ_vec      = λ_vec_fn() 

@@ -20,6 +20,7 @@ z = true_f.(x) + 0.2 * randn(n)  # Add some noise
 # Create prediction points
 x_pred = range(0, 4, length=200) 
 
+
 ## ============================================ ## 
 
 μ_best, σ²_best, best_gp = smooth_column_gp(x, y, x_pred) 
@@ -38,6 +39,7 @@ axislegend(ax)
 print_kernel(best_gp) 
 fig 
 
+
 ## ============================================ ## 
 
 x_data = x 
@@ -48,7 +50,7 @@ y_data = [y z]
 fig = Figure()
 ax = [Axis(fig[i, 1], xlabel="x", ylabel="y", title="Best Gaussian Process Kernel - Column $i") for i in 1:size(μ_best, 2)]
 
-for i in 1:size(μ_best, 2)
+for i in 1:size(μ_best, 2) 
 
     lines!(ax[i], x_pred, true_f.(x_pred), label="True function", linewidth=2)
     scatter!(ax[i], x_data, y_data[:, i], label="Observations", markersize=4)
