@@ -5,7 +5,9 @@ function evaluate_kernel(kernel, x, y)
     m        = MeanZero()
     logNoise = log(0.1)
     gp       = GP(x, y, m, kernel, logNoise)
-    optimize!(gp)
+    # optimize!(gp)
+    optimize!( gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
+
 
     return gp.target  # Return log marginal likelihood 
 end 
@@ -17,7 +19,7 @@ function define_kernels()
         Periodic(0.5, 1.0, 1.0) + SE(0.1, 0.1),
         Periodic(0.5, 1.0, 1.0) * SE(0.1, 0.1),
         SE(1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
-        RQ(1.0, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
+        # RQ(1.0, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0),
         Matern(1/2, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0), 
         Matern(3/2, 1.0, 1.0) + Periodic(0.5, 1.0, 1.0)
     ] 
@@ -66,7 +68,8 @@ function smooth_column_gp(x_data, y_data, x_pred)
 
     # Use the best kernel for final GP 
     best_gp = GP(x_data, y_data, MeanZero(), best_kernel[2], log(0.1))
-    optimize!(best_gp)
+    # optimize!(best_gp) 
+    optimize!( best_gp, method = LBFGS( linesearch = LineSearches.BackTracking() ) ) 
 
     # Make predictions with the best kernel 
     μ_best, σ²_best = predict_y(best_gp, x_pred)

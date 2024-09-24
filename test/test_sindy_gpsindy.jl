@@ -17,7 +17,7 @@ freq_hz        = 10
 noise          = 0.02 
 
 # rollout_1.csv  
-csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.02/rollout_2.csv"
+csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.02/rollout_2.csv" 
 
 sim_params = ( freq_hz = freq_hz, noise = noise, interpolate_gp = interpolate_gp, σn = σn, opt_σn = opt_σn ) 
 
@@ -70,7 +70,7 @@ end
 ## ============================================ ##
 # smooth training and test data with GPs 
 
-export smooth_train_test_data 
+# export smooth_train_test_data 
 function smooth_train_test_data( data_train, data_test, σ_n = 0.1, opt_σn = true ) 
 
     # # first - smooth measurements with Gaussian processes 
@@ -80,10 +80,10 @@ function smooth_train_test_data( data_train, data_test, σ_n = 0.1, opt_σn = tr
     # dx_test_GP  = smooth_gp( x_test_GP, x_test_GP, data_test.dx_noise ) 
 
     # first - smooth measurements with Gaussian processes 
-    x_train_GP, _, _  = smooth_column_gp(data_train.t, data_train.x_noise, data_train.t)
-    dx_train_GP, _, _ = smooth_column_gp(x_train_GP, data_train.dx_noise, x_train_GP)
-    x_test_GP, _, _   = smooth_column_gp(data_test.t, data_test.x_noise, data_test.t)
-    dx_test_GP, _, _  = smooth_column_gp(x_test_GP, data_test.dx_noise, x_test_GP)
+    x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, data_train.t)
+    dx_train_GP, _, _ = smooth_array_gp(x_train_GP, data_train.dx_noise, x_train_GP)
+    x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
+    dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
 
     return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
