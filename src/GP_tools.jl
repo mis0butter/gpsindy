@@ -89,7 +89,10 @@ function smooth_column_gp(x_data, y_data, x_pred)
 
     # Use the best kernel for final GP 
     best_gp = GP(x_data', y_data, MeanZero(), best_kernel[2], log(0.1))
-    optimize!(best_gp) 
+    optimize!(best_gp, 
+        method = LBFGS(linesearch = LineSearches.BackTracking()), 
+        # iterations = 100 
+    )
 
     # Make predictions with the best kernel 
     # y_post[:,i] = predict_y( gp, x_pred' )[1]  
