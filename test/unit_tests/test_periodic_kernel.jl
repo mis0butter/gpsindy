@@ -46,9 +46,36 @@ scatter!(ax, x, y, label="Observations", markersize=4)
 lines!(ax, x_pred, μ, label="GP prediction", linewidth=2)
 band!(ax, x_pred, μ .- 2*sqrt.(σ²), μ .+ 2*sqrt.(σ²), color=(:blue, 0.3))
 
-axislegend(ax)
-fig
+axislegend(ax) 
+fig 
 
+## ============================================ ## 
+
+# Print GP kernel parameters
+println("Optimized kernel parameters:")
+println("Periodic kernel:")
+println("  Length scale (l): ", gp.kernel.kernels[1].l)
+println("  Period (p): ", gp.kernel.kernels[1].p)
+println("  Signal variance (σ): ", exp(gp.kernel.kernels[1].lσ))
+println("Squared Exponential kernel:")
+println("  Length scale: ", gp.kernel.kernels[2].ℓ)
+println("  Signal variance: ", exp(gp.kernel.kernels[2].lσ))
+println("Noise variance: ", exp(2 * gp.logNoise))
+
+# Get the length scale from the periodic kernel (first kernel in the sum)
+periodic_kernel = gp.kernel.kernels[1]
+length_scale = periodic_kernel.l
+
+println("Length scale from gp.kernel.kernels[1].l: ", length_scale)
+
+# If you want to access it through kleft (although it's not recommended):
+# Note: This assumes the periodic kernel is the left kernel in the sum
+kleft_length_scale = gp.kernel.kleft.l
+
+println("Length scale from gp.kernel.kleft.l: ", kleft_length_scale)
+
+# Verify that both methods give the same result
+@assert length_scale == kleft_length_scale "Length scales should be equal"
 
 
 

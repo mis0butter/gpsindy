@@ -80,14 +80,14 @@ function smooth_array_gp(x_data, y_data, x_pred)
     n_vars   = size(y_data, 2) 
     μ_best   = zeros(size(x_pred, 1), n_vars)
     σ²_best  = zeros(size(x_pred, 1), n_vars)
-    best_gps = []
+    best_gps = [] 
 
     for i in 1:n_vars
         μ_best[:, i], σ²_best[:, i], best_gp = smooth_column_gp(x_data, y_data[:, i], x_pred) 
         push!(best_gps, best_gp) 
     end 
 
-    return μ_best, σ²_best, best_gp 
+    return μ_best, σ²_best, best_gps 
 end 
 
 
