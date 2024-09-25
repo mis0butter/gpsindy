@@ -1,5 +1,36 @@
 
 
+# Extract frequency and noise from csv_path_file
+
+export get_freq_noise  
+function get_freq_noise(csv)
+
+    # Split the path and get the relevant part
+    parts = split(csv, "/")
+    freq_noise_part = parts[end-1]  # Assuming the format is always "XHz_noise_Y"
+    
+    # Extract frequency
+    freq_match = match(r"(\d+)hz", freq_noise_part)
+    freq_hz = freq_match !== nothing ? parse(Int, freq_match[1]) : nothing
+    
+    # Extract noise
+    noise_match = match(r"noise_(\d+\.\d+)", freq_noise_part)
+    noise = noise_match !== nothing ? parse(Float64, noise_match[1]) : nothing
+    
+    return freq_hz, noise
+end
+
+## ============================================ ## 
+
+export get_rollout  
+function get_rollout(csv_path_file)
+
+    rollout_match = match(r"rollout_(\d+)\.csv", csv_path_file)
+    rollout_number = rollout_match !== nothing ? rollout_match[1] : "unknown"
+
+    return string("rollout_", rollout_number)
+end
+
 ## ============================================ ## 
 
 function extract_kernel_components(temp_string)

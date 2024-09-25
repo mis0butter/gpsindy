@@ -55,26 +55,42 @@ x_pred = x_train_GP
 
 ## ============================================ ## 
 
+# Extract frequency and noise from csv_path_file
+freq_hz, noise = get_freq_noise(csv_path_file) 
+
+println("Extracted frequency: $(freq_hz) Hz")
+println("Extracted noise: $(noise)")
+
+rollout = extract_rollout_number(csv_path_file)
+
+
 ## ============================================ ## 
 # function cross_validate_kernel( csv_path_file, σn, opt_σn, freq_hz, noise ) 
 
-# extract data 
-data_train, data_test = make_data_structs( csv_path_file ) 
+function cross_validate_csv(csv_path_file)
 
-x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_train_test_data( data_train, data_test ) 
+    # extract and smooth data 
+    data_train, data_test = make_data_structs(csv_path_file)
+    x_train_GP, dx_train_GP, x_test_GP, _ = smooth_train_test_data(data_train, data_test)
 
-df_sindy, df_gpsindy = cross_validate_sindy_gpsindy(data_train, data_test, x_train_GP, dx_train_GP) 
+    # cross validate sindy and gpsindy  
+    df_sindy, df_gpsindy = cross_validate_sindy_gpsindy(data_train, data_test, x_train_GP, dx_train_GP)
 
-# save gpsindy min err stats 
-df_min_err_sindy   = df_min_err_fn( df_sindy, csv_path_file ) 
-df_min_err_gpsindy = df_min_err_fn( df_gpsindy, csv_path_file ) 
+    # save gpsindy min err stats 
+    df_min_err_sindy   = df_min_err_fn(df_sindy, csv_path_file)
+    df_min_err_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
 
-# plot 
-csv_file = replace( split( csv_path_file, "/" )[end], ".csv" => "" ) 
-f_train  = plot_train( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, interpolate_gp, csv_file ) 
-f_test   = plot_test( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, σn, opt_σn, freq_hz, noise, interpolate_gp, csv_file )  
+    f_train = plot_data( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file, "train" )  
+    f_test  = plot_data( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file, "test" ) 
+
+    return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test  
+end 
+
+df_min_err_sindy, df_min_err_gpsindy, f_train, f_test = cross_validate_csv(csv_path_file) 
 
 #     return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test 
 # end 
+
+## ============================================ ## 
 
 

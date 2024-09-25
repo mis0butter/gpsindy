@@ -2,6 +2,7 @@ using CairoMakie
 
 ## ============================================ ## 
 
+
 function plot_trajectory( fig, i_x, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train" )
 
     sindy_traj   = getproperty( df_min_err_sindy,   string(type, "_traj") )[1] 
@@ -18,9 +19,6 @@ function plot_trajectory( fig, i_x, data_struct, x_GP, df_min_err_sindy, df_min_
 
     return ax
 end
-
-
-## ============================================ ## 
 
 
 function plot_error_trajectory(fig, i_x, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train")
@@ -46,7 +44,57 @@ function plot_error_trajectory(fig, i_x, data_struct, x_GP, df_min_err_sindy, df
     end 
 
     return ax
+end 
+
+
+function modify_fig( fig, csv_path_file, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train" )
+
+    # Extract frequency and noise from csv_path_file
+    freq_hz, noise = get_freq_noise(csv_path_file) 
+    rollout = get_rollout(csv_path_file)  
+    
+    # training, frequency, and noise level 
+    label_text = "$(type)ing: $freq_hz Hz \n noise = $noise" 
+    Label(fig[0, 1:2], label_text, fontsize = 24, font = :bold, halign = :left) 
+
+    # noise optimization? interpolation?  
+    # label_text = "σ_n = $σn \n σ_n opt = $opt_σn \n interp GP = $interpolate_gp"  
+    # Label(fig[0, 2:3], label_text, halign = :center) 
+
+    # csv file 
+    label_text = rollout 
+    Label(fig[0, 5], label_text) 
+
+    # print total error 
+    sindy_err   = getproperty( df_min_err_sindy, string(type, "_err") )[1]  
+    gpsindy_err = getproperty( df_min_err_gpsindy, string(type, "_err") )[1] 
+
+    label_text = string("total err: GP = ", round( norm( data_struct.x_noise - x_GP ), digits = 2 ), "\n sindy = ", round( sindy_err, digits = 2 ), ", gpsindy = ", round( gpsindy_err, digits = 2 ) ) 
+    Textbox( fig[0, 3:4], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :right ) 
+
+    # Adjust the layout to make room for the title
+    rowsize!(fig.layout, 0, 60) 
+
 end
+
+
+export plot_data 
+function plot_data( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file, type = "train" ) 
+
+    f_train = Figure( size = ( 800, 800 ) ) 
+
+    for i_x = 1:4 
+
+        ax = plot_trajectory( f_train, i_x, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, type ) 
+
+        ax = plot_error_trajectory( f_train, i_x, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, type ) 
+        
+    end 
+
+    modify_fig( f_train, csv_path_file, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, type )
+
+    return f_train 
+end 
 
 
 ## ============================================ ## 
