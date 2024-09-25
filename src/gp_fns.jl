@@ -3,11 +3,11 @@
 function evaluate_kernel(kernel, x, y)
 
     m = MeanZero()
-    logNoise = log(0.1)
+    log_noise = log(0.1)
     
     # Create the GP with a try-catch block
     try
-        gp = GP(x', y, m, kernel, logNoise)
+        gp = GP(x', y, m, kernel, log_noise)
         
         # Optimize with bounds and error handling
         try
@@ -38,7 +38,7 @@ function define_kernels(x, y)
     kernels = [
         Periodic(l, σ, p) + SE(l/10, σ/10),
         Periodic(l, σ, p) * SE(l/10, σ/10),
-        SE(l/10, σ/10) + Periodic(l, σ/2, p),
+        # SE(l/10, σ/10) + Periodic(l, σ/2, p),
         Matern(1/2, l, σ) + Periodic(l, σ, p), 
         SE(l, σ),  
         Matern(1/2, l, σ),  
