@@ -118,22 +118,11 @@ function smooth_column_gp(x_data, y_data, x_pred)
     if best_result === nothing
         error("No valid kernel found")
     end
-    best_kernel = best_result[2]  
-    best_score  = best_result[3]  
-    println("Best kernel: ", best_kernel, " with score ", best_score) 
+    println("Best kernel: ", best_result.kernel, " with score ", best_result.score) 
+ 
+    μ_best, σ²_best = predict_y(best_result.gp, x_pred')
 
-    # Use the best kernel for final GP 
-    best_gp = GP(x_data', y_data, MeanZero(), best_kernel, log(0.1))
-    optimize!(best_gp, 
-        method = LBFGS(linesearch = LineSearches.BackTracking()), 
-        # iterations = 100 
-    )
-
-    # Make predictions with the best kernel 
-    # y_post[:,i] = predict_y( gp, x_pred' )[1]  
-    μ_best, σ²_best = predict_y(best_gp, x_pred')
-
-    return μ_best, σ²_best, best_gp 
+    return μ_best, σ²_best, best_result.gp 
 end 
 
 ## ============================================ ## 
