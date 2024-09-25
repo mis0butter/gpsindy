@@ -38,10 +38,15 @@ function define_kernels(x, y)
     kernels = [
         Periodic(l, σ, p) + SE(l/10, σ/10),
         Periodic(l, σ, p) * SE(l/10, σ/10),
-        # SE(l/10, σ/10) + Periodic(l, σ/2, p),
         Matern(1/2, l, σ) + Periodic(l, σ, p), 
+        Matern(1/2, l, σ) * Periodic(l, σ, p), 
+        Matern(3/2, l, σ) + Periodic(l, σ, p), 
+        Matern(3/2, l, σ) * Periodic(l, σ, p), 
+        RQ(l, σ, 1.0) + Periodic(l, σ, p), 
+        RQ(l, σ, 1.0) * Periodic(l, σ, p), 
         SE(l, σ),  
         Matern(1/2, l, σ),  
+        Matern(3/2, l, σ),  
         RQ(l, σ, 1.0)  
     ] 
 
