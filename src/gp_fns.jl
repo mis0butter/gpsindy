@@ -2,31 +2,55 @@
 # Define a function to evaluate kernel performance
 export evaluate_kernel  
 function evaluate_kernel(kernel, x_data, y_data)
-
-    m = MeanZero()
-    log_noise = log(0.1)
     
     # Create the GP with a try-catch block
     try
-        gp = GP(x_data', y_data, m, kernel, log_noise)
+
+        gp = GP(x_data', y_data, MeanZero(), kernel, log(0.1))
         
-        # Optimize with bounds and error handling
         try
+
             optimize!(gp, 
                 method = LBFGS(linesearch = LineSearches.BackTracking()), 
-                # iterations = 100 
+                iterations = 100 
             )
-            return gp.target  # Return log marginal likelihood
+            return (gp.target, gp)  # Return log marginal likelihood
+
         catch opt_error
+
             println("Optimization error: ", opt_error)
-            return -Inf  # Return a very low score for failed optimizations
+            return (-Inf, nothing)  # Return a very low score for failed optimizations
+
         end
+
     catch gp_error
+
         println("GP creation error: ", gp_error)
-        return -Inf  # Return a very low score if GP creation fails
+        return (-Inf, nothing)  # Return a very low score if GP creation fails
 
     end
-end
+end 
+
+
+## ============================================ ## 
+
+
+export evaluate_kernels   
+function evaluate_kernels(kernels, x_data, y_data)
+
+    results = []
+    for (i, kernel) in enumerate(kernels) 
+
+        score, gp = evaluate_kernel(kernel, x_data, y_data)
+        result    = (i = i, kernel = kernel, score = score, gp = gp) 
+
+        push!(results, result)
+        println("Kernel $i: Log marginal likelihood = $score")
+
+    end
+
+    return results
+end 
 
 
 ## ============================================ ## 
@@ -70,31 +94,17 @@ function find_best_kernel(results)
     best_result = nothing
     best_score  = -Inf
     for result in results
-        score = result[3] 
-        if score > best_score
+
+        if result.score > best_score
             best_result = result
-            best_score  = score 
+            best_score  = result.score 
         end
+
     end
 
     return best_result
 end 
 
-
-## ============================================ ## 
-
-export evaluate_kernels   
-function evaluate_kernels(kernels, x_data, y_data)
-
-    results = []
-    for (i, kernel) in enumerate(kernels) 
-        score = evaluate_kernel(kernel, x_data, y_data)
-        push!(results, (i, kernel, score))
-        println("Kernel $i: Log marginal likelihood = $score")
-    end
-
-    return results
-end 
 
 ## ============================================ ## 
 

@@ -143,9 +143,12 @@ function test_find_best_kernel(results)
     return best_result
 end 
 
+## ============================================ ## 
+
+
 kernels = define_kernels(x_data, y_data)  
-results = test_evaluate_kernels(kernels, x_data, y_data)  
-best_result = test_find_best_kernel(results) 
+results = evaluate_kernels(kernels, x_data, y_data)  
+best_result = find_best_kernel(results) 
 
 best_gp = best_result.gp 
 
