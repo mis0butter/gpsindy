@@ -1,13 +1,14 @@
 
 # Define a function to evaluate kernel performance
-function evaluate_kernel(kernel, x, y)
+export evaluate_kernel  
+function evaluate_kernel(kernel, x_data, y_data)
 
     m = MeanZero()
     log_noise = log(0.1)
     
     # Create the GP with a try-catch block
     try
-        gp = GP(x', y, m, kernel, log_noise)
+        gp = GP(x_data', y_data, m, kernel, log_noise)
         
         # Optimize with bounds and error handling
         try
@@ -27,12 +28,17 @@ function evaluate_kernel(kernel, x, y)
     end
 end
 
-function define_kernels(x, y) 
+
+## ============================================ ## 
+
+
+export define_kernels  
+function define_kernels(x_data, y_data) 
 
     # Estimate some data characteristics
-    l = log(abs(median(diff(x, dims = 1))))     # Estimate of length scale
-    σ = log(std(y))                             # Estimate of signal variance 
-    p = log((maximum(x) - minimum(x)) / 2)      # Estimate of period
+    l = log(abs(median(diff(x_data, dims = 1))))     # Estimate of length scale
+    σ = log(std(y_data))                             # Estimate of signal variance 
+    p = log((maximum(x_data) - minimum(x_data)) / 2)      # Estimate of period
 
     # Define a list of kernels to try with more conservative initial parameters
     kernels = [
@@ -53,6 +59,11 @@ function define_kernels(x, y)
     return kernels  
 end 
 
+
+## ============================================ ## 
+
+
+export find_best_kernel  
 function find_best_kernel(results)
 
     # Find the best kernel
@@ -69,11 +80,15 @@ function find_best_kernel(results)
     return best_result
 end 
 
-function evaluate_kernels(kernels, x, y)
+
+## ============================================ ## 
+
+export evaluate_kernels   
+function evaluate_kernels(kernels, x_data, y_data)
 
     results = []
     for (i, kernel) in enumerate(kernels) 
-        score = evaluate_kernel(kernel, x, y)
+        score = evaluate_kernel(kernel, x_data, y_data)
         push!(results, (i, kernel, score))
         println("Kernel $i: Log marginal likelihood = $score")
     end
