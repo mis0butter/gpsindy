@@ -118,6 +118,19 @@ function smooth_array_gp(x_data, y_data, x_pred)
     return μ_best, σ²_best, best_gps 
 end 
 
+## ============================================ ## 
+
+export smooth_train_test_data 
+function smooth_train_test_data( data_train, data_test ) 
+
+    # first - smooth measurements with Gaussian processes 
+    x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, data_train.t)
+    dx_train_GP, _, _ = smooth_array_gp(x_train_GP, data_train.dx_noise, x_train_GP)
+    x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
+    dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
+
+    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+end 
 
 ## ============================================ ##
 # posterior GP and optimize hps 

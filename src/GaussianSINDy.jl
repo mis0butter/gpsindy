@@ -44,6 +44,8 @@ include("gpsindy_fns.jl")
 include("plot_fns.jl")
 include("nn_functions.jl")
 
+include("gp_fns.jl") 
+
 
 ## ============================================ ##
 

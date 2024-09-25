@@ -380,185 +380,185 @@ export cross_validate_all_csvs
 
 
 
-## ============================================ ##
+# ## ============================================ ##
 
-export cross_validate_sindy_gpsindy_traindouble
+# export cross_validate_sindy_gpsindy_traindouble
 
-function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false ) 
+# function cross_validate_sindy_gpsindy_traindouble( csv_file, plot_option = false ) 
 
-    data_train, data_test = make_data_structs( csv_file ) 
+#     data_train, data_test = make_data_structs( csv_file ) 
 
-    # smooth with GPs 
-    t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = interpolate_data_gp( data_train, data_test ) 
+#     # smooth with GPs 
+#     t_train_GP, u_train_GP, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = interpolate_data_gp( data_train, data_test ) 
     
-    # get x0 from smoothed data 
-    x0_train = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
-    # x0_test     = x_test_GP[1,:] 
-    x0_test  = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
+#     # get x0 from smoothed data 
+#     x0_train = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
+#     # x0_test     = x_test_GP[1,:] 
+#     x0_test  = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
 
-    # cross-validate SINDy!!! 
-    λ_vec = λ_vec_fn() 
-    Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
+#     # cross-validate SINDy!!! 
+#     λ_vec = λ_vec_fn() 
+#     Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
     
-    # save ξ with smallest x error  
-    Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
+#     # save ξ with smallest x error  
+#     Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
     
-    # build dx_fn from Ξ and integrate 
-    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train, x0_test ) 
+#     # build dx_fn from Ξ and integrate 
+#     x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train, x0_test ) 
     
-    # cross-validate GPSINDy!!!  
-    λ_vec = λ_vec_fn() 
-    Ξ_gpsindy_vec, err_x_gpsindy, err_dx_gpsindy = cross_validate_λ( t_train_GP, x_train_GP, dx_train_GP, u_train_GP, λ_vec ) 
+#     # cross-validate GPSINDy!!!  
+#     λ_vec = λ_vec_fn() 
+#     Ξ_gpsindy_vec, err_x_gpsindy, err_dx_gpsindy = cross_validate_λ( t_train_GP, x_train_GP, dx_train_GP, u_train_GP, λ_vec ) 
     
-    # save ξ with smallest x error  
-    Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
+#     # save ξ with smallest x error  
+#     Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
     
-    # build dx_fn from Ξ and integrate 
-    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train, x0_test ) 
+#     # build dx_fn from Ξ and integrate 
+#     x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train, x0_test ) 
 
-    # downsample x_train_GP (again) 
-    x_train_GP = x_train_GP[1:2:end,:] 
+#     # downsample x_train_GP (again) 
+#     x_train_GP = x_train_GP[1:2:end,:] 
 
-    # plot 
-    if plot_option == 1 
+#     # plot 
+#     if plot_option == 1 
 
-        # plot training 
-        # fig_train = plot_noise_GP_sindy_gpsindy_traindouble( data_train.t, data_train.x_noise, t_train_GP, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
-        fig_train = plot_noise_GP_sindy_gpsindy( data_train.t, data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+#         # plot training 
+#         # fig_train = plot_noise_GP_sindy_gpsindy_traindouble( data_train.t, data_train.x_noise, t_train_GP, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+#         fig_train = plot_noise_GP_sindy_gpsindy( data_train.t, data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
 
-        # plot testing 
-        fig_test = plot_noise_GP_sindy_gpsindy( data_test.t, data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
+#         # plot testing 
+#         fig_test = plot_noise_GP_sindy_gpsindy( data_test.t, data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
 
-    end 
+#     end 
 
-    return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test 
+#     return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test 
   
-end 
+# end 
 
 
 
-## ============================================ ##
+# ## ============================================ ##
 
-export cross_validate_sindy_gpsindy
+# export cross_validate_sindy_gpsindy
 
-function cross_validate_sindy_gpsindy( csv_file, plot_option = false ) 
+# function cross_validate_sindy_gpsindy( csv_file, plot_option = false ) 
 
-    data_train, data_test = make_data_structs( csv_file ) 
+#     data_train, data_test = make_data_structs( csv_file ) 
 
-    # smooth with GPs 
-    x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
+#     # smooth with GPs 
+#     x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = smooth_data_gp( data_train, data_test ) 
     
-    # get x0 from smoothed data 
-    x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
-    # x0_test     = x_test_GP[1,:] 
-    x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
+#     # get x0 from smoothed data 
+#     x0_train    = data_train.x_noise[1,:] ; x0_train_GP = x_train_GP[1,:] 
+#     # x0_test     = x_test_GP[1,:] 
+#     x0_test     = data_test.x_noise[1,:]  ; x0_test_GP  = x_test_GP[1,:] 
 
-    # ----------------------- #
+#     # ----------------------- #
     
-    # cross-validate SINDy!!! 
-    λ_vec = λ_vec_fn() 
-    Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
+#     # cross-validate SINDy!!! 
+#     λ_vec = λ_vec_fn() 
+#     Ξ_sindy_vec, err_x_sindy, err_dx_sindy = cross_validate_λ( data_train.t, data_train.x_noise, data_train.dx_noise, data_train.u, λ_vec ) 
     
-    # save ξ with smallest x error  
-    Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
+#     # save ξ with smallest x error  
+#     Ξ_sindy_lasso = Ξ_minerr( Ξ_sindy_vec, err_x_sindy ) 
     
-    # build dx_fn from Ξ and integrate 
-    x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train, x0_test ) 
+#     # build dx_fn from Ξ and integrate 
+#     x_train_sindy, x_test_sindy = dx_Ξ_integrate( data_train, data_test, Ξ_sindy_lasso, x0_train, x0_test ) 
     
-    # ----------------------- #
+#     # ----------------------- #
     
-    # cross-validate GPSINDy!!!  
-    λ_vec = λ_vec_fn() 
-    Ξ_gpsindy_vec, err_x_gpsindy, err_dx_gpsindy = cross_validate_λ( data_train.t, x_train_GP, dx_train_GP, data_train.u, λ_vec ) 
+#     # cross-validate GPSINDy!!!  
+#     λ_vec = λ_vec_fn() 
+#     Ξ_gpsindy_vec, err_x_gpsindy, err_dx_gpsindy = cross_validate_λ( data_train.t, x_train_GP, dx_train_GP, data_train.u, λ_vec ) 
     
-    # save ξ with smallest x error  
-    Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
+#     # save ξ with smallest x error  
+#     Ξ_gpsindy = Ξ_minerr( Ξ_gpsindy_vec, err_x_gpsindy ) 
     
-    # build dx_fn from Ξ and integrate 
-    x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train_GP, x0_test ) 
+#     # build dx_fn from Ξ and integrate 
+#     x_train_gpsindy, x_test_gpsindy = dx_Ξ_integrate( data_train, data_test, Ξ_gpsindy, x0_train_GP, x0_test ) 
 
-    # ----------------------- #
+#     # ----------------------- #
     
-    # plot 
-    if plot_option == 1 
+#     # plot 
+#     if plot_option == 1 
 
-        # plot training 
-        fig_train = plot_noise_GP_sindy_gpsindy( data_train.t, data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
+#         # plot training 
+#         fig_train = plot_noise_GP_sindy_gpsindy( data_train.t, data_train.x_noise, x_train_GP, x_train_sindy, x_train_gpsindy, "training data" ) 
 
-        # plot testing 
-        fig_test = plot_noise_GP_sindy_gpsindy( data_test.t, data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
+#         # plot testing 
+#         fig_test = plot_noise_GP_sindy_gpsindy( data_test.t, data_test.x_noise, x_test_GP, x_test_sindy, x_test_gpsindy, "testing data" ) 
 
-    end 
+#     end 
 
-    return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test 
+#     return data_train.t, data_test.t, data_train.x_noise, data_test.x_noise, Ξ_sindy_lasso, x_train_sindy, x_test_sindy, Ξ_gpsindy, x_train_gpsindy, x_test_gpsindy, fig_train, fig_test 
   
-end 
+# end 
 
 
-## ============================================ ##
-# cross-validate λ 
+# ## ============================================ ##
+# # cross-validate λ 
 
-export cross_validate_λ 
-function cross_validate_λ( t_train, x_train, dx_train, u_train, λ_vec ) 
+# export cross_validate_λ 
+# function cross_validate_λ( t_train, x_train, dx_train, u_train, λ_vec ) 
 
-    # get sizes 
-    x_vars, u_vars, poly_order, n_vars = size_vars( x_train, u_train ) 
+#     # get sizes 
+#     x_vars, u_vars, poly_order, n_vars = size_vars( x_train, u_train ) 
     
-    # build function library from smoothed data 
-    Θx_gp  = pool_data_test( [ x_train u_train ], n_vars, poly_order ) 
+#     # build function library from smoothed data 
+#     Θx_gp  = pool_data_test( [ x_train u_train ], n_vars, poly_order ) 
     
-    # get x0 from smoothed data
-    x0_train_GP = x_train[1,:] 
+#     # get x0 from smoothed data
+#     x0_train_GP = x_train[1,:] 
 
-    err_x_vec     = [] 
-    err_dx_vec    = [] 
-    Ξ_gpsindy_vec = [] 
+#     err_x_vec     = [] 
+#     err_dx_vec    = [] 
+#     Ξ_gpsindy_vec = [] 
 
-    # loop through each state 
-    for j = 1 : x_vars 
+#     # loop through each state 
+#     for j = 1 : x_vars 
     
-        err_xj_vec    = [] 
-        err_dxj_vec   = [] 
-        ξ_gpsindy_vec = []
+#         err_xj_vec    = [] 
+#         err_dxj_vec   = [] 
+#         ξ_gpsindy_vec = []
     
-        # CROSS-VALIDATION 
-        for i = eachindex(λ_vec) 
+#         # CROSS-VALIDATION 
+#         for i = eachindex(λ_vec) 
         
-            λ = λ_vec[i] 
-            # println( "x", j, ": λ = ", λ ) 
+#             λ = λ_vec[i] 
+#             # println( "x", j, ": λ = ", λ ) 
     
-            # GPSINDy-lasso ! 
-            Ξ_gpsindy  = sindy_lasso( x_train, dx_train, λ, u_train ) 
-            dx_gpsindy = Θx_gp * Ξ_gpsindy 
+#             # GPSINDy-lasso ! 
+#             Ξ_gpsindy  = sindy_lasso( x_train, dx_train, λ, u_train ) 
+#             dx_gpsindy = Θx_gp * Ξ_gpsindy 
     
-            if sum(Ξ_gpsindy[:,j]) == 0 
-                break 
-            end 
+#             if sum(Ξ_gpsindy[:,j]) == 0 
+#                 break 
+#             end 
     
-            # integrate discovered dynamics 
-            dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
-            x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train ) 
+#             # integrate discovered dynamics 
+#             dx_fn_gpsindy   = build_dx_fn( poly_order, x_vars, u_vars, Ξ_gpsindy ) 
+#             x_gpsindy_train = integrate_euler( dx_fn_gpsindy, x0_train_GP, t_train, u_train ) 
 
-            # save ξ coefficients 
-            ξ = Ξ_gpsindy[:,j] 
-            push!( ξ_gpsindy_vec, ξ ) 
+#             # save ξ coefficients 
+#             ξ = Ξ_gpsindy[:,j] 
+#             push!( ξ_gpsindy_vec, ξ ) 
     
-            # push error stuff 
-            err_xj_norm  = norm( x_gpsindy_train[:,j] - x_train[:,j] ) 
-            err_dxj_norm = norm( dx_gpsindy[:,j] - dx_train[:,j] ) 
-            push!( err_xj_vec, err_xj_norm ) 
-            push!( err_dxj_vec, err_dxj_norm ) 
+#             # push error stuff 
+#             err_xj_norm  = norm( x_gpsindy_train[:,j] - x_train[:,j] ) 
+#             err_dxj_norm = norm( dx_gpsindy[:,j] - dx_train[:,j] ) 
+#             push!( err_xj_vec, err_xj_norm ) 
+#             push!( err_dxj_vec, err_dxj_norm ) 
     
-        end 
+#         end 
     
-        push!( err_x_vec, err_xj_vec ) 
-        push!( err_dx_vec, err_dxj_vec ) 
-        push!( Ξ_gpsindy_vec, ξ_gpsindy_vec ) 
+#         push!( err_x_vec, err_xj_vec ) 
+#         push!( err_dx_vec, err_dxj_vec ) 
+#         push!( Ξ_gpsindy_vec, ξ_gpsindy_vec ) 
     
-    end 
+#     end 
 
-    return Ξ_gpsindy_vec, err_x_vec, err_dx_vec 
-end 
+#     return Ξ_gpsindy_vec, err_x_vec, err_dx_vec 
+# end 
 
 
 
