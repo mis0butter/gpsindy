@@ -56,16 +56,17 @@ end
 function find_best_kernel(results)
 
     # Find the best kernel
-    best_kernel = nothing
+    best_result = nothing
     best_score  = -Inf
     for result in results
-        if result[3] > best_score
-            best_kernel = result
-            best_score  = result[3]
+        score = result[3] 
+        if score > best_score
+            best_result = result
+            best_score  = score 
         end
     end
 
-    return best_kernel
+    return best_result
 end 
 
 function evaluate_kernels(kernels, x, y)
@@ -87,15 +88,17 @@ function smooth_column_gp(x_data, y_data, x_pred)
 
     kernels     = define_kernels(x_data, y_data) 
     results     = evaluate_kernels(kernels, x_data, y_data) 
-    best_kernel = find_best_kernel(results) 
+    best_result = find_best_kernel(results) 
 
-    if best_kernel === nothing
+    if best_result === nothing
         error("No valid kernel found")
     end
-    println("Best kernel: ", best_kernel[2], " with score ", best_kernel[3]) 
+    best_kernel = best_result[2]  
+    best_score  = best_result[3]  
+    println("Best kernel: ", best_kernel, " with score ", best_score) 
 
     # Use the best kernel for final GP 
-    best_gp = GP(x_data', y_data, MeanZero(), best_kernel[2], log(0.1))
+    best_gp = GP(x_data', y_data, MeanZero(), best_kernel, log(0.1))
     optimize!(best_gp, 
         method = LBFGS(linesearch = LineSearches.BackTracking()), 
         # iterations = 100 
@@ -309,7 +312,7 @@ function process_data_and_cross_validate(data_train, data_test, interp_factor)
 
         _, x_train_GP  = downsample_to_original(data_train.t, t_train_interp, x_train_GP) 
         _, dx_train_GP = downsample_to_original(data_train.t, t_train_interp, dx_train_GP) 
-        
+
     end 
 
     return df_sindy, df_gpsindy, x_train_GP, dx_train_GP, x_test_GP
