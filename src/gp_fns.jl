@@ -71,11 +71,14 @@ function define_kernels(x_data = rand(2), y_data = rand(2), list = "few")
             SE(l/10, σ/10),  
             Matern(1/2, l, σ),  
             Matern(3/2, l, σ),  
-            RQ(l, σ, 1.0)  
+            RQ(l, σ, 0.0), 
         ] 
     else 
-        # Define a list of kernels to try with more conservative initial parameters
         kernels = [
+            SE(0.0, 0.0),  
+            Matern(1/2, 0.0, 0.0),  
+            Matern(3/2, 0.0, 0.0),  
+            RQ(0.0, 0.0, 0.0), 
             SE(l/10, σ/10) + Periodic(l, σ, p),
             SE(l/10, σ/10) * Periodic(l, σ, p),
             Matern(1/2, l, σ) + Periodic(l, σ, p), 
@@ -84,10 +87,6 @@ function define_kernels(x_data = rand(2), y_data = rand(2), list = "few")
             Matern(3/2, l, σ) * Periodic(l, σ, p), 
             RQ(l, σ, 1.0) + Periodic(l, σ, p), 
             RQ(l, σ, 1.0) * Periodic(l, σ, p), 
-            SE(l/10, σ/10),  
-            Matern(1/2, l, σ),  
-            Matern(3/2, l, σ),  
-            RQ(l, σ, 1.0)  
         ] 
     end 
 
@@ -127,9 +126,20 @@ function smooth_column_gp(x_data, y_data, x_pred)
     results     = evaluate_kernels(kernels, x_data, y_data) 
     best_result = find_best_kernel(results) 
 
-    if best_result === nothing
-        error("No valid kernel found")
+    if isnothing(best_result) 
+
+        println("Expanding search for valid kernel")
+
+        kernels     = define_kernels(x_data, y_data, "many") 
+        results     = evaluate_kernels(kernels, x_data, y_data) 
+        best_result = find_best_kernel(results) 
+
+        if isnothing(best_result)
+            error("No valid kernel found")
+        end
+
     end
+    
     println("Best kernel: ", best_result.kernel, " with score ", best_result.score) 
  
     μ_best, σ²_best = predict_y(best_result.gp, x_pred')
