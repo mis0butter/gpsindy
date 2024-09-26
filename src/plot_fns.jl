@@ -30,7 +30,7 @@ function plot_error_trajectory(fig, i_x, i_y, data_struct, x_GP, df_min_err_sind
     gpsindy_traj = getproperty( df_min_err_gpsindy, string(type, "_traj") )[1]  
 
     # get error norm 
-    gp_train_err      = data_struct.x_noise[:,i_x] - x_GP[:,i_x] 
+    gp_train_err      = x_GP[:,i_x] - data_struct.x_noise[:,i_x]  
     sindy_train_err   = sindy_traj[:,i_x]   - data_struct.x_noise[:,i_x]  
     gpsindy_train_err = gpsindy_traj[:,i_x] - data_struct.x_noise[:,i_x]  
 
