@@ -313,10 +313,9 @@ function cross_validate_csv(csv_path_file, interp_factor = 1)
     df_min_err_sindy   = df_min_err_fn(df_sindy, csv_path_file)
     df_min_err_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
 
-    f_train = plot_data( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file, "train" )  
-    f_test  = plot_data( data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file, "test" ) 
+    fig = plot_data( data_train, x_train_GP, data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file )    
 
-    return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test  
+    return df_min_err_sindy, df_min_err_gpsindy, fig 
 end 
 
 
