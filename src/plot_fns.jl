@@ -1,27 +1,30 @@
 using CairoMakie 
 
+
 ## ============================================ ## 
 
 
-function plot_trajectory( fig, i_x, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train" )
+function plot_trajectory( fig, i_x, i_y, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train" )
 
     sindy_traj   = getproperty( df_min_err_sindy,   string(type, "_traj") )[1] 
     gpsindy_traj = getproperty( df_min_err_gpsindy, string(type, "_traj") )[1]  
 
-    ax = Axis(fig[i_x,1:2], title="x$i_x traj")
+    ax = Axis(fig[i_x, i_y], title="x$i_x $type traj")
     CairoMakie.scatter!(ax, data_struct.t, data_struct.x_noise[:,i_x], color=:black, label="noise")
-    lines!(ax, data_struct.t, x_GP[:,i_x], linewidth = 2, color = :red, label="GP")
-    lines!(ax, data_struct.t, sindy_traj[:,i_x], linewidth = 2, label="sindy")
-    lines!(ax, data_struct.t, gpsindy_traj[:,i_x], linewidth = 2, label="gpsindy")
-    if i_x == 4
-        ax.xlabel = "t [s]"
-    end
+    gp      = lines!(ax, data_struct.t, x_GP[:,i_x], linewidth=2, color=:red, label="GP")
+    sindy   = lines!(ax, data_struct.t, sindy_traj[:,i_x], linewidth=2, label="sindy")
+    gpsindy = lines!(ax, data_struct.t, gpsindy_traj[:,i_x], linewidth=2, label="gpsindy")
+
+    if i_x == 4 
+        ax.xlabel = "t [s]" 
+        Legend( fig[i_x + 1, 1], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, ) 
+    end 
 
     return ax
 end
 
 
-function plot_error_trajectory(fig, i_x, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train")
+function plot_error_trajectory(fig, i_x, i_y, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train")
 
     sindy_traj   = getproperty( df_min_err_sindy,   string(type, "_traj") )[1] 
     gpsindy_traj = getproperty( df_min_err_gpsindy, string(type, "_traj") )[1]  
@@ -31,31 +34,40 @@ function plot_error_trajectory(fig, i_x, data_struct, x_GP, df_min_err_sindy, df
     sindy_train_err   = sindy_traj[:,i_x]   - data_struct.x_noise[:,i_x]  
     gpsindy_train_err = gpsindy_traj[:,i_x] - data_struct.x_noise[:,i_x]  
 
-    title_str = string("x$i_x err: GP = ", round( norm( gp_train_err ), digits = 2 ), ", \n sindy = ", round( norm( sindy_train_err ), digits = 2 ), ", gpsindy = ", round( norm( gpsindy_train_err ), digits = 2 ) ) 
-    ax = Axis( fig[i_x,3:4], title = title_str ) 
-        gp      = lines!( ax, data_struct.t, gp_train_err, linewidth = 2, color = :red, label="GP" ) 
-        sindy   = lines!( ax, data_struct.t, sindy_train_err, linewidth = 2, label="sindy" ) 
-        gpsindy = lines!( ax, data_struct.t, gpsindy_train_err, linewidth = 2, label="gpsindy" ) 
+    title_str = string("x$i_x err: sindy = ", round( norm( sindy_train_err ), digits = 2 ), "\n gpsindy = ", round( norm( gpsindy_train_err ), digits = 2 ) ) 
 
-    if i_x == 1 
-        Legend( fig[i_x, 5], [ gp, sindy, gpsindy ], ["GP", "sindy", "gpsindy"], halign = :center, valign = :top, ) 
-    elseif i_x == 4 
-        ax.xlabel = "t [s]" 
-    end 
+    ax = Axis( fig[i_x, i_y], title = title_str ) 
+    lines!( ax, data_struct.t, gp_train_err, linewidth = 2, color = :red, label="GP" ) 
+    lines!( ax, data_struct.t, sindy_train_err, linewidth = 2, label="sindy" ) 
+    lines!( ax, data_struct.t, gpsindy_train_err, linewidth = 2, label="gpsindy" ) 
+
+    if i_x == 4
+
+        ax.xlabel = "t [s]"
+
+        # print total error 
+        sindy_err   = getproperty( df_min_err_sindy, string(type, "_err") )[1]  
+        gpsindy_err = getproperty( df_min_err_gpsindy, string(type, "_err") )[1] 
+
+        label_text = string("total err: GP = ", round( norm( data_struct.x_noise - x_GP ), digits = 2 ), "\n sindy = ", round( sindy_err, digits = 2 ), "\n gpsindy = ", round( gpsindy_err, digits = 2 ) ) 
+
+        Textbox( fig[i_x+1, i_y], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :center ) 
+
+    end     
 
     return ax
 end 
 
 
-function modify_fig( fig, csv_path_file, data_struct, x_GP, df_min_err_sindy, df_min_err_gpsindy, type = "train" )
+function modify_fig( fig, csv_path_file )
 
     # Extract frequency and noise from csv_path_file
     freq_hz, noise = get_freq_noise(csv_path_file) 
     rollout = get_rollout(csv_path_file)  
     
     # training, frequency, and noise level 
-    label_text = "$(type)ing: $freq_hz Hz \n noise = $noise" 
-    Label(fig[0, 1:2], label_text, fontsize = 24, font = :bold, halign = :left) 
+    label_text = "$freq_hz Hz \n noise = $noise" 
+    Label(fig[0, 1], label_text, fontsize = 24, font = :bold, halign = :left) 
 
     # noise optimization? interpolation?  
     # label_text = "σ_n = $σn \n σ_n opt = $opt_σn \n interp GP = $interpolate_gp"  
@@ -63,14 +75,8 @@ function modify_fig( fig, csv_path_file, data_struct, x_GP, df_min_err_sindy, df
 
     # csv file 
     label_text = rollout 
-    Label(fig[0, 5], label_text) 
-
-    # print total error 
-    sindy_err   = getproperty( df_min_err_sindy, string(type, "_err") )[1]  
-    gpsindy_err = getproperty( df_min_err_gpsindy, string(type, "_err") )[1] 
-
-    label_text = string("total err: GP = ", round( norm( data_struct.x_noise - x_GP ), digits = 2 ), "\n sindy = ", round( sindy_err, digits = 2 ), ", gpsindy = ", round( gpsindy_err, digits = 2 ) ) 
-    Textbox( fig[0, 3:4], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :right ) 
+    # Label(fig[0, 4], label_text, halign = :center) 
+    Textbox( fig[0, 4], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :center ) 
 
     # Adjust the layout to make room for the title
     rowsize!(fig.layout, 0, 60) 
@@ -79,21 +85,33 @@ end
 
 
 export plot_data 
-function plot_data( data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file, type = "train" ) 
+function plot_data( 
+    data_train, 
+    x_train_GP, 
+    data_test, 
+    x_test_GP, 
+    df_min_err_sindy, 
+    df_min_err_gpsindy, 
+    csv_path_file 
+) 
 
-    f_train = Figure( size = ( 800, 800 ) ) 
+    fig = Figure( size = ( 800, 800 ) ) 
+
+    modify_fig( fig, csv_path_file )
 
     for i_x = 1:4 
 
-        ax = plot_trajectory( f_train, i_x, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, type ) 
+        ax = plot_trajectory( fig, i_x, 1, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, "train" ) 
 
-        ax = plot_error_trajectory( f_train, i_x, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, type ) 
+        ax = plot_error_trajectory( fig, i_x, 2, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, "train" ) 
+
+        ax = plot_trajectory( fig, i_x, 3, data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, "test" ) 
+
+        ax = plot_error_trajectory( fig, i_x, 4, data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, "test" ) 
         
     end 
 
-    modify_fig( f_train, csv_path_file, data_train, x_train_GP, df_min_err_sindy, df_min_err_gpsindy, type )
-
-    return f_train 
+    return fig 
 end 
 
 

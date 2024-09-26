@@ -108,6 +108,7 @@ end
 
 ## ============================================ ## 
 
+
 export smooth_column_gp  
 function smooth_column_gp(x_data, y_data, x_pred) 
 
@@ -125,7 +126,9 @@ function smooth_column_gp(x_data, y_data, x_pred)
     return μ_best, σ²_best, best_result.gp 
 end 
 
+
 ## ============================================ ## 
+
 
 export smooth_array_gp  
 function smooth_array_gp(x_data, y_data, x_pred) 
@@ -142,6 +145,7 @@ function smooth_array_gp(x_data, y_data, x_pred)
 
     return μ_best, σ²_best, best_gps 
 end 
+
 
 ## ============================================ ## 
 
@@ -160,29 +164,8 @@ end
 
 
 ## ============================================ ## 
-# smooth training and test data with GPs 
 
-# function interpolate_and_smooth_data(data_train, data_test, interp_factor = 2)
 
-#     t_train_interp = interpolate_array(data_train.t, interp_factor)
-#     u_train_interp = interpolate_array(data_train.u, interp_factor)
-
-#     println("interpolating x_train_GP...")
-#     x_train_GP, _, _ = smooth_array_gp(data_train.t, data_train.x_noise, t_train_interp)
-
-#     println("interpolating dx_train_GP...")
-#     dx_train_GP, _, _ = smooth_array_gp(data_train.x_noise, data_train.dx_noise, x_train_GP)
-
-#     println("interpolating x_test_GP...")
-#     x_test_GP, _, _ = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
-
-#     println("interpolating dx_test_GP...")
-#     dx_test_GP, _, _ = smooth_array_gp(data_test.x_noise, data_test.dx_noise, x_test_GP)
-
-#     return t_train_interp, u_train_interp, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP
-# end
-
-# function smooth_gp_posterior( x_pred, 0, x_data, 0, y_data ) 
 export interpolate_train_test_data 
 function interpolate_train_test_data( data_train, data_test, interp_factor = 2 ) 
 
@@ -190,40 +173,17 @@ function interpolate_train_test_data( data_train, data_test, interp_factor = 2 )
     t_train_interp = interpolate_array( data_train.t, interp_factor ) 
     u_train_interp = interpolate_array( data_train.u, interp_factor ) 
 
-    println("interpolating x_train_GP...")
-    # x_train_GP  = smooth_gp_posterior( x_pred, 0, x_data, 0, y_data, σn, opt_σn )
-    x_pred = t_train_interp  
-    x_data = data_train.t   
-    y_data = data_train.x_noise  
-    # x_train_GP  = smooth_gp_posterior( t_train_interp, 0, data_train.t, 0, data_train.x_noise, σn, opt_σn ) 
     x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, t_train_interp)
-
-    println("interpolating dx_train_GP...") 
-    x_pred = x_train_GP  
-    x_data = data_train.x_noise  
-    y_data = data_train.dx_noise 
-    # dx_train_GP = smooth_gp_posterior( x_train_GP, 0, data_train.x_noise, 0, data_train.dx_noise, σn, opt_σn ) 
     dx_train_GP, _, _ = smooth_array_gp(data_train.x_noise, data_train.dx_noise, x_train_GP)
-
-    println("interpolating x_test_GP...")  
-    x_pred = data_test.t  
-    x_data = data_test.t   
-    y_data = data_test.x_noise 
-    # x_test_GP   = smooth_gp_posterior( data_test.t, 0, data_test.t, 0, σn, opt_σn ) 
-    x_test_GP, _, _ = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
-
-    println("interpolating dx_test_GP...") 
-    x_pred = x_test_GP   
-    x_data = data_test.x_noise  
-    y_data = data_test.dx_noise  
-    # dx_test_GP  = smooth_gp_posterior( x_test_GP, 0, x_test_GP, 0, σn, opt_σn ) 
-    dx_test_GP, _, _ = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
+    x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
+    dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
 
     return t_train_interp, u_train_interp, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
 end 
 
 
 ## ============================================ ## 
+
 
 export cross_validate_sindy_gpsindy  
 function cross_validate_sindy_gpsindy(data_train, data_test, x_train_GP, dx_train_GP)
@@ -264,7 +224,9 @@ function cross_validate_sindy_gpsindy(data_train, data_test, x_train_GP, dx_trai
     return df_sindy, df_gpsindy 
 end 
 
+
 ## ============================================ ## 
+
 
 export cross_validate_sindy_gpsindy_interp 
 function cross_validate_sindy_gpsindy_interp(data_train, data_test, x_train_GP, dx_train_GP, t_train_interp, u_train_interp) 
@@ -305,7 +267,9 @@ function cross_validate_sindy_gpsindy_interp(data_train, data_test, x_train_GP, 
     return df_sindy, df_gpsindy
 end
 
+
 ## ============================================ ## 
+
 
 export process_data_and_cross_validate  
 function process_data_and_cross_validate(data_train, data_test, interp_factor)
@@ -333,7 +297,9 @@ function process_data_and_cross_validate(data_train, data_test, interp_factor)
 
 end
 
+
 ## ============================================ ## 
+
 
 export cross_validate_csv  
 function cross_validate_csv(csv_path_file, interp_factor = 1)
@@ -352,3 +318,8 @@ function cross_validate_csv(csv_path_file, interp_factor = 1)
 
     return df_min_err_sindy, df_min_err_gpsindy, f_train, f_test  
 end 
+
+
+## ============================================ ## 
+
+
