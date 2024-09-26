@@ -427,7 +427,7 @@ function run_save_csv_files( freq_hz, noise, plot_option = false )
     df_mean_err = save_dfs_mean( df_best_csvs_sindy, df_best_csvs_gpsindy, freq_hz, noise ) 
     CSV.write( string( save_path, "df_mean_err.csv" ), df_mean_err ) 
 
-    return df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err 
+    return df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err 
 end 
 
 
