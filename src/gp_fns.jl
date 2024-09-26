@@ -339,12 +339,12 @@ function cross_validate_csv(csv_path_file, interp_factor = 1)
     df_sindy, df_gpsindy, x_train_GP, _  = process_data_and_cross_validate(data_train, data_test, interp_factor)
 
     # save gpsindy min err stats 
-    df_min_err_sindy   = df_min_err_fn(df_sindy, csv_path_file)
-    df_min_err_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
+    df_best_sindy   = df_min_err_fn(df_sindy, csv_path_file)
+    df_best_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
 
-    fig = plot_data( data_train, x_train_GP, data_test, df_min_err_sindy, df_min_err_gpsindy, interp_factor, csv_path_file )    
+    fig = plot_data( data_train, x_train_GP, data_test, df_best_sindy, df_best_gpsindy, interp_factor, csv_path_file )    
 
-    return df_min_err_sindy, df_min_err_gpsindy, fig 
+    return df_best_sindy, df_best_gpsindy, fig 
 end 
 
 
@@ -363,7 +363,7 @@ function run_csv_files(csv_files_vec, save_path_fig, plot_option = false)
     for i_csv in eachindex( csv_files_vec ) 
     
         csv_path_file = csv_files_vec[i_csv] 
-        df_min_err_sindy, df_min_err_gpsindy, fig = cross_validate_csv( csv_path_file, 1 ) 
+        df_best_sindy, df_best_gpsindy, fig = cross_validate_csv( csv_path_file, 1 ) 
 
         if plot_option == true 
             display(fig)
@@ -373,8 +373,8 @@ function run_csv_files(csv_files_vec, save_path_fig, plot_option = false)
         csv_file = replace( split( csv_path_file, "/" )[end], ".csv" => "" )  
         save( string( save_path_fig, csv_file, ".png" ), fig )  
     
-        push!( df_best_csvs_sindy, df_min_err_sindy[1,:] ) 
-        push!( df_best_csvs_gpsindy, df_min_err_gpsindy[1,:] ) 
+        push!( df_best_csvs_sindy, df_best_sindy[1,:] ) 
+        push!( df_best_csvs_gpsindy, df_best_gpsindy[1,:] ) 
     
     end 
 
