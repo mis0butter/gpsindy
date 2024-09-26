@@ -59,7 +59,10 @@ function plot_error_trajectory(fig, i_x, i_y, data_struct, x_GP, df_min_err_sind
 end 
 
 
-function modify_fig( fig, csv_path_file )
+## ============================================ ## 
+
+
+function modify_fig( fig, csv_path_file, interp_factor )
 
     # Extract frequency and noise from csv_path_file
     freq_hz, noise = get_freq_noise(csv_path_file) 
@@ -69,19 +72,20 @@ function modify_fig( fig, csv_path_file )
     label_text = "$freq_hz Hz \n noise = $noise" 
     Label(fig[0, 1], label_text, fontsize = 24, font = :bold, halign = :left) 
 
-    # noise optimization? interpolation?  
-    # label_text = "σ_n = $σn \n σ_n opt = $opt_σn \n interp GP = $interpolate_gp"  
-    # Label(fig[0, 2:3], label_text, halign = :center) 
+    label_text = "interp GP = $interp_factor"  
+    Textbox( fig[0, 3], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :center ) 
 
     # csv file 
     label_text = rollout 
-    # Label(fig[0, 4], label_text, halign = :center) 
     Textbox( fig[0, 4], placeholder = label_text, textcolor_placeholder = :black, tellwidth = false, halign = :center ) 
 
     # Adjust the layout to make room for the title
     rowsize!(fig.layout, 0, 60) 
 
 end
+
+
+## ============================================ ## 
 
 
 export plot_data 
@@ -92,12 +96,13 @@ function plot_data(
     x_test_GP, 
     df_min_err_sindy, 
     df_min_err_gpsindy, 
+    interp_factor, 
     csv_path_file 
 ) 
 
     fig = Figure( size = ( 800, 800 ) ) 
 
-    modify_fig( fig, csv_path_file )
+    modify_fig( fig, csv_path_file, interp_factor )
 
     for i_x = 1:4 
 

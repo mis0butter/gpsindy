@@ -18,14 +18,14 @@ function evaluate_kernel(kernel, x_data, y_data)
 
         catch opt_error
 
-            println("Optimization error: ", opt_error)
+            # println("Optimization error: ", opt_error)
             return (-Inf, nothing)  # Return a very low score for failed optimizations
 
         end
 
     catch gp_error
 
-        println("GP creation error: ", gp_error)
+        # println("GP creation error: ", gp_error)
         return (-Inf, nothing)  # Return a very low score if GP creation fails
 
     end
@@ -45,7 +45,7 @@ function evaluate_kernels(kernels, x_data, y_data)
         result    = (i = i, kernel = kernel, score = score, gp = gp) 
 
         push!(results, result)
-        println("Kernel $i: Log marginal likelihood = $score")
+        # println("Kernel $i: Log marginal likelihood = $score")
 
     end
 
@@ -313,7 +313,7 @@ function cross_validate_csv(csv_path_file, interp_factor = 1)
     df_min_err_sindy   = df_min_err_fn(df_sindy, csv_path_file)
     df_min_err_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
 
-    fig = plot_data( data_train, x_train_GP, data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, csv_path_file )    
+    fig = plot_data( data_train, x_train_GP, data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, interp_factor, csv_path_file )    
 
     return df_min_err_sindy, df_min_err_gpsindy, fig 
 end 
