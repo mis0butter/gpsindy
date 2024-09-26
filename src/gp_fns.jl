@@ -57,28 +57,39 @@ end
 
 
 export define_kernels  
-function define_kernels(x_data, y_data) 
+function define_kernels(x_data = rand(2), y_data = rand(2), list = "few") 
 
     # Estimate some data characteristics
     l = log(abs(median(diff(x_data, dims = 1))))     # Estimate of length scale
     σ = log(std(y_data))                             # Estimate of signal variance 
     p = log((maximum(x_data) - minimum(x_data)) / 2)      # Estimate of period
 
-    # Define a list of kernels to try with more conservative initial parameters
-    kernels = [
-        # SE(l/10, σ/10) + Periodic(l, σ, p),
-        # SE(l/10, σ/10) * Periodic(l, σ, p),
-        # Matern(1/2, l, σ) + Periodic(l, σ, p), 
-        # Matern(1/2, l, σ) * Periodic(l, σ, p), 
-        # Matern(3/2, l, σ) + Periodic(l, σ, p), 
-        # Matern(3/2, l, σ) * Periodic(l, σ, p), 
-        # RQ(l, σ, 1.0) + Periodic(l, σ, p), 
-        # RQ(l, σ, 1.0) * Periodic(l, σ, p), 
-        SE(l/10, σ/10),  
-        Matern(1/2, l, σ),  
-        Matern(3/2, l, σ),  
-        RQ(l, σ, 1.0)  
-    ] 
+    # Define a list of kernels to try with more conservative initial parameters 
+
+    if list == "few" 
+        kernels = [
+            SE(l/10, σ/10),  
+            Matern(1/2, l, σ),  
+            Matern(3/2, l, σ),  
+            RQ(l, σ, 1.0)  
+        ] 
+    else 
+        # Define a list of kernels to try with more conservative initial parameters
+        kernels = [
+            SE(l/10, σ/10) + Periodic(l, σ, p),
+            SE(l/10, σ/10) * Periodic(l, σ, p),
+            Matern(1/2, l, σ) + Periodic(l, σ, p), 
+            Matern(1/2, l, σ) * Periodic(l, σ, p), 
+            Matern(3/2, l, σ) + Periodic(l, σ, p), 
+            Matern(3/2, l, σ) * Periodic(l, σ, p), 
+            RQ(l, σ, 1.0) + Periodic(l, σ, p), 
+            RQ(l, σ, 1.0) * Periodic(l, σ, p), 
+            SE(l/10, σ/10),  
+            Matern(1/2, l, σ),  
+            Matern(3/2, l, σ),  
+            RQ(l, σ, 1.0)  
+        ] 
+    end 
 
     return kernels  
 end 
