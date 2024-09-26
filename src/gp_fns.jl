@@ -161,8 +161,8 @@ end
 ## ============================================ ## 
 
 
-export smooth_train_test_data 
-function smooth_train_test_data( data_train, data_test ) 
+export smooth_train_data 
+function smooth_train_data( data_train, data_test ) 
 
     # first - smooth measurements with Gaussian processes 
     x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, data_train.t)
@@ -346,7 +346,7 @@ function process_data_and_cross_validate(data_train, data_test, interp_factor)
 
     if interp_factor == 1 
 
-        x_train_GP, dx_train_GP = smooth_train_test_data(data_train, data_test)
+        x_train_GP, dx_train_GP = smooth_train_data(data_train, data_test)
 
         # cross validate sindy and gpsindy  
         df_sindy, df_gpsindy = cross_validate_sindy_gpsindy(data_train, data_test, x_train_GP, dx_train_GP) 
