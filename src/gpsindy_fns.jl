@@ -38,7 +38,7 @@ function interpolate_data_gp( data_train, data_test, σn = 0.1, opt_σn = true, 
 end 
 
 
-## ============================================ ##
+## ============================================ ## 
 
 export cross_validate_csv_path 
 
@@ -87,7 +87,6 @@ end
 ## ============================================ ##
 
 export cross_validate_csv_path_file 
-
 function cross_validate_csv_path_file( csv_path_file, σn, opt_σn, freq_hz, noise, interpolate_gp = false ) 
 
     # extract data 

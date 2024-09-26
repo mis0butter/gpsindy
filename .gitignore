@@ -1,5 +1,5 @@
-/Manifest.toml
-test/results/
+/Manifest.toml 
+test/results/old/ 
 test/double-pendulum-chaotic/ 
 test/data/double-pendulum-chaotic/
 *.png 
