@@ -66,17 +66,17 @@ function define_kernels(x_data, y_data)
 
     # Define a list of kernels to try with more conservative initial parameters
     kernels = [
-        # SE(l/10, σ/10) + Periodic(l, σ, p),
-        # SE(l/10, σ/10) * Periodic(l, σ, p),
-        # Matern(1/2, l, σ) + Periodic(l, σ, p), 
-        # Matern(1/2, l, σ) * Periodic(l, σ, p), 
-        # Matern(3/2, l, σ) + Periodic(l, σ, p), 
-        # Matern(3/2, l, σ) * Periodic(l, σ, p), 
-        # RQ(l, σ, 1.0) + Periodic(l, σ, p), 
-        # RQ(l, σ, 1.0) * Periodic(l, σ, p), 
+        SE(l/10, σ/10) + Periodic(l, σ, p),
+        SE(l/10, σ/10) * Periodic(l, σ, p),
+        Matern(1/2, l, σ) + Periodic(l, σ, p), 
+        Matern(1/2, l, σ) * Periodic(l, σ, p), 
+        Matern(3/2, l, σ) + Periodic(l, σ, p), 
+        Matern(3/2, l, σ) * Periodic(l, σ, p), 
+        RQ(l, σ, 1.0) + Periodic(l, σ, p), 
+        RQ(l, σ, 1.0) * Periodic(l, σ, p), 
         SE(l/10, σ/10),  
         Matern(1/2, l, σ),  
-        # Matern(3/2, l, σ),  
+        Matern(3/2, l, σ),  
         RQ(l, σ, 1.0)  
     ] 
 
@@ -155,6 +155,8 @@ function smooth_train_test_data( data_train, data_test )
 
     # first - smooth measurements with Gaussian processes 
     x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, data_train.t)
+
+    println("using u to smooth dx3 and dx4") 
 
     # dx_train_GP, _, _ = smooth_array_gp(x_train_GP, data_train.dx_noise, x_train_GP) 
     dx_train_GP = similar(data_train.dx_noise) 

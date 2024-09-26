@@ -13,20 +13,32 @@ using DataFrames
 
 ## ============================================ ## 
 
-csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz_noise_0.02/rollout_3.csv" 
 
-df_min_err_sindy, df_min_err_gpsindy, fig_csv = cross_validate_csv( csv_path_file, 1 ) 
+csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.02/rollout_9.csv" 
+
+df_best_sindy, df_best_gpsindy, fig_csv = cross_validate_csv( csv_path_file, 1 ) 
 
 fig_csv 
 
+
 ## ============================================ ## 
 
-df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.03 ) 
+
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.02 ) 
+
+
+## ============================================ ## 
+
+
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.01 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.03 ) 
+
 
 ## ============================================ ## 
 # find bad sindy 
 
-csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz_noise_0.02/rollout_3.csv" 
+csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.02/rollout_9.csv" 
 
 interp_factor = 1 
 
@@ -61,3 +73,5 @@ interp_factor = 1
     x_sindy_test  = df_best_sindy.test_traj[1] 
 
     fig = plot_data( data_train, x_sindy_train, data_test, x_sindy_test, df_best_sindy, df_best_sindy, interp_factor, csv_path_file )    
+
+
