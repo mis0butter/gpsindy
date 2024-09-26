@@ -185,10 +185,11 @@ function smooth_train_test_data( data_train, data_test )
     x_pred = data_train.u[:,2] 
     dx_train_GP[:,4], _, _ = smooth_column_gp(x_data, y_data, x_pred)  
 
-    x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
-    dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
+    # x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
+    # dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
 
-    return x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+    # return x_train_GP, dx_train_GP, data_test.x_noise, data_test.dx_noise   
+    return x_train_GP, dx_train_GP 
 end 
 
 
@@ -204,10 +205,11 @@ function interpolate_train_test_data( data_train, data_test, interp_factor = 2 )
 
     x_train_GP, _, _  = smooth_array_gp(data_train.t, data_train.x_noise, t_train_interp)
     dx_train_GP, _, _ = smooth_array_gp(data_train.x_noise, data_train.dx_noise, x_train_GP)
-    x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
-    dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
+    # x_test_GP, _, _   = smooth_array_gp(data_test.t, data_test.x_noise, data_test.t)
+    # dx_test_GP, _, _  = smooth_array_gp(x_test_GP, data_test.dx_noise, x_test_GP)
 
-    return t_train_interp, u_train_interp, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+    # return t_train_interp, u_train_interp, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP 
+    return t_train_interp, u_train_interp, x_train_GP, dx_train_GP 
 end 
 
 
@@ -344,14 +346,14 @@ function process_data_and_cross_validate(data_train, data_test, interp_factor)
 
     if interp_factor == 1 
 
-        x_train_GP, dx_train_GP, x_test_GP, _ = smooth_train_test_data(data_train, data_test)
+        x_train_GP, dx_train_GP = smooth_train_test_data(data_train, data_test)
 
         # cross validate sindy and gpsindy  
         df_sindy, df_gpsindy = cross_validate_sindy_gpsindy(data_train, data_test, x_train_GP, dx_train_GP) 
 
     else 
 
-        t_train_interp, u_train_interp, x_train_GP, dx_train_GP, x_test_GP, dx_test_GP = interpolate_train_test_data(data_train, data_test, interp_factor) 
+        t_train_interp, u_train_interp, x_train_GP, dx_train_GP = interpolate_train_test_data(data_train, data_test, interp_factor) 
 
         # cross validate sindy and gpsindy   
         df_sindy, df_gpsindy = cross_validate_sindy_gpsindy_interp(data_train, data_test, x_train_GP, dx_train_GP, t_train_interp, u_train_interp) 
@@ -361,8 +363,8 @@ function process_data_and_cross_validate(data_train, data_test, interp_factor)
 
     end 
 
-    return df_sindy, df_gpsindy, x_train_GP, dx_train_GP, x_test_GP
-
+    # return df_sindy, df_gpsindy, x_train_GP, dx_train_GP, x_test_GP
+    return df_sindy, df_gpsindy, x_train_GP, dx_train_GP 
 end
 
 
@@ -375,13 +377,13 @@ function cross_validate_csv(csv_path_file, interp_factor = 1)
     # extract and smooth data 
     data_train, data_test = make_data_structs(csv_path_file)
 
-    df_sindy, df_gpsindy, x_train_GP, _, x_test_GP = process_data_and_cross_validate(data_train, data_test, interp_factor)
+    df_sindy, df_gpsindy, x_train_GP, _  = process_data_and_cross_validate(data_train, data_test, interp_factor)
 
     # save gpsindy min err stats 
     df_min_err_sindy   = df_min_err_fn(df_sindy, csv_path_file)
     df_min_err_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
 
-    fig = plot_data( data_train, x_train_GP, data_test, x_test_GP, df_min_err_sindy, df_min_err_gpsindy, interp_factor, csv_path_file )    
+    fig = plot_data( data_train, x_train_GP, data_test, df_min_err_sindy, df_min_err_gpsindy, interp_factor, csv_path_file )    
 
     return df_min_err_sindy, df_min_err_gpsindy, fig 
 end 
