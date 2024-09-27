@@ -21,9 +21,9 @@ fig_csv
 ## ============================================ ## 
 
 
-df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 25, 0.02 ) 
-df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 25, 0.03 ) 
-df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 25, 0.04 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 5, 0.01 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 5, 0.02 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 5, 0.03 ) 
 
 
 ## ============================================ ## 
