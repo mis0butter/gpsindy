@@ -1,0 +1,2 @@
+freq_hz,noise,mean_err_sindy_train,mean_err_gpsindy_train,mean_err_sindy_test,mean_err_gpsindy_test
+5.0,0.04,37.698723317979415,23.25220797390424,25.043854728700754,19.87023481243567
