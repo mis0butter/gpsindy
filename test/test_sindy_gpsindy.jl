@@ -14,7 +14,7 @@ using DataFrames
 ## ============================================ ## 
 
 
-csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/10hz_noise_0.09/rollout_25.csv" 
+csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/25hz_noise_0/rollout_2.csv" 
 
 df_best_sindy, df_best_gpsindy, fig_csv = cross_validate_csv( csv_path_file, 1 ) 
 
@@ -24,14 +24,8 @@ fig_csv
 ## ============================================ ## 
 
 
-df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.06 ) 
-
-
-## ============================================ ## 
-
-
-df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.09 ) 
-df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 10, 0.1 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 25, 0 ) 
+df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 25, 0.01 ) 
 
 
 ## ============================================ ## 
