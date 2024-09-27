@@ -31,21 +31,67 @@ df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 5, 0
 
 
 ## ============================================ ## 
-# find bad sindy 
-
-csv_path_file = "test/data/jake_car_csvs_ctrlshift_no_trans/50hz_noise_0/rollout_3.csv" 
-
-interp_factor = 1 
+## ============================================ ## 
+# save results 
 
 
-    # extract and smooth data 
-    data_train, data_test = make_data_structs(csv_path_file)
+# go through all files in result folder 
+results_path    = "test/results/jake_car_csvs_ctrlshift_no_trans/" 
+results_folders = readdir( results_path ) 
 
-    df_sindy, df_gpsindy, x_train_GP, _  = process_data_and_cross_validate(data_train, data_test, interp_factor)
+header = [ "rmse", "hz", "noise", "rollout", "method", "lambda" ] 
+somi_df = DataFrame( fill( [], length(header) ), header ) 
 
-    # save gpsindy min err stats 
-    df_best_sindy   = df_min_err_fn(df_sindy, csv_path_file)
-    df_best_gpsindy = df_min_err_fn(df_gpsindy, csv_path_file) 
+for i in eachindex( results_folders )
 
-    fig = plot_data( data_train, x_train_GP, data_test, df_best_sindy, df_best_gpsindy, interp_factor, csv_path_file )    
+    folder = results_folders[i] 
+    folder_string = split( folder, "_" ) 
+    
+    # get freq and hz strings 
+    freq_hz = replace( folder_string[1], "hz" => "" ) 
+    noise   = folder_string[3] 
+
+    println( "folder = ", folder ) 
+
+    folder_path = string( results_path, folder)  
+    somi_df = push_somi_df( somi_df, folder_path, freq_hz, noise, "sindy" ) 
+    somi_df = push_somi_df( somi_df, folder_path, freq_hz, noise, "gpsindy" ) 
+
+end 
+
+# save data frame 
+CSV.write( "somi_df.csv", somi_df ) 
+
+
+## ============================================ ##
+
+
+function push_somi_df( somi_df, folder_path, freq_hz, noise, method ) 
+    
+    sindy_df = CSV.read( string( folder_path, "/dfs/df_min_err_csvs_", method, ".csv" ), DataFrame ) 
+    
+    # rollout 
+    rollout_vec = sindy_df.csv_file 
+    for j in eachindex( rollout_vec ) 
+        rollout_vec[j] = replace( rollout_vec[j], ".csv" => "" ) 
+        rollout_vec[j] = replace( rollout_vec[j], "rollout_" => "" ) 
+    end 
+
+    rmse_vec   = sindy_df.test_err                      # rmse    
+    freq_vec   = fill( freq_hz, length(rollout_vec) )   # hz 
+    noise_vec  = fill( noise, length(rollout_vec) )     # noise 
+    method_vec = fill( method, length(rollout_vec) )    # method 
+    lambda_vec = sindy_df.λ_min                         # lambda 
+
+    # create dataframe 
+    data = [ rmse_vec freq_vec noise_vec rollout_vec method_vec lambda_vec ]
+
+    # add data to somi_df 
+    for i in 1:size(data, 1) 
+        push!( somi_df, data[i, :] ) 
+    end 
+
+    return somi_df 
+end 
+
 
