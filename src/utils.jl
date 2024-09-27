@@ -1,5 +1,70 @@
 
 
+export create_somi_df  
+function create_somi_df(results_path)
+
+    results_folders = readdir(results_path)
+    # Remove elements from results_folders that are not directories
+    filter!(folder -> isdir(joinpath(results_path, folder)), results_folders)
+
+    header = ["rmse", "hz", "noise", "rollout", "method", "lambda"]
+    somi_df = DataFrame(fill([], length(header)), header)
+
+    for folder in results_folders
+
+        println("folder = ", folder)
+        folder_string = split(folder, "_")
+        
+        # get freq and hz strings
+        freq_hz = replace(folder_string[1], "hz" => "")
+        noise = folder_string[3]
+
+        folder_path = string(results_path, folder)
+        somi_df = push_somi_df(somi_df, folder_path, freq_hz, noise, "sindy")
+        somi_df = push_somi_df(somi_df, folder_path, freq_hz, noise, "gpsindy")
+    end
+
+    return somi_df
+end
+
+
+## ============================================ ##
+
+
+export push_somi_df 
+function push_somi_df( somi_df, folder_path, freq_hz, noise, method ) 
+    
+    sindy_df = CSV.read( string( folder_path, "/dfs/df_min_err_csvs_", method, ".csv" ), DataFrame ) 
+    
+    # rollout 
+    rollouts = sindy_df.csv_file 
+    for j in eachindex( rollouts ) 
+        rollouts[j] = replace( rollouts[j], ".csv" => "" ) 
+        rollouts[j] = replace( rollouts[j], "rollout_" => "" ) 
+    end 
+    N = length(rollouts)  
+
+    rmse_vec   = sindy_df.test_err                      # rmse    
+    freq_vec   = fill( freq_hz, N )   # hz 
+    noise_vec  = fill( noise, N )     # noise 
+    method_vec = fill( method, N )    # method 
+    lambda_vec = sindy_df.λ_min                         # lambda 
+
+    # create dataframe 
+    data = [ rmse_vec freq_vec noise_vec rollouts method_vec lambda_vec ]
+
+    # add data to somi_df 
+    for i in 1:size(data, 1) 
+        push!( somi_df, data[i, :] ) 
+    end 
+
+    return somi_df 
+end 
+
+
+## ============================================ ## 
+
+
 # Extract frequency and noise from csv_path_file
 
 export get_freq_noise  
@@ -174,13 +239,13 @@ end
 ## ============================================ ##
 
 export save_dfs_mean 
-function save_dfs_mean( df_min_err_csvs_sindy, df_min_err_csvs_gpsindy, freq_hz, noise ) 
+function save_dfs_mean( df_best_csvs_sindy, df_best_csvs_gpsindy, freq_hz, noise ) 
 
     # save mean min err which is what we care about 
-    mean_err_sindy_test    = mean( df_min_err_csvs_sindy.test_err ) 
-    mean_err_gpsindy_test  = mean( df_min_err_csvs_gpsindy.test_err ) 
-    mean_err_sindy_train   = mean( df_min_err_csvs_sindy.train_err ) 
-    mean_err_gpsindy_train = mean( df_min_err_csvs_gpsindy.train_err )  
+    mean_err_sindy_test    = mean( df_best_csvs_sindy.test_err ) 
+    mean_err_gpsindy_test  = mean( df_best_csvs_gpsindy.test_err ) 
+    mean_err_sindy_train   = mean( df_best_csvs_sindy.train_err ) 
+    mean_err_gpsindy_train = mean( df_best_csvs_gpsindy.train_err )  
 
     header = [ "freq_hz", "noise", "mean_err_sindy_train", "mean_err_gpsindy_train", "mean_err_sindy_test", "mean_err_gpsindy_test" ] 
 

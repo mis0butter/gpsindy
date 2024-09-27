@@ -37,62 +37,66 @@ df_best_csvs_sindy, df_best_csvs_gpsindy, df_mean_err = run_save_csv_files( 5, 0
 
 # go through all files in result folder 
 results_path    = "test/results/jake_car_csvs_ctrlshift_no_trans/" 
-results_folders = readdir( results_path ) 
 
-header = [ "rmse", "hz", "noise", "rollout", "method", "lambda" ] 
-somi_df = DataFrame( fill( [], length(header) ), header ) 
-
-for i in eachindex( results_folders )
-
-    folder = results_folders[i] 
-    folder_string = split( folder, "_" ) 
-    
-    # get freq and hz strings 
-    freq_hz = replace( folder_string[1], "hz" => "" ) 
-    noise   = folder_string[3] 
-
-    println( "folder = ", folder ) 
-
-    folder_path = string( results_path, folder)  
-    somi_df = push_somi_df( somi_df, folder_path, freq_hz, noise, "sindy" ) 
-    somi_df = push_somi_df( somi_df, folder_path, freq_hz, noise, "gpsindy" ) 
-
-end 
+somi_df = create_somi_df( results_path ) 
 
 # save data frame 
 CSV.write( string( results_path, "somi_df.csv" ), somi_df ) 
 
 
-## ============================================ ##
+## ============================================ ## 
 
 
-function push_somi_df( somi_df, folder_path, freq_hz, noise, method ) 
+function boxplot_rmse_noise(somi_df, hz)
+
+    # Extract rows from somi_df where hz matches the input
+    somi_df_hz_sindy   = filter(row -> row.hz == string(hz) && row.method == "sindy", somi_df)
+    somi_df_hz_gpsindy = filter(row -> row.hz == string(hz) && row.method == "gpsindy", somi_df)
+
+    # Convert noise column to Float64
+    somi_df_hz_sindy.noise   = parse.(Float64, somi_df_hz_sindy.noise)
+    somi_df_hz_gpsindy.noise = parse.(Float64, somi_df_hz_gpsindy.noise) 
+
+    # Convert rmse column to Float64
+    somi_df_hz_sindy.rmse   = parse.(Float64, string.(somi_df_hz_sindy.rmse))
+    somi_df_hz_gpsindy.rmse = parse.(Float64, string.(somi_df_hz_gpsindy.rmse)) 
+
+    # Create a box plot with log scale for y-axis
+    fig = Figure(size=(600, 400))
+
+    ax = Axis(fig[1, 1], xlabel="Noise Level", ylabel="Log RMSE error", title="Log RMSE vs Noise Level for $(hz)Hz Data") 
+
+    # Define colors for each method
+    sindy_color = colorant"#1f77b4"  # A nice blue
+    gpsindy_color = colorant"#ff7f0e"  # A complementary orange
+
+    # Add some jittered points for better data representation
+    scatter!(ax, somi_df_hz_sindy.noise .- 0.0005 .+ 0.001 .* randn(length(somi_df_hz_sindy.noise)),
+             log.(somi_df_hz_sindy.rmse), color=(sindy_color, 0.3), markersize=7)
     
-    sindy_df = CSV.read( string( folder_path, "/dfs/df_min_err_csvs_", method, ".csv" ), DataFrame ) 
+    scatter!(ax, somi_df_hz_gpsindy.noise .+ 0.0005 .+ 0.001 .* randn(length(somi_df_hz_gpsindy.noise)),
+             log.(somi_df_hz_gpsindy.rmse), color=(gpsindy_color, 0.3), markersize=7)
+
+    # Create boxplots with improved aesthetics, transparency, and outline
+    boxplot!(ax, somi_df_hz_sindy.noise .- 0.0005, log.(somi_df_hz_sindy.rmse),
+             width=0.008, label="SINDy", color=(sindy_color, 0.4), whiskerwidth=0.5, whiskercolor=sindy_color,
+             mediancolor=sindy_color, show_outliers=false, strokecolor=sindy_color, strokewidth=1)
     
-    # rollout 
-    rollouts = sindy_df.csv_file 
-    for j in eachindex( rollouts ) 
-        rollouts[j] = replace( rollouts[j], ".csv" => "" ) 
-        rollouts[j] = replace( rollouts[j], "rollout_" => "" ) 
-    end 
-    N = length(rollouts)  
+    boxplot!(ax, somi_df_hz_gpsindy.noise .+ 0.0005, log.(somi_df_hz_gpsindy.rmse),
+             width=0.008, label="GPSINDy", color=(gpsindy_color, 0.4), whiskerwidth=0.5, whiskercolor=gpsindy_color, mediancolor=gpsindy_color, show_outliers=false, strokecolor=gpsindy_color, strokewidth=1)
 
-    rmse_vec   = sindy_df.test_err                      # rmse    
-    freq_vec   = fill( freq_hz, N )   # hz 
-    noise_vec  = fill( noise, N )     # noise 
-    method_vec = fill( method, N )    # method 
-    lambda_vec = sindy_df.λ_min                         # lambda 
+    # Add legend
+    Legend(fig[1,2], ax, framevisible = false)
 
-    # create dataframe 
-    data = [ rmse_vec freq_vec noise_vec rollouts method_vec lambda_vec ]
-
-    # add data to somi_df 
-    for i in 1:size(data, 1) 
-        push!( somi_df, data[i, :] ) 
-    end 
-
-    return somi_df 
+    return fig 
 end 
+
+fig = boxplot_rmse_noise( somi_df, 5 )  
+
+# Example usage:
+# fig = plot_rmse_vs_noise(somi_df, 10)
+# fig
+
+
 
 
