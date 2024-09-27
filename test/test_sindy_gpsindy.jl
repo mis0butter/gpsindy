@@ -60,7 +60,7 @@ for i in eachindex( results_folders )
 end 
 
 # save data frame 
-CSV.write( "somi_df.csv", somi_df ) 
+CSV.write( string( results_path, "somi_df.csv" ), somi_df ) 
 
 
 ## ============================================ ##
@@ -71,20 +71,21 @@ function push_somi_df( somi_df, folder_path, freq_hz, noise, method )
     sindy_df = CSV.read( string( folder_path, "/dfs/df_min_err_csvs_", method, ".csv" ), DataFrame ) 
     
     # rollout 
-    rollout_vec = sindy_df.csv_file 
-    for j in eachindex( rollout_vec ) 
-        rollout_vec[j] = replace( rollout_vec[j], ".csv" => "" ) 
-        rollout_vec[j] = replace( rollout_vec[j], "rollout_" => "" ) 
+    rollouts = sindy_df.csv_file 
+    for j in eachindex( rollouts ) 
+        rollouts[j] = replace( rollouts[j], ".csv" => "" ) 
+        rollouts[j] = replace( rollouts[j], "rollout_" => "" ) 
     end 
+    N = length(rollouts)  
 
     rmse_vec   = sindy_df.test_err                      # rmse    
-    freq_vec   = fill( freq_hz, length(rollout_vec) )   # hz 
-    noise_vec  = fill( noise, length(rollout_vec) )     # noise 
-    method_vec = fill( method, length(rollout_vec) )    # method 
+    freq_vec   = fill( freq_hz, N )   # hz 
+    noise_vec  = fill( noise, N )     # noise 
+    method_vec = fill( method, N )    # method 
     lambda_vec = sindy_df.λ_min                         # lambda 
 
     # create dataframe 
-    data = [ rmse_vec freq_vec noise_vec rollout_vec method_vec lambda_vec ]
+    data = [ rmse_vec freq_vec noise_vec rollouts method_vec lambda_vec ]
 
     # add data to somi_df 
     for i in 1:size(data, 1) 
