@@ -2,6 +2,5 @@
 test/results/old/ 
 test/double-pendulum-chaotic/ 
 test/data/double-pendulum-chaotic/
-*.png 
 *.DS_Store 
 *.vscode
