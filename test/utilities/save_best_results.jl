@@ -22,7 +22,7 @@ save_best_results( freq_hz, noise, σn, opt_σn, interpolate_gp )
 ## ============================================ ##
 
 # go through all files in result folder 
-final_results_path = string( "test/results/jake_car_csvs_ctrlshift_no_trans/final_results/" )  
+final_results_path = string( "test/results/jake_car_csvs_ctrlshift_no_trans/" )  
 
 results_folders = readdir( final_results_path ) 
 header = [ "rmse", "hz", "noise", "rollout", "method", "lambda" ] 

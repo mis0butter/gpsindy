@@ -474,7 +474,7 @@ function add_noise_car( csv_path, save_path, noise )
     end
     
     for i = eachindex(csv_files_vec) 
-    # for i = [ 4 ]
+
         # i = 4 
         csv_file = csv_files_vec[i] 
         df       = CSV.read(csv_file, DataFrame) 
@@ -616,7 +616,10 @@ function make_data_structs( csv_file )
 
     t, x, u = extract_car_data( csv_file ) 
     x_vars, u_vars, poly_order, n_vars = size_vars( x, u ) 
-    x, dx_fd = unroll( t, x ) 
+    # x, dx_fd = unroll( t, x ) 
+    
+    # use central finite differencing now  
+    dx_fd = fdiff(t, x, 2) 
     
     # split into training and test data 
     test_fraction = 0.3 
