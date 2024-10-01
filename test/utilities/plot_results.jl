@@ -38,7 +38,7 @@ combined_df = vcat( SSR_coeff_res_df, rest_df, sindy_gpsindy_df )
 # create lineplot with ribbons 
 
 
-function lineplot_rmse_noise(combined_df, hz, islog = "false")
+function lineplot_rmse_noise(fig, i_ax, combined_df, hz, islog = "false")
 
     function create_lineplot!(ax, df, label, color, islog)
 
@@ -63,15 +63,13 @@ function lineplot_rmse_noise(combined_df, hz, islog = "false")
     ssr_coeff_df  = filter(row -> row.hz == hz && row.method == "SSR_coeff", combined_df) 
     ssr_res_df    = filter(row -> row.hz == hz && row.method == "SSR_residual", combined_df)  
 
-    # Create a line plot with log scale for y-axis
-    fig = Figure(size=(800, 400))
-
-    if islog == true 
+    if islog == true && i_ax == 1 
         ylabel = "Log RMSE error"
     else 
-        ylabel = "RMSE error" 
+        ylabel = "" 
     end 
-    ax = Axis(fig[1, 1], xlabel="Noise Level", ylabel=ylabel, title="RMSE vs Noise Level for $(hz)Hz Data") 
+
+    ax = Axis(fig[1, i_ax], xlabel="Noise Level", ylabel=ylabel, title="$(hz)Hz Data") 
 
     # Define colors for each method 
     ssr_coeff_color = colorant"#800080"  # Purple
@@ -88,18 +86,25 @@ function lineplot_rmse_noise(combined_df, hz, islog = "false")
     # set y axis limit to 50 
     # ylims!(ax, 0, 50)
 
-    # Add legend
-    Legend(fig[1,2], ax, framevisible = false)
-
-    return fig 
+    return fig, ax 
 end 
 
 
 ## ============================================ ## 
 
 
-hz = 5 
-fig = lineplot_rmse_noise( combined_df, hz, true )  
+# Create a line plot with log scale for y-axis
+fig = Figure(size=(1000, 300))
+
+hz = 25 
+fig, _ = lineplot_rmse_noise( fig, 1, combined_df, 5, true )  
+fig, _ = lineplot_rmse_noise( fig, 2, combined_df, 10, true )  
+fig, ax = lineplot_rmse_noise( fig, 3, combined_df, 25, true )  
+
+# Add legend
+Legend(fig[1,4], ax, framevisible = false)
+
+fig 
 
 
 
