@@ -25,31 +25,35 @@ CSV.write( string( results_path, "somi_df.csv" ), somi_df )
 
 # contains SSR_coeff and SSR_residual 
 SSR_coeff_res_df = CSV.read( "test/results/SSR_coeff_res.csv", DataFrame )  
+rest_df = CSV.read( "test/results/25hz_0p05_to_0p1_rmse_results.csv", DataFrame )
 
 # contains sindy and gpsindy 
 sindy_gpsindy_df = CSV.read( "test/results/jake_car_csvs_ctrlshift_no_trans/somi_df.csv", DataFrame )  
 
 # combine with somi_df 
-combined_df = vcat( SSR_coeff_res_df, sindy_gpsindy_df ) 
+combined_df = vcat( SSR_coeff_res_df, rest_df, sindy_gpsindy_df ) 
 
 
 ## ============================================ ## 
 # create lineplot with ribbons 
 
 
-function lineplot_rmse_noise(combined_df, hz)
+function lineplot_rmse_noise(combined_df, hz, islog = "false")
 
-    function create_lineplot!(ax, df, label, color)
+    function create_lineplot!(ax, df, label, color, islog)
 
         noise_levels = sort(unique(df.noise))
         medians = [median(filter(row -> row.noise == n, df).rmse) for n in noise_levels]
         lower_quartiles = [quantile(filter(row -> row.noise == n, df).rmse, 0.25) for n in noise_levels]
         upper_quartiles = [quantile(filter(row -> row.noise == n, df).rmse, 0.75) for n in noise_levels]
 
-        # lines!(ax, noise_levels, log.(medians), label=label, color=color, linewidth=3)
-        # band!(ax, noise_levels, log.(lower_quartiles), log.(upper_quartiles), color=(color, 0.2)) 
-        lines!(ax, noise_levels, medians, label=label, color=color, linewidth=3)
-        band!(ax, noise_levels, lower_quartiles, upper_quartiles, color=(color, 0.2))
+        if islog == true 
+            lines!(ax, noise_levels, log.(medians), label=label, color=color, linewidth=3)
+            band!(ax, noise_levels, log.(lower_quartiles), log.(upper_quartiles), color=(color, 0.2)) 
+        else 
+            lines!(ax, noise_levels, medians, label=label, color=color, linewidth=3)
+            band!(ax, noise_levels, lower_quartiles, upper_quartiles, color=(color, 0.2))    
+        end 
         
     end
 
@@ -62,7 +66,12 @@ function lineplot_rmse_noise(combined_df, hz)
     # Create a line plot with log scale for y-axis
     fig = Figure(size=(800, 400))
 
-    ax = Axis(fig[1, 1], xlabel="Noise Level", ylabel="RMSE error", title="RMSE vs Noise Level for $(hz)Hz Data") 
+    if islog == true 
+        ylabel = "Log RMSE error"
+    else 
+        ylabel = "RMSE error" 
+    end 
+    ax = Axis(fig[1, 1], xlabel="Noise Level", ylabel=ylabel, title="RMSE vs Noise Level for $(hz)Hz Data") 
 
     # Define colors for each method 
     ssr_coeff_color = colorant"#800080"  # Purple
@@ -71,13 +80,13 @@ function lineplot_rmse_noise(combined_df, hz)
     gpsindy_color   = colorant"#cc6600"  # A slightly lighter orange
 
     # Create line plots with ribbons
-    # create_lineplot!(ax, ssr_coeff_df, "SSR Coeff", ssr_coeff_color)
-    # create_lineplot!(ax, ssr_res_df, "SSR Res", ssr_res_color)
-    create_lineplot!(ax, sindy_df, "SINDy", sindy_color)
-    create_lineplot!(ax, gpsindy_df, "GPSINDy", gpsindy_color)
+    create_lineplot!(ax, ssr_coeff_df, "SSR Coeff", ssr_coeff_color, islog)
+    create_lineplot!(ax, ssr_res_df, "SSR Res", ssr_res_color, islog)
+    create_lineplot!(ax, sindy_df, "SINDy", sindy_color, islog)
+    create_lineplot!(ax, gpsindy_df, "GPSINDy", gpsindy_color, islog)
 
     # set y axis limit to 50 
-    ylims!(ax, 0, 50)
+    # ylims!(ax, 0, 50)
 
     # Add legend
     Legend(fig[1,2], ax, framevisible = false)
@@ -89,8 +98,8 @@ end
 ## ============================================ ## 
 
 
-hz = 25
-fig = lineplot_rmse_noise( combined_df, hz )  
+hz = 5 
+fig = lineplot_rmse_noise( combined_df, hz, true )  
 
 
 
