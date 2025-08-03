@@ -21,17 +21,15 @@ for noise = 0.01 : 0.01 : 0.02
 end 
 
 
-
 ## ============================================ ##
 # single car test 
 
-freq_hz = 50 
+freq_hz = 10 
 noise   = 0.02 
 
 csv_path = string("test/data/jake_car_csvs_ctrlshift_no_trans/", freq_hz, "hz_noise_", noise, "/" )
 
 df_min_err_hist = cross_validate_csv_path( csv_path, freq_hz, true ) 
-
 
 
 ## ============================================ ##
