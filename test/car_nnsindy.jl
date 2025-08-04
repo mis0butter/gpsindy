@@ -17,7 +17,7 @@ opt_σn  = false
 GP_intp = false 
 
 
-# df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
+df_min_err_csvs_nnsindy = cross_validate_nnsindy( freq_hz, noise, σn, opt_σn, GP_intp ) 
 
 
 ## ============================================ ##
