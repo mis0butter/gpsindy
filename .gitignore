@@ -1,6 +1,4 @@
 Manifest.toml
 test/results/*
 test/outputs/* 
-test/double-pendulum-chaotic/ 
-test/data/double-pendulum-chaotic/
 *.png 
