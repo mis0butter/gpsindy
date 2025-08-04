@@ -1,4 +1,4 @@
-name = "GaussianSINDy"
+name = "GPSINDy"
 uuid = "048f916e-80ce-4b0c-84ed-c0ec4229b229"
 authors = ["mis0butter <junetter@gmail.com> and contributors"]
 version = "0.1.0"
